@@ -11,6 +11,8 @@ from .vector import Vec3d
 
 class Mat3d:
     """
+    4x4 row-ordered matrix
+     
     ```
     Mat3d = [Vec3d([x1 y1 z1 w1])
              Vec3d([x2 y2 z2 w2])
@@ -19,7 +21,7 @@ class Mat3d:
     ```
     """
 
-    def __init__(self, r1: Vec3d, r2: Vec3d, r3: Vec3d, r4: Vec3d) -> None:
+    def __init__(self, r1: Vec3d, r2: Vec3d, r3: Vec3d, r4: Vec3d) -> 'Mat3d':
         ensure.type_of(r1, "r1", [Vec3d])
         ensure.type_of(r2, "r2", [Vec3d])
         ensure.type_of(r3, "r3", [Vec3d])
@@ -28,47 +30,47 @@ class Mat3d:
         self.matrix = [r1, r2, r3, r4]
 
     @staticmethod
-    def translation_matrix(tx: float, ty: float, tz: float):
+    def translation_matrix(tx: float, ty: float, tz: float) -> 'Mat3d':
         return Mat3d(Vec3d(1, 0, 0, tx),
                      Vec3d(0, 1, 0, ty),
                      Vec3d(0, 0, 1, tz),
                      Vec3d(0, 0, 0, 1))
 
     @staticmethod
-    def scaling_matrix(sx: float, sy: float, sz: float):
+    def scaling_matrix(sx: float, sy: float, sz: float) -> 'Mat3d':
         return Mat3d(Vec3d(sx, 0, 0, 0),
                      Vec3d(0, sy, 0, 0),
                      Vec3d(0, 0, sz, 0),
                      Vec3d(0, 0, 0, 1),)
 
     @staticmethod
-    def rotation_x_matrix(theta: float):
+    def rotation_x_matrix(theta: float) -> 'Mat3d':
         return Mat3d(Vec3d(1, 0, 0, 0),
                      Vec3d(0, cos(theta), -sin(theta), 0),
                      Vec3d(0, sin(theta), cos(theta), 0),
                      Vec3d(0, 0, 0, 1))
 
     @staticmethod
-    def rotation_y_matrix(theta: float):
+    def rotation_y_matrix(theta: float) -> 'Mat3d':
         return Mat3d(Vec3d(cos(theta), 0, sin(theta), 0),
                      Vec3d(0, 1, 0, 0),
                      Vec3d(-sin(theta), 0, cos(theta), 0),
                      Vec3d(0, 0, 0, 1))
 
     @staticmethod
-    def rotation_z_matrix(theta: float):
+    def rotation_z_matrix(theta: float) -> 'Mat3d':
         return Mat3d(Vec3d(cos(theta), -sin(theta), 0, 0),
                      Vec3d(sin(theta), cos(theta), 0, 0),
                      Vec3d(0, 0, 1, 0),
                      Vec3d(0, 0, 0, 1))
 
-    def clone(self):
+    def clone(self) -> 'Mat3d':
         return Mat3d(self.matrix[0].clone(),
                      self.matrix[1].clone(),
                      self.matrix[2].clone(),
                      self.matrix[3].clone())
 
-    def __add__(self, mat2: Union[int, float]):
+    def __add__(self, mat2: 'Mat3d') -> 'Mat3d':
         ensure.type_of(mat2, "operand", [Mat3d])
 
         return Mat3d(self.matrix[0] + mat2.matrix[0],
@@ -76,18 +78,18 @@ class Mat3d:
                      self.matrix[2] + mat2.matrix[2],
                      self.matrix[3] + mat2.matrix[3])
 
-    def __radd__(self, mat2: Union[int, float]):
+    def __radd__(self, mat2: 'Mat3d') -> 'Mat3d':
         return self + mat2
 
-    def __sub__(self, mat2: Union[int, float]):
+    def __sub__(self, mat2: 'Mat3d') -> 'Mat3d':
         ensure.type_of(mat2, "operand", [Mat3d])
 
         return self + (-mat2)
 
-    def __rsub__(self, mat2: Union[int, float]):
+    def __rsub__(self, mat2: 'Mat3d') -> 'Mat3d':
         return self - mat2
 
-    def __mul__(self, scalar: Union[int, float]):
+    def __mul__(self, scalar: Union[int, float]) -> 'Mat3d':
         ensure.number(scalar, "operand")
 
         return Mat3d(self.matrix[0] * scalar,
@@ -95,23 +97,23 @@ class Mat3d:
                      self.matrix[2] * scalar,
                      self.matrix[3] * scalar)
 
-    def __rmul__(self, scalar: Union[int, float]):
+    def __rmul__(self, scalar: Union[int, float]) -> 'Mat3d':
         return self * scalar
 
-    def __matmul__(self, mat):
-        ensure.type_of(mat, "mat", [Vec3d, Mat3d])
+    def __matmul__(self, mat2: Union['Mat3d', 'Vec3d']) -> 'Mat3d':
+        ensure.type_of(mat2, "mat", [Vec3d, Mat3d])
 
-        if type(mat) is Vec3d:
-            return Vec3d(self.matrix[0].dot(mat),
-                         self.matrix[1].dot(mat),
-                         self.matrix[2].dot(mat),
-                         self.matrix[3].dot(mat))
+        if type(mat2) is Vec3d:
+            return Vec3d(self.matrix[0].dot(mat2),
+                         self.matrix[1].dot(mat2),
+                         self.matrix[2].dot(mat2),
+                         self.matrix[3].dot(mat2))
 
-        mat_T = mat.transpose()
+        mat_T = mat2.transpose()
 
         return Mat3d(*[Vec3d(*[row.dot(row_T) for row_T in mat_T]) for row in self.matrix])
 
-    def transpose(self):
+    def transpose(self) -> 'Mat3d':
         return Mat3d(
             Vec3d(self.matrix[0].x, self.matrix[1].x,
                   self.matrix[2].x, self.matrix[3].x),
@@ -130,16 +132,16 @@ class Mat3d:
             self.matrix[2] == o.matrix[2] and \
             self.matrix[3] == o.matrix[3]
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Vec3d:
         return self.matrix[index]
 
-    def __setitem__(self, index, value):
+    def __setitem__(self, index: int, value: Vec3d) -> None:
         self.matrix[index] = value
 
-    def __neg__(self):
+    def __neg__(self) -> 'Mat3d':
         return -1 * self
 
-    def __pos__(self):
+    def __pos__(self) -> 'Mat3d':
         return self.clone()
 
     def __str__(self) -> str:
