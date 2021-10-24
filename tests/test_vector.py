@@ -77,7 +77,7 @@ class vec3dTest(unittest.TestCase):
         self.assertAlmostEqual(Vec3d.vector(1, 0, 1).angle(Vec3d.vector(1, 0, 0)), pi/4)
 
     def test_project(self):
-        pass
+        raise Exception("Not implemented error.")
 
     def test_normalize(self):
         self.assertEqual(self.point_one.normalize(),
