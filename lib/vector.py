@@ -3,7 +3,7 @@
 # StudentId: 250201041
 # 10 2021
 
-from math import acos, pi, sqrt
+from math import acos, cos, pi, sqrt
 from typing import Union
 from . import ensure
 
@@ -81,7 +81,7 @@ class Vec3d:
                      0)
 
     def project(self, vec2: 'Vec3d') -> 'Vec3d':
-        return None
+        return self.length() * cos(self.angle(vec2)) * vec2.normalize()
 
     def angle(self, vec2: 'Vec3d', degree: bool = False) -> float:
         ensure.type_of(vec2, "operand", [Vec3d])
@@ -139,8 +139,17 @@ class Vec3d:
             self.z == o.z and \
             self.w == o.w
 
-    def __getitem__(self, index: int) -> float:
-        return self.__getattribute__(self.order[index])
+    def __abs__(self):
+        return Vec3d(abs(self.x), abs(self.y), abs(self.z), abs(self.w))
+
+    def __round__(self, ndigits=None):
+        return Vec3d(round(self.x, ndigits), round(self.y, ndigits), round(self.z, ndigits), round(self.w, ndigits))
+
+    def __getitem__(self, index: Union[int, slice]) -> float:
+        if isinstance(index, int):
+            return self.__getattribute__(self.order[index])
+
+        return list(map(lambda p: self.__getattribute__(p), self.order)).__getitem__(index)
 
     def __setitem__(self, index: int, value: float) -> None:
         self.__setattr__(self.order[index], value)

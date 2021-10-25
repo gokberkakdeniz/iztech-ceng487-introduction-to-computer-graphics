@@ -11,19 +11,13 @@ from lib.matrix import Mat3d
 from lib.shape import Shape
 from lib.vector import Vec3d
 import sys
-
-
-# Some api in the chain is translating the keystrokes to this octal string
-# so instead of saying: ESCAPE = 27, we use the following.
-ESCAPE = '\033'
+import time
 
 # Number of the glut window.
 window = 0
+fps = 60
 
-# A general OpenGL initialization function.  Sets all of the initial parameters.
 
-
-# We call this right after our OpenGL window is created.
 def InitGL(Width, Height):
     # This Will Clear The Background Color To Black
     glClearColor(0.0, 0.0, 0.0, 0.0)
@@ -39,8 +33,6 @@ def InitGL(Width, Height):
 
     glMatrixMode(GL_MODELVIEW)
 
-# The function called when our window is resized (which shouldn't happen if you enable fullscreen, below)
-
 
 def ReSizeGLScene(Width, Height):
     if Height == 0:						# Prevent A Divide By Zero If The Window Is Too Small
@@ -53,10 +45,50 @@ def ReSizeGLScene(Width, Height):
     gluPerspective(45.0, float(Width)/float(Height), 0.1, 100.0)
     glMatrixMode(GL_MODELVIEW)
 
-# The main drawing function.
+
+triangle = Shape(
+    vertices=[
+        Vec3d.point(0.0, 1.0, 0.0),
+        Vec3d.point(1.0, -1.0, 0.0),
+        Vec3d.point(-1.0, -1.0, 0.0)
+    ],
+    color=[
+        (1.0, 0.0, 0.0),
+        (0.0, 1.0, 0.0),
+        (0.0, 0.0, 1.0)
+    ]
+)
+triangle_rotation_vertice_index = 0
+triangle.transform(
+    Mat3d.scaling_matrix(0.6, 0.6, 0.6)
+)
+triangle.transform(
+    Mat3d.translation_matrix(
+        *(-triangle[triangle_rotation_vertice_index])[:-1]
+    )
+)
+
+square = Shape(
+    vertices=[
+        Vec3d.point(-1.0, 1.0, 0.0),
+        Vec3d.point(1.0, 1.0, 0.0),
+        Vec3d.point(1.0, -1.0, 0.0),
+        Vec3d.point(-1.0, -1.0, 0.0),
+    ],
+    color=(0.3, 0.5, 1.0)
+)
+square_rotation_vertice_index = 2
+square.transform(
+    Mat3d.scaling_matrix(0.6, 0.6, 0.6)
+)
+square.transform(
+    Mat3d.translation_matrix(*(-square[square_rotation_vertice_index])[:-1])
+)
 
 
 def DrawGLScene():
+    global angle, square, triangle
+
     # Clear The Screen And The Depth Buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()					# Reset The View
@@ -64,68 +96,39 @@ def DrawGLScene():
     # Move Left 1.5 units and into the screen 6.0 units.
     glTranslatef(-1.5, 0.0, -6.0)
 
-    # Since we have smooth color mode on, this will be great for the Phish Heads :-).
-    # Draw a triangle
-    # glBegin(GL_POLYGON)                 # Start drawing a polygon
-    # glColor3f(1.0, 0.0, 0.0)            # Red
-    # glVertex3f(0.0, 1.0, 0.0)           # Top
-    # glColor3f(0.0, 1.0, 0.0)            # Green
-    # glVertex3f(1.0, -1.0, 0.0)          # Bottom Right
-    # glColor3f(0.0, 0.0, 1.0)            # Blue
-    # glVertex3f(-1.0, -1.0, 0.0)         # Bottom Left
-    # glEnd()                             # We are done with the polygon
-
-    triangle = Shape(
-        vertices=[
-            Vec3d.point(0.0, 1.0, 0.0),
-            Vec3d.point(1.0, -1.0, 0.0),
-            Vec3d.point(-1.0, -1.0, 0.0)
-        ],
-        color=[
-            (1.0, 0.0, 0.0),
-            (0.0, 1.0, 0.0),
-            (0.0, 0.0, 1.0)
-        ]
-    )
+    triangle.transform(Mat3d.rotation_x_matrix(pi/120))
+    triangle.transform(Mat3d.rotation_y_matrix(pi/120))
+    triangle.transform(Mat3d.rotation_z_matrix(pi/60))
     triangle.draw()
 
     # Move Right 3.0 units.
     glTranslatef(3.0, 0.0, 0.0)
 
-    # Draw a square (quadrilateral)
-    # glColor3f(0.3, 0.5, 1.0)            # Bluish shade
-    # glBegin(GL_QUADS)                   # Start drawing a 4 sided polygon
-    # glVertex3f(-1.0, 1.0, 0.0)          # Top Left
-    # glVertex3f(1.0, 1.0, 0.0)           # Top Right
-    # glVertex3f(1.0, -1.0, 0.0)          # Bottom Right
-    # glVertex3f(-1.0, -1.0, 0.0)         # Bottom Left
-    # glEnd()                             # We are done with the polygon
-
-    square = Shape(
-        vertices=[
-            Vec3d.point(-1.0, 1.0, 0.0),
-            Vec3d.point(1.0, 1.0, 0.0),
-            Vec3d.point(1.0, -1.0, 0.0),
-            Vec3d.point(-1.0, -1.0, 0.0),
-        ],
-        color=(0.3, 0.5, 1.0)
-    )
-    square.transform(Mat3d.scaling_matrix(0.5, 0.5, 0.5))
-    square.transform(Mat3d.rotation_z_matrix(pi/4))
-    square.transform(Mat3d.rotation_z_matrix(-pi/4))
-    square.transform(Mat3d.scaling_matrix(2, 2, 0))
+    square.transform(Mat3d.rotation_x_matrix(pi/120))
+    square.transform(Mat3d.rotation_y_matrix(pi/120))
+    square.transform(Mat3d.rotation_z_matrix(pi/60))
     square.draw()
 
     #  since this is double buffered, swap the buffers to display what just got drawn.
     glutSwapBuffers()
 
-# The function called whenever a key is pressed. Note the use of Python tuples to pass in: (key, x, y)
+    time.sleep(1/fps)
 
 
-def keyPressed(*args):
-    # If escape is pressed, kill everything.
-    if args[0] == ESCAPE:
-        sys.exit()
+def keyPressed(key, x, y):
+    global fps
+
+    if ord(key) == 27:
+        glutLeaveMainLoop()
+        return
+    elif key == b'+':
+        fps = fps if fps > 300 else fps + 16
+    elif key == b'-':
+        fps = fps if fps < 16 else fps - 15
+    elif key == b'*':
+        fps = 60
+
+    print("FPS:", fps)
 
 
 def main():
@@ -165,6 +168,8 @@ def main():
     glutMainLoop()
 
 
-# Print message to console, and kick off the main to get it rolling.
 print("Hit ESC key to quit.")
+print("Hit + to increase fps.")
+print("Hit - to decrease fps.")
+print("Hit * to reset fps.")
 main()

@@ -4,6 +4,7 @@
 # 10 2021
 
 import unittest
+from lib import vector
 from lib.vector import Vec3d
 from math import pi, sqrt
 
@@ -70,14 +71,32 @@ class vec3dTest(unittest.TestCase):
 
     def test_cross_product(self):
         self.assertEqual(self.vector.cross(self.vector), self.vector_zero)
-        self.assertEqual(self.vector.cross(self.vector_one), -self.vector_one.cross(self.vector))
+        self.assertEqual(
+            self.vector.cross(self.vector_one),
+            -self.vector_one.cross(self.vector)
+        )
 
     def test_angle(self):
         self.assertEqual(self.vector.angle(self.vector), 0)
-        self.assertAlmostEqual(Vec3d.vector(1, 0, 1).angle(Vec3d.vector(1, 0, 0)), pi/4)
+        self.assertAlmostEqual(
+            Vec3d.vector(1, 0, 1).angle(Vec3d.vector(1, 0, 0)),
+            pi/4
+        )
 
     def test_project(self):
-        raise Exception("Not implemented error.")
+
+        self.assertEqual(
+            Vec3d.vector(1, 1, 0).project(Vec3d.vector(1, 0, 0)),
+            Vec3d.vector(1, 0, 0)
+        )
+        self.assertEqual(
+            Vec3d.vector(3, 4, 0).project(Vec3d.vector(0, 2, 0)),
+            Vec3d.vector(0, 4, 0)
+        )
+        self.assertAlmostEqual(
+            Vec3d.vector(3, 4, 0).project(Vec3d.vector(-1, 0, 0)).length(),
+            Vec3d.vector(3, 0, 0).length()
+        )
 
     def test_normalize(self):
         self.assertEqual(self.point_one.normalize(),
@@ -117,6 +136,7 @@ class vec3dTest(unittest.TestCase):
         vec[2] = 3
         vec[3] = 1
         self.assertEqual(vec, self.point)
+
 
 if __name__ == '__main__':
     unittest.main()
