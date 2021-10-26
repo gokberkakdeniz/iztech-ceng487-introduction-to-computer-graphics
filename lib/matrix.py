@@ -12,7 +12,7 @@ from .vector import Vec3d
 class Mat3d:
     """
     4x4 row-ordered matrix
-     
+
     ```
     Mat3d = [Vec3d([x1 y1 z1 w1])
              Vec3d([x2 y2 z2 w2])
@@ -99,6 +99,9 @@ class Mat3d:
 
     def __rmul__(self, scalar: Union[int, float]) -> 'Mat3d':
         return self * scalar
+
+    def __truediv__(self, scalar: Union[int, float]) -> 'Mat3d':
+        return self * (1 / scalar)
 
     def __matmul__(self, mat2: Union['Mat3d', 'Vec3d']) -> 'Mat3d':
         ensure.type_of(mat2, "mat", [Vec3d, Mat3d])

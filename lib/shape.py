@@ -4,7 +4,6 @@
 # 10 2021
 
 from typing import List, Tuple, Union
-
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *

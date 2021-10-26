@@ -125,10 +125,19 @@ def keyPressed(key, x, y):
         fps = fps if fps > 300 else fps + 16
     elif key == b'-':
         fps = fps if fps < 16 else fps - 15
-    elif key == b'*':
+    elif key == b'0':
         fps = 60
+    else:
+        T = None
+        if key == b'/':
+            T = Mat3d.scaling_matrix(0.5, 0.5, 0.5)
+        elif key == b'*':
+            T = Mat3d.scaling_matrix(2, 2, 2)
+        else:
+            return
 
-    print("FPS:", fps)
+        triangle.transform(T)
+        square.transform(T)
 
 
 def main():
@@ -171,5 +180,7 @@ def main():
 print("Hit ESC key to quit.")
 print("Hit + to increase fps.")
 print("Hit - to decrease fps.")
-print("Hit * to reset fps.")
+print("Hit 0 to reset fps.")
+print("Hit * to scale up.")
+print("Hit / to scale down.")
 main()
