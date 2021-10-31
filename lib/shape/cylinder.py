@@ -1,13 +1,13 @@
+# CENG 487 Assignment1 by
+# Gokberk Akdeniz
+# StudentId:250201041
+# 10 2021
 
-from typing import List
-
-import lib.color as Color
-from lib.matrix import Mat3d
-from lib.object import Object3d
-from .vector import Vec3d
-from .shape import Shape
-import random
 from math import cos, pi, sin
+from . import color
+from ..vector import Vec3d
+from .object3d import Object3d
+from .shape import Shape
 
 
 class Cylinder(Object3d):
@@ -31,8 +31,8 @@ class Cylinder(Object3d):
             top_vertices.append(Vec3d.point(x, 1, z))
             bottom_vertices.append(Vec3d.point(x, -1, z))
 
-        top = Shape(top_vertices, color=Color.GRAY)
-        bottom = Shape(bottom_vertices, color=Color.GRAY)
+        top = Shape(top_vertices, color=color.GRAY)
+        bottom = Shape(bottom_vertices, color=color.GRAY)
 
         shapes = [top, bottom]
 
@@ -43,7 +43,7 @@ class Cylinder(Object3d):
                     top_vertices[(i+1) % point_count],
                     bottom_vertices[(i+1) % point_count],
                     bottom_vertices[i],
-                    color=Color.GRAY
+                    color=color.GRAY
                 )
             )
 

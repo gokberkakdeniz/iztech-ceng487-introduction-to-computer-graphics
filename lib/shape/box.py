@@ -1,12 +1,13 @@
+# CENG 487 Assignment1 by
+# Gokberk Akdeniz
+# StudentId:250201041
+# 10 2021
 
-from typing import List
-
-import lib.color as Color
-from lib.matrix import Mat3d
-from lib.object import Object3d
-from .vector import Vec3d
+from . import color
+from ..vector import Vec3d
+from ..matrix import Mat3d
 from .shape import Shape
-import random
+from .object3d import Object3d
 
 
 class Box(Object3d):
@@ -18,42 +19,42 @@ class Box(Object3d):
                     Vec3d.point(-1.0, 1.0, -1.0),
                     Vec3d.point(-1.0, 1.0, 1.0),
                     Vec3d.point(1.0, 1.0, 1.0),
-                    color=Color.GRAY
+                    color=color.GRAY
                 ),
                 Shape.quadrilateral(  # Bottom
                     Vec3d.point(1.0, -1.0, 1.0),
                     Vec3d.point(-1.0, -1.0, 1.0),
                     Vec3d.point(-1.0, -1.0, -1.0),
                     Vec3d.point(1.0, -1.0, -1.0),
-                    color=Color.GRAY
+                    color=color.GRAY
                 ),
                 Shape.quadrilateral(  # Front
                     Vec3d.point(1.0, 1.0, 1.0),
                     Vec3d.point(-1.0, 1.0, 1.0),
                     Vec3d.point(-1.0, -1.0, 1.0),
                     Vec3d.point(1.0, -1.0, 1.0),
-                    color=Color.GRAY
+                    color=color.GRAY
                 ),
                 Shape.quadrilateral(  # Back
                     Vec3d.point(1.0, -1.0, -1.0),
                     Vec3d.point(-1.0, -1.0, -1.0),
                     Vec3d.point(-1.0, 1.0, -1.0),
                     Vec3d.point(1.0, 1.0, -1.0),
-                    color=Color.GRAY
+                    color=color.GRAY
                 ),
                 Shape.quadrilateral(  # Left
                     Vec3d.point(-1.0, 1.0, 1.0),
                     Vec3d.point(-1.0, 1.0, -1.0),
                     Vec3d.point(-1.0, -1.0, -1.0),
                     Vec3d.point(-1.0, -1.0, 1.0),
-                    color=Color.GRAY
+                    color=color.GRAY
                 ),
                 Shape.quadrilateral(  # Right
                     Vec3d.point(1.0, 1.0, -1.0),
                     Vec3d.point(1.0, 1.0, 1.0),
                     Vec3d.point(1.0, -1.0, 1.0),
                     Vec3d.point(1.0, -1.0, -1.0),
-                    color=Color.GRAY
+                    color=color.GRAY
                 )
             ]
         )

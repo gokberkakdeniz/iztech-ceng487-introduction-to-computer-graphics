@@ -3,17 +3,13 @@
 # StudentId:250201041
 # 10 2021
 
-from math import atan, pi, sqrt
+from math import atan, pi
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 import sys
 
-from lib.box import Box
-from lib.cylinder import Cylinder
-from lib.sphere import Sphere
-from lib.torus import Torus
-
+from lib.shape import Torus, Box, Cylinder, Sphere
 
 primitive = Sphere()
 mouse_x = 0

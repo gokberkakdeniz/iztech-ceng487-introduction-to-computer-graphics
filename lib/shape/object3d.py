@@ -1,9 +1,13 @@
 
+# CENG 487 Assignment1 by
+# Gokberk Akdeniz
+# StudentId:250201041
+# 10 2021
+
 from abc import ABC, abstractmethod
 from typing import List
-
-from lib.matrix import Mat3d
 from .shape import Shape
+from ..matrix import Mat3d
 
 
 class Object3d(ABC):

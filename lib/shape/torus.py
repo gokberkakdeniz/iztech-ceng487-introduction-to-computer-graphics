@@ -1,9 +1,13 @@
+# CENG 487 Assignment1 by
+# Gokberk Akdeniz
+# StudentId:250201041
+# 10 2021
 
-from lib import color
-from lib.object import Object3d
 from math import cos, pi, sin
-from .vector import Vec3d
+from .object3d import Object3d
 from .shape import Shape
+from . import color
+from ..vector import Vec3d
 
 
 class Torus(Object3d):

@@ -5,7 +5,7 @@
 
 from math import acos, cos, pi, sqrt
 from typing import Union
-from . import ensure
+from .utils import ensure
 
 
 class Vec3d:

@@ -4,12 +4,15 @@
 # 10 2021
 
 from typing import List, Tuple, Union
+
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
-from lib.matrix import Mat3d
-from lib.vector import Vec3d
-import lib.color as color
+
+from ..matrix import Mat3d
+from ..vector import Vec3d
+from . import color
+
 origin_zero = Vec3d.point(0, 0, 0)
 color_white = (1, 1, 1)
 
