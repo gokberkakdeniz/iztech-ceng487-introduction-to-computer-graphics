@@ -36,7 +36,6 @@ class Sphere(Object3d):
         count = self.circle_count // 2
         for y in range(-self.circle_count, self.circle_count + 1):
             y_fixed = y / self.circle_count
-            print(y_fixed)
             scale_factor = (1 - abs(y_fixed) ** 2) ** 0.5
 
             current_points = []

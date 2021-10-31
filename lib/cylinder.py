@@ -19,7 +19,6 @@ class Cylinder(Object3d):
 
     @staticmethod
     def _calculate_subdivisions(point_count):
-        print(point_count)
         top_vertices = []
         bottom_vertices = []
 

@@ -61,9 +61,7 @@ class Shape:
 
     def transform(self, T: Mat3d):
         self.stack.append(T)
-        # print("ONCE", *self.vertices)
         self.vertices = [T @ vertice for vertice in self.vertices]
-        # print("SONRA", *self.vertices)
 
     def undo(self):
         inv_T = self.stack.pop()  # .inverse()
