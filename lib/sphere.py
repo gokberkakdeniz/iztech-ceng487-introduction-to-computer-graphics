@@ -8,8 +8,8 @@ from .shape import Shape
 
 class Sphere(Object3d):
     def __init__(self):
-        self.circle_count = 2
-        self.circle_point_count = 4
+        self.circle_count = 4
+        self.circle_point_count = 6
 
         super().__init__(
             subdivisions=self._calculate_subdivisions()
@@ -33,7 +33,6 @@ class Sphere(Object3d):
 
         shapes = []
         previous_points = None
-        count = self.circle_count // 2
         for y in range(-self.circle_count, self.circle_count + 1):
             y_fixed = y / self.circle_count
             scale_factor = (1 - abs(y_fixed) ** 2) ** 0.5
@@ -67,7 +66,7 @@ class Sphere(Object3d):
         self.subdivisions = self._calculate_subdivisions()
 
     def decrease_subdivisions(self):
-        if self.circle_count < 4 or self.circle_point_count < 4:
+        if self.circle_count < 4 or self.circle_point_count < 6:
             return
 
         self.circle_count -= 1
