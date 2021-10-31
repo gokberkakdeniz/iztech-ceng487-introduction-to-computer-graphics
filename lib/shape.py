@@ -92,7 +92,7 @@ class Shape:
         return self.__class__.__name__ + "(" + ", ".join(map(str, self.vertices)) + ")"
 
     @staticmethod
-    def create_quadrilateral(
+    def quadrilateral(
         vertice1=Vec3d,
         vertice2=Vec3d,
         vertice3=Vec3d,
@@ -106,3 +106,17 @@ class Shape:
     ):
         return Shape([vertice1, vertice2, vertice3, vertice4],
                      origin, color or [color1, color2, color3, color4])
+
+    @staticmethod
+    def triangle(
+        vertice1=Vec3d,
+        vertice2=Vec3d,
+        vertice3=Vec3d,
+        origin: Vec3d = origin_zero,
+        color: Tuple[int, int, int] = None,
+        color1: Tuple[int, int, int] = color_white,
+        color2: Tuple[int, int, int] = color_white,
+        color3: Tuple[int, int, int] = color_white,
+    ):
+        return Shape([vertice1, vertice2, vertice3],
+                     origin, color or [color1, color2, color3])

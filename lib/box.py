@@ -13,42 +13,42 @@ class Box(Object3d):
     def __init__(self):
         super().__init__(
             subdivisions=[
-                Shape.create_quadrilateral(  # Top
+                Shape.quadrilateral(  # Top
                     Vec3d.point(1.0, 1.0, -1.0),
                     Vec3d.point(-1.0, 1.0, -1.0),
                     Vec3d.point(-1.0, 1.0, 1.0),
                     Vec3d.point(1.0, 1.0, 1.0),
                     color=Color.GRAY
                 ),
-                Shape.create_quadrilateral(  # Bottom
+                Shape.quadrilateral(  # Bottom
                     Vec3d.point(1.0, -1.0, 1.0),
                     Vec3d.point(-1.0, -1.0, 1.0),
                     Vec3d.point(-1.0, -1.0, -1.0),
                     Vec3d.point(1.0, -1.0, -1.0),
                     color=Color.GRAY
                 ),
-                Shape.create_quadrilateral(  # Front
+                Shape.quadrilateral(  # Front
                     Vec3d.point(1.0, 1.0, 1.0),
                     Vec3d.point(-1.0, 1.0, 1.0),
                     Vec3d.point(-1.0, -1.0, 1.0),
                     Vec3d.point(1.0, -1.0, 1.0),
                     color=Color.GRAY
                 ),
-                Shape.create_quadrilateral(  # Back
+                Shape.quadrilateral(  # Back
                     Vec3d.point(1.0, -1.0, -1.0),
                     Vec3d.point(-1.0, -1.0, -1.0),
                     Vec3d.point(-1.0, 1.0, -1.0),
                     Vec3d.point(1.0, 1.0, -1.0),
                     color=Color.GRAY
                 ),
-                Shape.create_quadrilateral(  # Left
+                Shape.quadrilateral(  # Left
                     Vec3d.point(-1.0, 1.0, 1.0),
                     Vec3d.point(-1.0, 1.0, -1.0),
                     Vec3d.point(-1.0, -1.0, -1.0),
                     Vec3d.point(-1.0, -1.0, 1.0),
                     color=Color.GRAY
                 ),
-                Shape.create_quadrilateral(  # Right
+                Shape.quadrilateral(  # Right
                     Vec3d.point(1.0, 1.0, -1.0),
                     Vec3d.point(1.0, 1.0, 1.0),
                     Vec3d.point(1.0, -1.0, 1.0),

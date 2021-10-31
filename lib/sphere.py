@@ -6,15 +6,14 @@ from lib.matrix import Mat3d
 from lib.object import Object3d
 from .vector import Vec3d
 from .shape import Shape
-import random
 from math import cos, pi, sin
 
 
-class Cylinder(Object3d):
+class Sphere(Object3d):
     def __init__(self):
         self.count = 8
         super().__init__(
-            subdivisions=Cylinder._calculate_subdivisions(self.count)
+            subdivisions=Sphere._calculate_subdivisions(self.count)
         )
 
     @staticmethod
