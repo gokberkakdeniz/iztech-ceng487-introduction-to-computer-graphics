@@ -9,8 +9,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from lib.matrix import Mat3d
 from lib.vector import Vec3d
-import lib.color as Color
-
+import lib.color as color
 origin_zero = Vec3d.point(0, 0, 0)
 color_white = (1, 1, 1)
 
@@ -47,23 +46,12 @@ class Shape:
             glVertex3f(position.x, position.y, position.z)
         glEnd()
 
-    def draw_border(self, color=Color.WHITE):
-        is_multicolored = type(self.color) is list
-        color_itr = None
-
-        if is_multicolored:
-            color_itr = iter(self.color)
-        else:
-            glColor3f(self.color[0], self.color[1], self.color[2])
-
+    def draw_border(self):
         glLineWidth(2)
         glBegin(GL_LINE_LOOP)
-        glColor3f(*color)
-        for vertice in self.vertices:
-            if is_multicolored:
-                color = next(color_itr)
-                glColor3f(*color)
+        glColor3f(*color.RED)
 
+        for vertice in self.vertices:
             position = vertice + self.origin
             glVertex3f(position.x, position.y, position.z)
         glEnd()

@@ -15,6 +15,7 @@ from lib.box import Box
 from lib.cylinder import Cylinder
 from lib.matrix import Mat3d
 from lib.shape import Shape
+from lib.sphere import Sphere
 from lib.vector import Vec3d
 
 
@@ -59,7 +60,7 @@ def ReSizeGLScene(Width, Height):
     glMatrixMode(GL_MODELVIEW)
 
 
-box = Cylinder()
+box = Sphere()
 # box = Box()
 i = 0
 
@@ -111,7 +112,7 @@ def DrawGLScene():
 
     box.draw_border()
     box.draw()
-    if (i//5) % 2 == 0:
+    if (i//10) % 2 == 0:
         box.increase_subdivisions()
     else:
         box.decrease_subdivisions()

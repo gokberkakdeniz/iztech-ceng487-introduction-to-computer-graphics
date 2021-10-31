@@ -1,60 +1,77 @@
 
-from typing import List
-
-import lib.color as Color
-from lib.matrix import Mat3d
+from lib import color
 from lib.object import Object3d
+from math import cos, pi, sin
 from .vector import Vec3d
 from .shape import Shape
-from math import cos, pi, sin
 
 
 class Sphere(Object3d):
     def __init__(self):
-        self.count = 8
+        self.circle_count = 2
+        self.circle_point_count = 4
+
         super().__init__(
-            subdivisions=Sphere._calculate_subdivisions(self.count)
+            subdivisions=self._calculate_subdivisions()
         )
 
-    @staticmethod
-    def _calculate_subdivisions(point_count):
-        print(point_count)
-        top_vertices = []
-        bottom_vertices = []
+    def _calculate_unit_points(self):
+        unit_points = []
 
-        for i in range(point_count):
-            theta = 2.0 * pi * i / point_count
+        for i in range(self.circle_point_count):
+            theta = 2.0 * pi * i / self.circle_point_count
 
             x = cos(theta)
             z = sin(theta)
 
-            top_vertices.append(Vec3d.point(x, 1, z))
-            bottom_vertices.append(Vec3d.point(x, -1, z))
+            unit_points.append((x, z))
 
-        top = Shape(top_vertices, color=Color.GRAY)
-        bottom = Shape(bottom_vertices, color=Color.GRAY)
+        return unit_points
 
-        shapes = [top, bottom]
+    def _calculate_subdivisions(self):
+        unit_points = self._calculate_unit_points()
 
-        for i in range(point_count):
-            shapes.append(
-                Shape.quadrilateral(
-                    top_vertices[i],
-                    top_vertices[(i+1) % point_count],
-                    bottom_vertices[(i+1) % point_count],
-                    bottom_vertices[i],
-                    color=Color.GRAY
+        shapes = []
+        previous_points = None
+        count = self.circle_count // 2
+        for y in range(-self.circle_count, self.circle_count + 1):
+            y_fixed = y / self.circle_count
+            print(y_fixed)
+            scale_factor = (1 - abs(y_fixed) ** 2) ** 0.5
+
+            current_points = []
+            for x, z in unit_points:
+                current_points.append(
+                    Vec3d.point(
+                        x * scale_factor, y_fixed, z * scale_factor
+                    )
                 )
-            )
 
+            if previous_points is not None:
+                for i in range(self.circle_point_count):
+                    shapes.append(
+                        Shape.quadrilateral(
+                            previous_points[i],
+                            previous_points[(i+1) % self.circle_point_count],
+                            current_points[(i+1) % self.circle_point_count],
+                            current_points[i],
+                            color=color.GRAY
+                        )
+                    )
+            previous_points = current_points
         return shapes
 
     def increase_subdivisions(self):
-        self.count *= 2
-        self.subdivisions = self._calculate_subdivisions(self.count)
+        self.circle_count += 1
+        self.circle_point_count += 1
+
+        self.subdivisions = self._calculate_subdivisions()
 
     def decrease_subdivisions(self):
-        if self.count < 8:
+        if self.circle_count < 4 or self.circle_point_count < 4:
             return
-        self.count //= 2
-        self.subdivisions = self._calculate_subdivisions(self.count)
+
+        self.circle_count -= 1
+        self.circle_point_count -= 1
+
+        self.subdivisions = self._calculate_subdivisions()
