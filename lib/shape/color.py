@@ -1,3 +1,8 @@
+# CENG 487 Assignment2 by
+# Gokberk Akdeniz
+# StudentId:250201041
+# 10 2021
+
 RED = (1.0, 0.0, 0.0)
 GREEN = (0.0, 1.0, 0.0)
 BLUE = (0.0, 0.0, 1.0)

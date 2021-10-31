@@ -1,4 +1,4 @@
-# CENG 487 Assignment1 by
+# CENG 487 Assignment2 by
 # Gokberk Akdeniz
 # StudentId:250201041
 # 10 2021
@@ -119,6 +119,7 @@ class vec3dTest(unittest.TestCase):
             ) @ self.point,
             self.point + Vec3d(10, 11, 12, 0)
         )
+
 
 if __name__ == '__main__':
     unittest.main()

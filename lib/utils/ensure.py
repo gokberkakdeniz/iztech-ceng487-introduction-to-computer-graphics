@@ -1,4 +1,4 @@
-# CENG 487 Assignment1 by
+# CENG 487 Assignment2 by
 # Gokberk Akdeniz
 # StudentId:250201041
 # 10 2021
@@ -6,6 +6,7 @@
 message_type_of = "The '{name}' must be one of the types: {class_names}"
 message_one_of = "The '{name}' must be one of the values: {values}"
 message_number = "The '{name}' must be number."
+
 
 def type_of(o: object,
             name: str,
