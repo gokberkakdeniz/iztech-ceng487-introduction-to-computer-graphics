@@ -12,6 +12,7 @@ import sys
 from lib.box import Box
 from lib.cylinder import Cylinder
 from lib.sphere import Sphere
+from lib.torus import Torus
 
 
 primitive = Sphere()
@@ -66,6 +67,8 @@ def keyboardFunc(key, x, y):
         primitive = Box()
     elif key == b'3':
         primitive = Cylinder()
+    elif key == b'4':
+        primitive = Torus()
     elif key == b'+':
         primitive.increase_subdivisions()
     elif key == b'-':
@@ -115,6 +118,7 @@ print("=OBJECTS=")
 print(" Press 1 to show sphere")
 print(" Press 2 to show box")
 print(" Press 3 to show cylinder")
+print(" Press 4 to show torus")
 print("=QUALITY=")
 print(" Press + to increase subdivision count")
 print(" Press - to decrease subdivision count")
