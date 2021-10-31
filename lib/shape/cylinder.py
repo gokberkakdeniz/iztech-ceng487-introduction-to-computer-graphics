@@ -14,13 +14,15 @@ class Cylinder(Object3d):
     def __init__(self):
         self.count = 8
         super().__init__(
-            subdivisions=Cylinder._calculate_subdivisions(self.count)
+            subdivisions=self._calculate_subdivisions(self.count)
         )
 
-    @staticmethod
-    def _calculate_subdivisions(point_count):
+    def _calculate_subdivisions(self, point_count):
         top_vertices = []
         bottom_vertices = []
+        stack = []
+        if hasattr(self, "subdivisions") and len(self.subdivisions) > 0:
+            stack = self.subdivisions[0].stack
 
         for i in range(point_count):
             theta = 2.0 * pi * i / point_count
@@ -31,8 +33,8 @@ class Cylinder(Object3d):
             top_vertices.append(Vec3d.point(x, 1, z))
             bottom_vertices.append(Vec3d.point(x, -1, z))
 
-        top = Shape(top_vertices, color=color.GRAY)
-        bottom = Shape(bottom_vertices, color=color.GRAY)
+        top = Shape(top_vertices, color=color.GRAY, stack=stack)
+        bottom = Shape(bottom_vertices, color=color.GRAY, stack=stack)
 
         shapes = [top, bottom]
 
@@ -43,7 +45,8 @@ class Cylinder(Object3d):
                     top_vertices[(i+1) % point_count],
                     bottom_vertices[(i+1) % point_count],
                     bottom_vertices[i],
-                    color=color.GRAY
+                    color=color.GRAY,
+                    stack=stack
                 )
             )
 

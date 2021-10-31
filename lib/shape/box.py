@@ -62,17 +62,13 @@ class Box(Object3d):
     def increase_subdivisions(self):
         divided_subdivisions = []
 
-        S_half = Mat3d.scaling_matrix(0.5, 0.5, 0.5)
-
         for subdivision in self.subdivisions:
             halved = subdivision.clone()
-            halved.transform(S_half)
+            halved.scale(0.5, 0.5, 0.5)
 
             for vertice in halved:
-                T_vertice = Mat3d.translation_matrix(*vertice[:-1])
-
                 new_subdivision = halved.clone()
-                new_subdivision.transform(T_vertice)
+                new_subdivision.translate(*vertice[:-1])
 
                 divided_subdivisions.append(new_subdivision)
 
@@ -84,14 +80,10 @@ class Box(Object3d):
 
         merged_subdivisions = []
 
-        S_double = Mat3d.scaling_matrix(2.0, 2.0, 2.0)
-
         for subdivision in self.subdivisions[::4]:
-            T_vertice = Mat3d.translation_matrix(*(-subdivision[0])[:-1])
-
             doubled = subdivision.clone()
-            doubled.transform(S_double)
-            doubled.transform(T_vertice)
+            doubled.scale(2.0, 2.0, 2.0)
+            doubled.translate(*(-subdivision[0])[:-1])
 
             merged_subdivisions.append(doubled)
 

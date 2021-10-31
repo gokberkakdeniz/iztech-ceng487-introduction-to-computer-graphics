@@ -22,6 +22,10 @@ class Torus(Object3d):
     def _calculate_subdivisions(self):
         shapes = []
         previous_points = None
+        stack = []
+        if hasattr(self, "subdivisions") and len(self.subdivisions) > 0:
+            stack = self.subdivisions[0].stack
+
         for i in range(self.circle_count+1):
             theta = 2.0 * pi * i / self.circle_count
 
@@ -46,7 +50,8 @@ class Torus(Object3d):
                             previous_points[(i+1) % self.circle_point_count],
                             current_points[(i+1) % self.circle_point_count],
                             current_points[i % self.circle_point_count],
-                            color=color.GRAY
+                            color=color.GRAY,
+                            stack=stack
                         )
                     )
             previous_points = current_points

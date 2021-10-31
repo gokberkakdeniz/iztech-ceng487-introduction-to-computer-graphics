@@ -31,16 +31,14 @@ class Object3d(ABC):
         for division in self.subdivisions:
             division.draw_border()
 
-    def rotate(self, theta_x, theta_y, theta_z):
-        Tx = Mat3d.rotation_x_matrix(theta_x)
-        Ty = Mat3d.rotation_y_matrix(theta_y)
-        Tz = Mat3d.rotation_z_matrix(theta_z)
+    def rotate(self, theta_0, theta_1, theta_2, order="xyz"):
         for division in self.subdivisions:
-            division.transform(Tx)
-            division.transform(Ty)
-            division.transform(Tz)
+            division.rotate(theta_0, theta_1, theta_2, order)
 
     def scale(self, factor):
-        S = Mat3d.scaling_matrix(factor, factor, factor)
         for division in self.subdivisions:
-            division.transform(S)
+            division.scale(factor, factor, factor)
+
+    def undo(self):
+        for division in self.subdivisions:
+            division.undo()

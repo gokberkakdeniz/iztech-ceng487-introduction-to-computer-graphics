@@ -86,12 +86,12 @@ def mouseFunc(button, state, x, y):
         else:
             mouse_x = x
             mouse_y = y
-    elif button == GLUT_CURSOR_DESTROY:
-        if state == GLUT_UP:
-            primitive.scale(1.5)
-    elif button == GLUT_CURSOR_HELP:
-        if state == GLUT_UP:
-            primitive.scale(0.75)
+    elif button == GLUT_RIGHT_BUTTON and state == GLUT_UP:
+        primitive.undo()
+    elif button == GLUT_CURSOR_DESTROY and state == GLUT_UP:
+        primitive.scale(1.5)
+    elif button == GLUT_CURSOR_HELP and state == GLUT_UP:
+        primitive.scale(0.75)
 
 
 def main():
@@ -118,9 +118,10 @@ print(" Press 4 to show torus")
 print("=QUALITY=")
 print(" Press + to increase subdivision count")
 print(" Press - to decrease subdivision count")
-print("=OPTIONS=")
-print(" Scroll up to zoom in")
-print(" Scroll down to zoom down")
+print("=TRANSFORMATION=")
+print(" Scrool mouse wheel up to zoom in")
+print(" Scroll mouse wheel down to zoom out")
 print(" Drag and drop to rotate")
+print(" Right click to undo transformations")
 
 main()
