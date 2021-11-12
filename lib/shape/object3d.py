@@ -4,18 +4,61 @@
 # 10 2021
 
 from typing import List
+import operator
+from functools import reduce
+from lib.shape import color
+from lib.vector import Vec3d
 from .shape import Shape
 
 
 class Object3d:
     def __init__(self, subdivisions: List[Shape]) -> None:
         self.subdivisions = subdivisions
+        self.level = 0
 
     def increase_subdivisions(self):
-        pass
+        new_subdivisions = []
+        for subdivision in self.subdivisions:
+            center = reduce(operator.add, subdivision.vertices) / \
+                len(subdivision.vertices)
+            vertices = []
+            for i in range(4):
+                vertices.append(subdivision.vertices[i])
+                vertices.append(
+                    (subdivision.vertices[i] +
+                     subdivision.vertices[(i+1) % 4]) / 2
+                )
+            for i in range(0, 8, 2):
+                new_subdivisions.append(
+                    Shape.quadrilateral(
+                        vertices[i],
+                        vertices[i+1],
+                        center,
+                        vertices[(i-1) % 8],
+                        color=color.GRAY
+                    )
+                )
+        self.subdivisions = new_subdivisions
+        self.level += 1
 
     def decrease_subdivisions(self):
-        pass
+        if self.level == 0:
+            return
+
+        new_subdivisions = []
+        for i in range(0, len(self.subdivisions), 4):
+            new_subdivisions.append(
+                Shape.quadrilateral(
+                    self.subdivisions[i].vertices[0],
+                    self.subdivisions[i+1].vertices[0],
+                    self.subdivisions[i+2].vertices[0],
+                    self.subdivisions[i+3].vertices[0],
+                    color=color.GRAY
+                )
+            )
+
+        self.subdivisions = new_subdivisions
+        self.level -= 1
 
     def draw(self):
         for division in self.subdivisions:
