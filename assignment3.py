@@ -3,16 +3,14 @@
 # StudentId:250201041
 # 10 2021
 
-from math import atan, pi
+from math import pi
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from sys import argv
 
 from lib.shape.object3d import Object3d
-from lib.shape.shape import Shape
 from lib.utils.reader import parse_obj
-from lib.vector import Vec3d
 
 primitive: Object3d = None
 
@@ -34,14 +32,14 @@ def InitGL(Width, Height):
     glMatrixMode(GL_MODELVIEW)
 
 
-def ReSizeGLScene(Width, Height):
-    if Height == 0:
-        Height = 1
+def ReSizeGLScene(width, height):
+    if height == 0:
+        height = 1
 
-    glViewport(0, 0, Width, Height)
+    glViewport(0, 0, width, height)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(45.0, float(Width)/float(Height), 0.1, 100.0)
+    gluPerspective(45.0, float(width)/float(height), 0.1, 100.0)
     glMatrixMode(GL_MODELVIEW)
 
 
@@ -53,11 +51,14 @@ def DrawGLScene():
     primitive.draw_border()
     primitive.draw()
 
+    glRasterPos2i(-3, -2)
+    glColor4f(0.0, 0.0, 1.0, 1.0)
+    glutBitmapString(GLUT_BITMAP_9_BY_15, str(primitive.level).encode("utf-8"))
+
     glutSwapBuffers()
 
 
 def keyboardFunc(key, x, y):
-    print(key)
     global primitive
 
     if ord(key) == 27:
@@ -75,6 +76,10 @@ def specialFunc(key, x, y):
         primitive.rotate(0, -pi/8, 0)
     elif key == GLUT_KEY_RIGHT:
         primitive.rotate(0, +pi/8, 0)
+    elif key == GLUT_KEY_UP:
+        primitive.rotate(-pi/8, 0, 0)
+    elif key == GLUT_KEY_DOWN:
+        primitive.rotate(+pi/8, 0, 0)
 
 
 def mouseFunc(button, state, x, y):
@@ -105,6 +110,8 @@ def main():
     print("=TRANSFORMATION=")
     print(" Left arrow to rotate around y axis (cw).")
     print(" Right arrow to rotate around y axis (ccw).")
+    print(" Up arrow to rotate around x axis (cw).")
+    print(" Down arrow to rotate around x axis (ccw).")
     print(" Scrool mouse wheel up to zoom in")
     print(" Scroll mouse wheel down to zoom out")
     print(" Right click to undo transformations")
