@@ -8,7 +8,7 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from sys import argv
-
+from os.path import basename
 from lib.shape.object3d import Object3d
 from lib.utils.reader import parse_obj
 
@@ -122,7 +122,9 @@ def main():
     glutInitWindowSize(640, 480)
     glutInitWindowPosition(0, 0)
 
-    glutCreateWindow("IZTECH CENG487 - 10 2021 - 250201041")
+    glutCreateWindow(
+        "IZTECH CENG487 - 10 2021 - 250201041 [" + basename(argv[1]) + "]"
+    )
     glutDisplayFunc(DrawGLScene)
     glutIdleFunc(DrawGLScene)
     glutReshapeFunc(ReSizeGLScene)
