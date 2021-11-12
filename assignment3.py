@@ -7,11 +7,15 @@ from math import atan, pi
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
-import sys
+from sys import argv
 
-from lib.shape import Torus, Box, Cylinder, Sphere
+from lib.shape.object3d import Object3d
+from lib.shape.shape import Shape
+from lib.utils.reader import parse_obj
+from lib.vector import Vec3d
 
-primitive = Sphere()
+primitive: Object3d = None
+
 mouse_x = 0
 mouse_y = 0
 
@@ -53,40 +57,28 @@ def DrawGLScene():
 
 
 def keyboardFunc(key, x, y):
+    print(key)
     global primitive
 
     if ord(key) == 27:
         glutLeaveMainLoop()
-    elif key == b'1':
-        primitive = Sphere()
-    elif key == b'2':
-        primitive = Box()
-    elif key == b'3':
-        primitive = Cylinder()
-    elif key == b'4':
-        primitive = Torus()
     elif key == b'+':
         primitive.increase_subdivisions()
     elif key == b'-':
         primitive.decrease_subdivisions()
 
 
-def mouseFunc(button, state, x, y):
-    global mouse_x, mouse_y
+def specialFunc(key, x, y):
+    global primitive
 
-    if button == GLUT_LEFT_BUTTON:
-        if state == GLUT_UP:
-            factor = (((mouse_y-y)**2 + (mouse_x-x)**2) /
-                      (640**2 + 480**2))**0.5
-            drag_angle = pi/2 if x == mouse_x else atan(
-                (y-mouse_y)/((x-mouse_x)))
-            primitive.rotate(factor*drag_angle*pi/2,
-                             factor*drag_angle*pi/2,
-                             factor*drag_angle*pi/2)
-        else:
-            mouse_x = x
-            mouse_y = y
-    elif button == GLUT_RIGHT_BUTTON and state == GLUT_UP:
+    if key == GLUT_KEY_LEFT:
+        primitive.rotate(0, -pi/8, 0)
+    elif key == GLUT_KEY_RIGHT:
+        primitive.rotate(0, +pi/8, 0)
+
+
+def mouseFunc(button, state, x, y):
+    if button == GLUT_RIGHT_BUTTON and state == GLUT_UP:
         primitive.undo()
     elif button == GLUT_CURSOR_DESTROY and state == GLUT_UP:
         primitive.scale(1.5)
@@ -95,7 +87,30 @@ def mouseFunc(button, state, x, y):
 
 
 def main():
-    glutInit(sys.argv)
+    global primitive
+    argc = len(argv)
+
+    if argc < 2:
+        print("error: object file must be given.")
+        exit(1)
+    try:
+        primitive = parse_obj(argv[1])
+    except FileNotFoundError:
+        print("error: the given file does not exist.")
+        exit(2)
+
+    print("=QUALITY=")
+    print(" Press + to increase subdivision count")
+    print(" Press - to decrease subdivision count")
+    print("=TRANSFORMATION=")
+    print(" Left arrow to rotate around y axis (cw).")
+    print(" Right arrow to rotate around y axis (ccw).")
+    print(" Scrool mouse wheel up to zoom in")
+    print(" Scroll mouse wheel down to zoom out")
+    print(" Right click to undo transformations")
+
+    glutInit(argv[2:])
+
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH)
     glutInitWindowSize(640, 480)
     glutInitWindowPosition(0, 0)
@@ -105,23 +120,11 @@ def main():
     glutIdleFunc(DrawGLScene)
     glutReshapeFunc(ReSizeGLScene)
     glutKeyboardFunc(keyboardFunc)
+    glutSpecialFunc(specialFunc)
     glutMouseFunc(mouseFunc)
     InitGL(640, 480)
     glutMainLoop()
 
 
-print("=OBJECTS=")
-print(" Press 1 to show sphere")
-print(" Press 2 to show box")
-print(" Press 3 to show cylinder")
-print(" Press 4 to show torus")
-print("=QUALITY=")
-print(" Press + to increase subdivision count")
-print(" Press - to decrease subdivision count")
-print("=TRANSFORMATION=")
-print(" Scrool mouse wheel up to zoom in")
-print(" Scroll mouse wheel down to zoom out")
-print(" Drag and drop to rotate")
-print(" Right click to undo transformations")
-
-main()
+if __name__ == "__main__":
+    main()
