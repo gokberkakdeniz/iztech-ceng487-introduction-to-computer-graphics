@@ -1,3 +1,8 @@
+# CENG 487 Assignment3 by
+# Gokberk Akdeniz
+# StudentId:250201041
+# 10 2021
+
 from lib.shape.object3d import Object3d
 from lib.vector import Vec3d
 from lib.shape import Shape, color
