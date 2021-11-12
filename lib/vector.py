@@ -50,7 +50,7 @@ class Vec3d:
         return Vec3d(self.x, self.y, self.z, 0)
 
     def __str__(self) -> str:
-        return "vec3d({}, {}, {}, {})".format(self.x, self.y, self.z, self.w)
+        return "Vec3d({}, {}, {}, {})".format(self.x, self.y, self.z, self.w)
 
     def is_point(self) -> bool:
         return self.w == 1

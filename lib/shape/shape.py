@@ -139,7 +139,7 @@ class Shape:
         return cloned
 
     def __str__(self) -> str:
-        return self.__class__.__name__ + "(" + ", ".join(map(str, self.vertices)) + ")"
+        return self.__class__.__name__ + "(vertices=[" + ", ".join(map(str, self.vertices)) + "])"
 
     @staticmethod
     def quadrilateral(
