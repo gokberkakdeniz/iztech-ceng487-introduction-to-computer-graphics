@@ -3,22 +3,17 @@
 # StudentId:250201041
 # 10 2021
 
-from abc import ABC, abstractmethod
 from typing import List
 from .shape import Shape
-from ..matrix import Mat3d
 
 
-class Object3d(ABC):
+class Object3d:
     def __init__(self, subdivisions: List[Shape]) -> None:
-        super().__init__()
         self.subdivisions = subdivisions
 
-    @abstractmethod
     def increase_subdivisions(self):
         pass
 
-    @abstractmethod
     def decrease_subdivisions(self):
         pass
 
@@ -41,3 +36,6 @@ class Object3d(ABC):
     def undo(self):
         for division in self.subdivisions:
             division.undo()
+
+    def __str__(self) -> str:
+        return self.__class__.__name__ + "(subdivisions=[" + ", ".join(map(str, self.subdivisions)) + "])"
