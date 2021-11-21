@@ -63,10 +63,18 @@ class BaseApplication(ABC):
         pass
 
     def on_resize(self, width, height):
-        pass
+        if height == 0:
+            height = 1
+
+        glViewport(0, 0, width, height)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        gluPerspective(45.0, float(width)/float(height), 0.1, 100.0)
+        glMatrixMode(GL_MODELVIEW)
 
     def on_key_press(self, key, x, y):
-        pass
+        if ord(key) == 27:
+            glutLeaveMainLoop()
 
     def on_special_key_press(self, key, x, y):
         pass
