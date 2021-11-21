@@ -37,9 +37,11 @@ class Sphere(Object3d):
 
         shapes = []
         previous_points = None
-        stack = []
+        stack = None
+        matrix = None
         if hasattr(self, "subdivisions") and len(self.subdivisions) > 0:
             stack = self.subdivisions[0].stack
+            matrix = self.subdivisions[0].matrix
 
         for y in range(-self.circle_count, self.circle_count + 1):
             y_fixed = y / self.circle_count
@@ -62,7 +64,7 @@ class Sphere(Object3d):
                             current_points[(i+1) % self.circle_point_count],
                             current_points[i],
                             color=color.GRAY,
-                            stack=stack
+                            state=(stack, matrix)
                         )
                     )
             previous_points = current_points

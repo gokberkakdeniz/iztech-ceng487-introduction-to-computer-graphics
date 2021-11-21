@@ -20,9 +20,11 @@ class Cylinder(Object3d):
     def _calculate_subdivisions(self, point_count):
         top_vertices = []
         bottom_vertices = []
-        stack = []
+        stack = None
+        matrix = None
         if hasattr(self, "subdivisions") and len(self.subdivisions) > 0:
             stack = self.subdivisions[0].stack
+            matrix = self.subdivisions[0].matrix
 
         for i in range(point_count):
             theta = 2.0 * pi * i / point_count
@@ -33,8 +35,12 @@ class Cylinder(Object3d):
             top_vertices.append(Vec3d.point(x, 1, z))
             bottom_vertices.append(Vec3d.point(x, -1, z))
 
-        top = Shape(top_vertices, color=color.GRAY, stack=stack)
-        bottom = Shape(bottom_vertices, color=color.GRAY, stack=stack)
+        top = Shape(top_vertices,
+                    color=color.GRAY,
+                    state=(stack, matrix))
+        bottom = Shape(bottom_vertices,
+                       color=color.GRAY,
+                       state=(stack, matrix))
 
         shapes = [top, bottom]
 
@@ -46,7 +52,7 @@ class Cylinder(Object3d):
                     bottom_vertices[(i+1) % point_count],
                     bottom_vertices[i],
                     color=color.GRAY,
-                    stack=stack
+                    state=(stack, matrix)
                 )
             )
 

@@ -4,6 +4,8 @@
 # 10 2021
 
 from math import cos, pi, sin
+
+from lib.matrix import Mat3d
 from .object3d import Object3d
 from .shape import Shape
 from . import color
@@ -18,29 +20,40 @@ class Torus(Object3d):
         super().__init__(
             subdivisions=self._calculate_subdivisions()
         )
+        self.rotate(pi/2, 0, 0)
 
     def _calculate_subdivisions(self):
         shapes = []
         previous_points = None
-        stack = []
+        stack = None
+        matrix = None
         if hasattr(self, "subdivisions") and len(self.subdivisions) > 0:
             stack = self.subdivisions[0].stack
+            matrix = self.subdivisions[0].matrix
+
+        theta_x = 2.0 * pi / self.circle_count
+        theta_y = 2.0 * pi / self.circle_point_count
 
         for i in range(self.circle_count+1):
-            theta = 2.0 * pi * i / self.circle_count
+            theta_xi = theta_x * i
+            Ry = Mat3d.rotation_y_matrix(-theta_xi)
 
-            center_x = 0.75 * cos(theta)
-            center_z = 0.75 * sin(theta)
+            center_x = 0.75 * cos(theta_xi)
+            center_z = 0.75 * sin(theta_xi)
 
             current_points = []
-            for i in range(self.circle_point_count):
-                theta_2 = 2.0 * pi * i / self.circle_point_count
+            for j in range(self.circle_point_count):
+                theta_yj = theta_y * j
 
-                x = center_x + 0.25 * cos(theta_2)
-                y = 0.25 * sin(theta_2)
-                z = center_z
+                p_center = Vec3d.vector(center_x, 0, center_z)
+                p_origin = Vec3d.point(
+                    0.25 * cos(theta_yj),
+                    0.25 * sin(theta_yj),
+                    0
+                )
+                point = p_center + Ry @ p_origin
 
-                current_points.append(Vec3d.point(x, y, z))
+                current_points.append(point)
 
             if previous_points is not None:
                 for i in range(self.circle_point_count+1):
@@ -51,7 +64,7 @@ class Torus(Object3d):
                             current_points[(i+1) % self.circle_point_count],
                             current_points[i % self.circle_point_count],
                             color=color.GRAY,
-                            stack=stack
+                            state=(stack, matrix)
                         )
                     )
             previous_points = current_points

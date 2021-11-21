@@ -149,3 +149,10 @@ class Mat3d:
 
     def __str__(self) -> str:
         return "mat3d(" + ",\n      ".join(map(str, self.matrix)) + ")"
+
+    @staticmethod
+    def identity():
+        return Mat3d(Vec3d(1, 0, 0, 0),
+                     Vec3d(0, 1, 0, 0),
+                     Vec3d(0, 0, 1, 0),
+                     Vec3d(0, 0, 0, 1))

@@ -23,13 +23,17 @@ class Shape:
             Tuple[int, int, int],
             List[Tuple[int, int, int]]
         ] = color.WHITE,
-        stack=[]
+        state=(None, None)
     ):
         self.vertices = vertices
         self.origin = origin
         self.color = color
-        self.stack = []
-        self._load_stack(stack)
+        self.stack = (state[0] or []).copy()
+        self.matrix = state[1] or Mat3d.identity()
+
+        if state[0] is not None:
+            self.vertices = [self.matrix @
+                             vertice for vertice in self.vertices]
 
     def draw(self):
         is_multicolored = type(self.color) is list
@@ -68,18 +72,25 @@ class Shape:
         R1 = getattr(Mat3d, f'rotation_{order[1]}_matrix')(theta_1)
         R2 = getattr(Mat3d, f'rotation_{order[2]}_matrix')(theta_2)
 
-        self.vertices = [R2 @ R1 @ R0 @ vertice for vertice in self.vertices]
+        R = R2 @ R1 @ R0
+        self.matrix = R @ self.matrix
+
+        self.vertices = [R @ vertice for vertice in self.vertices]
 
         self.stack.append(('R', order, theta_0, theta_1, theta_2))
 
     def translate(self, tx: float, ty: float, tz: float) -> None:
         T = Mat3d.translation_matrix(tx, ty, tz)
+        self.matrix = T @ self.matrix
+
         self.vertices = [T @ vertice for vertice in self.vertices]
 
         self.stack.append(('T', tx, ty, tz))
 
     def scale(self, sx: float, sy: float, sz: float) -> None:
         S = Mat3d.scaling_matrix(sx, sy, sz)
+        self.matrix = S @ self.matrix
+
         self.vertices = [S @ vertice for vertice in self.vertices]
 
         self.stack.append(('S', sx, sy, sz))
@@ -112,25 +123,6 @@ class Shape:
 
         self.stack.pop()
 
-    def _load_stack(self, stack):
-        for transformation in stack:
-            if transformation[0] == 'S':
-                sx = transformation[1]
-                sy = transformation[2]
-                sz = transformation[3]
-                self.scale(sx, sy, sz)
-            elif transformation[0] == 'T':
-                tx = transformation[1]
-                ty = transformation[2]
-                tz = transformation[3]
-                self.translate(tx, ty, tz)
-            elif transformation[0] == 'R':
-                order = transformation[1]
-                theta_1 = transformation[4]
-                theta_2 = transformation[3]
-                theta_3 = transformation[2]
-                self.rotate(theta_1, theta_2, theta_3, order)
-
     def clone(self) -> 'Shape':
         cloned = Shape(
             self.vertices[::], self.origin.clone(), self.color[::])
@@ -153,10 +145,10 @@ class Shape:
         color2: Tuple[int, int, int] = color.WHITE,
         color3: Tuple[int, int, int] = color.WHITE,
         color4: Tuple[int, int, int] = color.WHITE,
-        stack=[]
+        state=(None, None)
     ):
         return Shape([vertice1, vertice2, vertice3, vertice4],
-                     origin, color or [color1, color2, color3, color4], stack)
+                     origin, color or [color1, color2, color3, color4], state)
 
     @staticmethod
     def triangle(
@@ -168,7 +160,7 @@ class Shape:
         color1: Tuple[int, int, int] = color.WHITE,
         color2: Tuple[int, int, int] = color.WHITE,
         color3: Tuple[int, int, int] = color.WHITE,
-        stack=[]
+        state=(None, None)
     ):
         return Shape([vertice1, vertice2, vertice3],
-                     origin, color or [color1, color2, color3], stack)
+                     origin, color or [color1, color2, color3], state)
