@@ -4,3 +4,4 @@
 # 10 2021
 
 from .text import *
+from .app import *
