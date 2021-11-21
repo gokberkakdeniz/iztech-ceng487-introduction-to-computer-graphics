@@ -1,3 +1,8 @@
+# CENG 487 Assignment3 by
+# Gokberk Akdeniz
+# StudentId:250201041
+# 10 2021
+
 from functools import reduce
 from typing import List
 from OpenGL.GLUT import glutBitmapString

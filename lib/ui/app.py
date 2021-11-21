@@ -1,4 +1,9 @@
-from abc import ABC, abstractmethod
+# CENG 487 Assignment3 by
+# Gokberk Akdeniz
+# StudentId:250201041
+# 10 2021
+
+from abc import ABC
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
