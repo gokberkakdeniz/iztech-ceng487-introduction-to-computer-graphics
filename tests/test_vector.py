@@ -4,8 +4,7 @@
 # 10 2021
 
 import unittest
-from lib import vector
-from lib.vector import Vec3d
+from lib.math import Vec3d
 from math import pi, sqrt
 
 

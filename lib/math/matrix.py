@@ -5,7 +5,7 @@
 
 from typing import Union
 from math import sin, cos
-from .utils import ensure
+from ..utils import ensure
 from .vector import Vec3d
 
 

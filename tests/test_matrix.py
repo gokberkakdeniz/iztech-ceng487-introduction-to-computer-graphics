@@ -5,8 +5,7 @@
 
 import unittest
 from math import pi
-from lib.matrix import Mat3d
-from lib.vector import Vec3d
+from lib.math import Mat3d, Vec3d
 
 
 class vec3dTest(unittest.TestCase):

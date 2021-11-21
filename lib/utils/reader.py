@@ -3,9 +3,9 @@
 # StudentId:250201041
 # 10 2021
 
-from lib.shape.object3d import Object3d
-from lib.vector import Vec3d
-from lib.shape import Shape, color
+from ..shape import Object3d
+from ..math import Vec3d
+from ..shape import Shape, color
 
 
 def parse_obj(file):

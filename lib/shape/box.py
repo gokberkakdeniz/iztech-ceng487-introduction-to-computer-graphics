@@ -4,8 +4,7 @@
 # 10 2021
 
 from . import color
-from ..vector import Vec3d
-from ..matrix import Mat3d
+from ..math import Vec3d, Mat3d
 from .shape import Shape
 from .object3d import Object3d
 

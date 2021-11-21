@@ -9,8 +9,8 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
-from ..matrix import Mat3d
-from ..vector import Vec3d
+from ..math import Vec3d, Mat3d
+
 from . import color
 
 

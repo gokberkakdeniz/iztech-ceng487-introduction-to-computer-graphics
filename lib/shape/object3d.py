@@ -3,12 +3,10 @@
 # StudentId:250201041
 # 10 2021
 
-from typing import List
 import operator
 from functools import reduce
-from lib.shape import color
-from lib.vector import Vec3d
-from .shape import Shape
+from typing import List
+from .shape import color, Shape
 
 
 class Object3d:
