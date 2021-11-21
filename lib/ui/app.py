@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
+from signal import signal, SIGINT
 
 
 class BaseApplication(ABC):
@@ -50,6 +51,9 @@ class BaseApplication(ABC):
         glutPassiveMotionFunc(self.on_mouse_move)
 
         self.init_gl()
+
+        signal(SIGINT, lambda *_: glutLeaveMainLoop())
+
         glutMainLoop()
 
     def on_display(self):

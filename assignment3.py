@@ -11,8 +11,7 @@ from sys import argv
 from os.path import basename
 
 from lib.shape import Object3d
-from lib.ui import create_ascii_table, create_ascii_table_header
-from lib.ui.app import BaseApplication
+from lib.ui import create_ascii_table, create_ascii_table_header, BaseApplication
 from lib.utils.reader import parse_obj
 
 
@@ -35,16 +34,9 @@ class Assignment3Application(BaseApplication):
         else:
             self.object.draw_border()
             self.object.draw()
+            self.draw_subdivision_level()
 
-            glColor3f(0.0, 1.0, 1.0)
-            glRasterPos2i(-3, -2)
-
-            level = str(self.object.level).encode("utf-8")
-            glutBitmapString(GLUT_BITMAP_9_BY_15, level)
-
-        glColor3f(0.0, 1.0, 1.0)
-        glRasterPos2i(3, 2)
-        glutBitmapString(GLUT_BITMAP_HELVETICA_18, b'?')
+        self.draw_help_button()
 
         glutSwapBuffers()
 
@@ -85,9 +77,10 @@ class Assignment3Application(BaseApplication):
     def on_mouse_click(self, button, state, x, y):
         if button == GLUT_LEFT_BUTTON:
             if state == GLUT_UP:
-                dx = (pi) * (y - self.mouse_y)/640
-                dy = (pi) * (x - self.mouse_x)/480
-                self.object.rotate(dy, 0, dx, "yzx")
+                width, height = self.size
+                dx = (pi) * (y - self.mouse_y)/width
+                dy = (pi) * (x - self.mouse_x)/height
+                self.object.rotate(dy, dx, 0, "yxz")
             else:
                 self.mouse_x = x
                 self.mouse_y = y
@@ -105,6 +98,17 @@ class Assignment3Application(BaseApplication):
         else:
             glutSetCursor(GLUT_CURSOR_INHERIT)
             self.show_help = False
+
+    def draw_subdivision_level(self):
+        glColor3f(0.0, 1.0, 1.0)
+        glRasterPos2i(-3, -2)
+        glutBitmapString(GLUT_BITMAP_9_BY_15,
+                         str(self.object.level).encode("utf-8"))
+
+    def draw_help_button(self):
+        glColor3f(0.0, 1.0, 1.0)
+        glRasterPos2i(3, 2)
+        glutBitmapString(GLUT_BITMAP_HELVETICA_18, b'?')
 
     def draw_help_text(self):
         glColor3f(0.0, 1.0, 1.0)
@@ -163,6 +167,10 @@ def main():
     except FileNotFoundError:
         print("error: the given file does not exist.")
         exit(2)
+    except Exception as e:
+        print("error: could not parse the file.")
+        print("      ", e)
+        exit(3)
 
     app = Assignment3Application(
         obj,
