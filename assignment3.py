@@ -11,9 +11,8 @@ from sys import argv
 from os.path import basename
 
 from lib.shape import Object3d
-from lib.ui import create_ascii_table, create_ascii_table_header, BaseApplication
+from lib.ui import BaseApplication, Camera, Scene
 from lib.ui.elements import SubdivisionLevelElement, HelpButtonElement, HelpElement
-from lib.ui.scene import Scene
 from lib.utils.reader import parse_obj
 
 
@@ -25,12 +24,15 @@ class Assignment3Application(BaseApplication):
         self.mouse_y = 0
         self.show_help = False
 
+        self.camera_model = Camera()
+        self.camera_ui = Camera()
+
         # model scene
-        self.scene_model = Scene()
+        self.scene_model = Scene(cameras=(self.camera_model,))
         self.scene_model.register(obj)
 
         # model ui scene
-        self.scene_ui = Scene()
+        self.scene_ui = Scene(cameras=(self.camera_ui,))
 
         self.element_subdivision_level = SubdivisionLevelElement()
         self.scene_ui.register(self.element_subdivision_level)
@@ -39,7 +41,7 @@ class Assignment3Application(BaseApplication):
         self.scene_ui.register(self.element_help_button)
 
         # help ui scene
-        self.scene_help = Scene(visible=False)
+        self.scene_help = Scene(cameras=(self.camera_ui,), visible=False)
 
         self.element_help = HelpElement()
         self.scene_help.register(self.element_help)
@@ -86,16 +88,20 @@ class Assignment3Application(BaseApplication):
                 width, height = self.size
                 dx = (pi) * (y - self.mouse_y)/width
                 dy = (pi) * (x - self.mouse_x)/height
-                self.scene_model.objects[0][0].rotate(dy, dx, 0, "yxz")
+                # self.scene_model.objects[0][0].rotate(dy, dx, 0, "yxz")
             else:
                 self.mouse_x = x
                 self.mouse_y = y
         elif button == GLUT_RIGHT_BUTTON and state == GLUT_UP:
             self.scene_model.objects[0][0].undo()
         elif button == GLUT_CURSOR_DESTROY and state == GLUT_UP:
-            self.scene_model.objects[0][0].scale(1.5)
+            # self.scene_model.objects[0][0].scale(1.5)
+            self.camera_model.zoom_in()
         elif button == GLUT_CURSOR_HELP and state == GLUT_UP:
-            self.scene_model.objects[0][0].scale(0.75)
+            self.camera_model.zoom_out()
+        width, height = self.size
+        print(x/width, y/height)
+        # self.camera_model.set_eye(x=(-x/width), y=(-y/height), z=6)
 
     # def on_mouse_drag(self, x, y):
     #     width, height = self.size

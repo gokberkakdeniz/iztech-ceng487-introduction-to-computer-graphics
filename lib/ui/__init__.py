@@ -7,3 +7,5 @@ from .text import *
 from .app import *
 from .element import *
 from .elements import *
+from .scene import *
+from .camera import *
