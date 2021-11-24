@@ -81,6 +81,14 @@ class Assignment3Application(BaseApplication):
         elif button == GLUT_CURSOR_HELP and state == GLUT_UP:
             self.object.scale(0.75)
 
+    def on_mouse_drag(self, x, y):
+        width, height = self.size
+        dx = (pi) * (y - self.mouse_y)/width
+        dy = (pi) * (x - self.mouse_x)/height
+        self.object.rotate(dy, dx, 0, "yxz")
+        self.mouse_x = x
+        self.mouse_y = y
+
     def on_mouse_move(self, x, y):
         if 30 <= y <= 50 and 605 <= x <= 620:
             glutSetCursor(GLUT_CURSOR_INFO)

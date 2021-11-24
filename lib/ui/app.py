@@ -53,6 +53,7 @@ class BaseApplication(ABC):
         glutKeyboardFunc(self.on_key_press)
         glutSpecialFunc(self.on_special_key_press)
         glutMouseFunc(self.on_mouse_click)
+        glutMotionFunc(self.on_mouse_drag)
         glutPassiveMotionFunc(self.on_mouse_move)
 
         self.init_gl()
@@ -85,6 +86,9 @@ class BaseApplication(ABC):
         pass
 
     def on_mouse_click(self, button, state, x, y):
+        pass
+
+    def on_mouse_drag(self, x, y):
         pass
 
     def on_mouse_move(self, x, y):
