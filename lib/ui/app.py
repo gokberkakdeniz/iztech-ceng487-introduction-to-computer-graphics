@@ -72,6 +72,8 @@ class BaseApplication(ABC):
         if height == 0:
             height = 1
 
+        self.size = (width, height)
+
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()

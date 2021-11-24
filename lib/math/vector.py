@@ -32,6 +32,9 @@ class Vec3d:
         self.w = float(w)
         self.order = ["x", "y", "z", "w"]
 
+    def to_array(self):
+        return [self.x, self.y, self.z, self.w]
+
     @staticmethod
     def point(x: float, y: float, z: float) -> 'Vec3d':
         return Vec3d(x, y, z, 1)

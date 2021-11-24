@@ -25,8 +25,8 @@ class HelpElement(Element):
         self.draw_quality_title()
         self.draw_quality_table()
 
-        self.draw_transformation_title()
-        self.draw_transformation_table()
+        self.draw_camera_title()
+        self.draw_camera_table()
 
     def draw_border(self):
         pass
@@ -43,15 +43,14 @@ class HelpElement(Element):
             ("-", "decrease subdivision count"),
         ])
     )
-    draw_transformation_title = staticmethod(
-        create_ascii_table_header("transformation")
+    draw_camera_title = staticmethod(
+        create_ascii_table_header("camera")
     )
-    draw_transformation_table = staticmethod(
+    draw_camera_table = staticmethod(
         create_ascii_table([
             ("MWHEELUP",     "zoom in"),
             ("MWHEELDOWN",   "zoom out"),
             ("MLEFT",        "rotate (drag and drop)"),
-            ("MRIGHT",       "undo last transformation"),
             ("LEFTARROW",    "rotate around y axis (cw)"),
             ("RIGHTARROW",   "rotate around y axis (ccw)"),
             ("UPARROW",      "rotate around x axis (cw)"),

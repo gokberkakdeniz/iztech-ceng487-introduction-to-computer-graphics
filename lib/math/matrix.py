@@ -29,6 +29,9 @@ class Mat3d:
 
         self.matrix = [r1, r2, r3, r4]
 
+    def to_array(self):
+        return [self.matrix[j][i] for i in range(len(self.matrix)) for j in range(4)]
+
     @staticmethod
     def translation_matrix(tx: float, ty: float, tz: float) -> 'Mat3d':
         return Mat3d(Vec3d(1, 0, 0, tx),
