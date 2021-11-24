@@ -13,10 +13,14 @@ from ..element import Element
 class HelpButtonElement(Element):
     def __init__(self) -> None:
         super().__init__()
+        self.pos = (0, 0)
+
+    def set_pos(self, pos):
+        self.pos = pos
 
     def draw(self):
         glColor3f(0.0, 1.0, 1.0)
-        glRasterPos2i(3, 2)
+        glWindowPos2d(*self.pos)
         glutBitmapString(GLUT_BITMAP_HELVETICA_18, b'?')
 
     def draw_border(self):

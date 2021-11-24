@@ -51,6 +51,7 @@ class Assignment3Application(BaseApplication):
 
         level = self.scene_model.objects[0][0].level
         self.element_subdivision_level.set_level(level)
+        self.element_help_button.set_pos((self.size[0]-30, self.size[1]-30))
 
         self.scene_ui.draw()
         self.scene_help.draw()
@@ -104,7 +105,7 @@ class Assignment3Application(BaseApplication):
         self.scene_model.active_camera.rotate(dy, dx, 0)
 
     def on_mouse_move(self, x, y):
-        if 30 <= y <= 50 and 605 <= x <= 620:
+        if y < 30 and x > self.size[0] - 30:
             glutSetCursor(GLUT_CURSOR_INFO)
             self.scene_help.set_visibility(True)
             self.scene_ui.set_visibility(False)
