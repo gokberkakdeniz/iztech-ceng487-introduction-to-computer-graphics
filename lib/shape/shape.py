@@ -9,12 +9,13 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
+from . import Drawable
 from ..math import Vec3d, Mat3d
 
 from . import color
 
 
-class Shape:
+class Shape(Drawable):
     def __init__(
         self,
         vertices: List[Vec3d],

@@ -7,9 +7,10 @@ import operator
 from functools import reduce
 from typing import List
 from .shape import color, Shape
+from . import Drawable
 
 
-class Object3d:
+class Object3d(Drawable):
     def __init__(self, subdivisions: List[Shape]) -> None:
         self.subdivisions = subdivisions
         self.level = 0
