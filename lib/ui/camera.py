@@ -23,9 +23,7 @@ class Camera:
         )
 
     def rotate(self, x: float, y: float, z: float):
-        self.matrix @= Mat3d.rotation_z_matrix(z) \
-            @ Mat3d.rotation_y_matrix(y) \
-            @ Mat3d.rotation_x_matrix(x)
+        self.matrix @= Mat3d.rotation_matrix(x, y, z)
 
     def reset(self):
         self.matrix = Mat3d.translation_matrix(0, 0, -6)

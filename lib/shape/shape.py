@@ -18,7 +18,6 @@ class Shape:
     def __init__(
         self,
         vertices: List[Vec3d],
-        origin: Vec3d = Vec3d.point(0, 0, 0),
         color: Union[
             Tuple[int, int, int],
             List[Tuple[int, int, int]]
@@ -26,7 +25,6 @@ class Shape:
         state=(None, None)
     ):
         self.vertices = vertices
-        self.origin = origin
         self.color = color
         self.stack = (state[0] or []).copy()
         self.matrix = state[1] or Mat3d.identity()
@@ -50,8 +48,7 @@ class Shape:
                 color = next(color_itr)
                 glColor3f(*color)
 
-            position = vertice + self.origin
-            glVertex3f(position.x, position.y, position.z)
+            glVertex3f(vertice.x, vertice.y, vertice.z)
         glEnd()
 
     def draw_border(self):
@@ -60,19 +57,15 @@ class Shape:
         glColor3f(*color.RED)
 
         for vertice in self.vertices:
-            position = vertice + self.origin
-            glVertex3f(position.x, position.y, position.z)
+            glVertex3f(vertice.x, vertice.y, vertice.z)
+
         glEnd()
 
     def __getitem__(self, index: Union[int, slice]):
         return self.vertices.__getitem__(index)
 
     def rotate(self, theta_0: float, theta_1: float, theta_2: float, order="xyz") -> None:
-        R0 = getattr(Mat3d, f'rotation_{order[0]}_matrix')(theta_0)
-        R1 = getattr(Mat3d, f'rotation_{order[1]}_matrix')(theta_1)
-        R2 = getattr(Mat3d, f'rotation_{order[2]}_matrix')(theta_2)
-
-        R = R2 @ R1 @ R0
+        R = Mat3d.rotation_matrix(theta_0, theta_1, theta_2, order)
         self.matrix = R @ self.matrix
 
         self.vertices = [R @ vertice for vertice in self.vertices]
@@ -139,7 +132,6 @@ class Shape:
         vertice2=Vec3d,
         vertice3=Vec3d,
         vertice4=Vec3d,
-        origin: Vec3d = Vec3d.point(0, 0, 0),
         color: Tuple[int, int, int] = None,
         color1: Tuple[int, int, int] = color.WHITE,
         color2: Tuple[int, int, int] = color.WHITE,
@@ -148,14 +140,13 @@ class Shape:
         state=(None, None)
     ):
         return Shape([vertice1, vertice2, vertice3, vertice4],
-                     origin, color or [color1, color2, color3, color4], state)
+                     color or [color1, color2, color3, color4], state)
 
     @staticmethod
     def triangle(
         vertice1=Vec3d,
         vertice2=Vec3d,
         vertice3=Vec3d,
-        origin: Vec3d = Vec3d.point(0, 0, 0),
         color: Tuple[int, int, int] = None,
         color1: Tuple[int, int, int] = color.WHITE,
         color2: Tuple[int, int, int] = color.WHITE,
@@ -163,4 +154,4 @@ class Shape:
         state=(None, None)
     ):
         return Shape([vertice1, vertice2, vertice3],
-                     origin, color or [color1, color2, color3], state)
+                     color or [color1, color2, color3], state)

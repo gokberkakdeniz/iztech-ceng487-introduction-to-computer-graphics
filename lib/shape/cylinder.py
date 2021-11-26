@@ -5,7 +5,7 @@
 
 from math import cos, pi, sin
 from . import color
-from ..math import Vec3d, Mat3d
+from ..math import Vec3d
 from .object3d import Object3d
 from .shape import Shape
 

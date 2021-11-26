@@ -47,6 +47,23 @@ class Mat3d:
                      Vec3d(0, 0, 0, 1),)
 
     @staticmethod
+    def rotation_matrix(theta_0: float, theta_1: float, theta_2: float, order="xyz") -> 'Mat3d':
+        R = None
+
+        if theta_0 != 0:
+            R = getattr(Mat3d, f'rotation_{order[0]}_matrix')(theta_0)
+
+        if theta_1 != 0:
+            R1 = getattr(Mat3d, f'rotation_{order[1]}_matrix')(theta_1)
+            R = R1 if R is None else R1 @ R
+
+        if theta_2 != 0:
+            R2 = getattr(Mat3d, f'rotation_{order[2]}_matrix')(theta_2)
+            R = R2 if R is None else R2 @ R
+
+        return R or Mat3d.identity()
+
+    @staticmethod
     def rotation_x_matrix(theta: float) -> 'Mat3d':
         return Mat3d(Vec3d(1, 0, 0, 0),
                      Vec3d(0, cos(theta), -sin(theta), 0),
@@ -66,6 +83,20 @@ class Mat3d:
                      Vec3d(sin(theta), cos(theta), 0, 0),
                      Vec3d(0, 0, 1, 0),
                      Vec3d(0, 0, 0, 1))
+
+    @staticmethod
+    def identity():
+        return Mat3d(Vec3d(1, 0, 0, 0),
+                     Vec3d(0, 1, 0, 0),
+                     Vec3d(0, 0, 1, 0),
+                     Vec3d(0, 0, 0, 1))
+
+    @staticmethod
+    def zero():
+        return Mat3d(Vec3d(0, 0, 0, 0),
+                     Vec3d(0, 0, 0, 0),
+                     Vec3d(0, 0, 0, 0),
+                     Vec3d(0, 0, 0, 0))
 
     def clone(self) -> 'Mat3d':
         return Mat3d(self.matrix[0].clone(),
@@ -151,11 +182,4 @@ class Mat3d:
         return self.clone()
 
     def __str__(self) -> str:
-        return "mat3d(" + ",\n      ".join(map(str, self.matrix)) + ")"
-
-    @staticmethod
-    def identity():
-        return Mat3d(Vec3d(1, 0, 0, 0),
-                     Vec3d(0, 1, 0, 0),
-                     Vec3d(0, 0, 1, 0),
-                     Vec3d(0, 0, 0, 1))
+        return "Mat3d(" + ",\n      ".join(map(str, self.matrix)) + ")"
