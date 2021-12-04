@@ -38,6 +38,8 @@ class WingedEdgeShape(Drawable):
         self._adj_edges: List[WingedEdge] = []
         self._adj_faces: List[int] = []
         self._adj_vertices: dict[int, int] = {}
+
+        self._quad_complements: bidict[int, int] = bidict()
         self._colors = []
 
         self._stack = (state[0] or []).copy()
@@ -54,7 +56,7 @@ class WingedEdgeShape(Drawable):
         if not self.__printed:
             self.__repr__()
 
-        for e_id in self._adj_faces:
+        for f_id, e_id in enumerate(self._adj_faces):
             e = self._adj_edges[e_id]
             e_next: WingedEdge = self._adj_edges[e.edge_left_forward]
 
@@ -65,10 +67,25 @@ class WingedEdgeShape(Drawable):
             v1 = self._vertices_cache[h_v1]
             v2 = self._vertices_cache[h_v2]
             v3 = self._vertices_cache[h_v3]
+            v4 = None
+
+            if self._quad_complements.has_left(f_id):
+                f_c_id = self._quad_complements.get_right(f_id)
+                e_c_id = self._adj_faces[f_c_id]
+                e_c = self._adj_edges[e_c_id]
+                e_c_next: WingedEdge = self._adj_edges[e_c.edge_left_forward]
+                h_v4 = self._vertices.get_right(e_c_next.vert_origin)
+                v4 = self._vertices_cache[h_v4]
+
+                # preserve ccw order
+                v2, v4 = v4, v2
+                v3, v4 = v4, v3
+            elif self._quad_complements.has_right(f_id):
+                continue
 
             if not self.__printed:
                 print(e_id, "=>", e)
-                print(" ", "=>", v1, v2, v3)
+                print(" ", "=>", v1, v2, v3, v4)
 
             if border:
                 glLineWidth(2)
@@ -77,14 +94,19 @@ class WingedEdgeShape(Drawable):
                 glVertex4f(*v1)
                 glVertex4f(*v2)
                 glVertex4f(*v3)
+                if v4 is not None:
+                    glVertex4f(*v4)
                 glVertex4f(*v1)
                 glEnd()
 
             glColor3f(*color.GRAY)
-            glBegin(GL_TRIANGLES)
+            # TODO: check performance
+            glBegin(GL_TRIANGLES if v4 is None else GL_POLYGON)
             glVertex4f(*v1)
             glVertex4f(*v2)
             glVertex4f(*v3)
+            if v4 is not None:
+                glVertex4f(*v4)
             glEnd()
 
         self.__printed = True
@@ -213,10 +235,15 @@ class WingedEdgeShape(Drawable):
         color2: Tuple[int, int, int] = color.WHITE,
         color3: Tuple[int, int, int] = color.WHITE
     ):
+        face1_index = len(self._adj_faces)
+        face2_index = face1_index + 1
+
         self.add_tri_face(vertice0, vertice1, vertice3,
                           color0, color1, color3)
         self.add_tri_face(vertice3, vertice1, vertice2,
                           color3, color1, color2)
+
+        self._quad_complements.add(face1_index, face2_index)
 
     def __register_vertice(self, vertice: Vec3d) -> int:
         h_vertice = hash(vertice)
