@@ -47,9 +47,4 @@ class Scene:
                 obj, visible = el
 
                 if visible:
-                    try:
-                        obj.draw(border)
-                    except Exception:
-                        obj.draw()
-                        if border:
-                            obj.draw_border()
+                    obj.draw(border)

@@ -14,7 +14,7 @@ class HelpElement(Element):
     def __init__(self) -> None:
         super().__init__()
 
-    def draw(self):
+    def draw(self, border=None):
         glColor3f(0.0, 1.0, 1.0)
         glRasterPos2i(-1, 2)
         self.draw_keyboard_shortcuts_title()
@@ -27,9 +27,6 @@ class HelpElement(Element):
 
         self.draw_camera_title()
         self.draw_camera_table()
-
-    def draw_border(self):
-        pass
 
     draw_keyboard_shortcuts_title = staticmethod(
         create_ascii_table_header("keyboard shortcuts")

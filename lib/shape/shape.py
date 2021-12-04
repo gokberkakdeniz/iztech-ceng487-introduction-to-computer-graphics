@@ -34,7 +34,7 @@ class Shape(Drawable):
             self.vertices = [self.matrix @
                              vertice for vertice in self.vertices]
 
-    def draw(self):
+    def draw(self, border=True):
         is_multicolored = type(self.color) is list
         color_itr = None
 
@@ -45,21 +45,18 @@ class Shape(Drawable):
 
         glBegin(GL_POLYGON)
         for vertice in self.vertices:
+            if border:
+                glLineWidth(2)
+                glBegin(GL_LINE_LOOP)
+                glColor3f(*color.RED)
+                glVertex4f(*vertice)
+                glEnd()
+
             if is_multicolored:
                 color = next(color_itr)
                 glColor3f(*color)
 
-            glVertex3f(vertice.x, vertice.y, vertice.z)
-        glEnd()
-
-    def draw_border(self):
-        glLineWidth(2)
-        glBegin(GL_LINE_LOOP)
-        glColor3f(*color.RED)
-
-        for vertice in self.vertices:
-            glVertex3f(vertice.x, vertice.y, vertice.z)
-
+                glVertex4f(*vertice)
         glEnd()
 
     def __getitem__(self, index: Union[int, slice]):

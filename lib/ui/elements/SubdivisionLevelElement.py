@@ -18,11 +18,8 @@ class SubdivisionLevelElement(Element):
     def set_level(self, level: int):
         self.level = level
 
-    def draw(self):
+    def draw(self, border=None):
         glColor3f(0.0, 1.0, 1.0)
         glRasterPos2i(-3, -2)
         glutBitmapString(GLUT_BITMAP_9_BY_15,
                          (f"Level: {self.level}").encode("utf-8"))
-
-    def draw_border(self):
-        pass

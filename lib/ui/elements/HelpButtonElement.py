@@ -18,10 +18,7 @@ class HelpButtonElement(Element):
     def set_pos(self, pos):
         self.pos = pos
 
-    def draw(self):
+    def draw(self, border=None):
         glColor3f(0.0, 1.0, 1.0)
         glWindowPos2d(*self.pos)
         glutBitmapString(GLUT_BITMAP_HELVETICA_18, b'?')
-
-    def draw_border(self):
-        pass
