@@ -33,10 +33,10 @@ def parse_obj(file):
                     line.split(" ")[1:]
                 ))
 
-                obj.add_quad(face_vertices[0],
-                             face_vertices[3],
-                             face_vertices[2],
-                             face_vertices[1])
+                obj.add_quad_face(face_vertices[0],
+                                  face_vertices[3],
+                                  face_vertices[2],
+                                  face_vertices[1])
             else:
                 print("invalid line:", line)
     print(obj)

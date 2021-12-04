@@ -129,6 +129,7 @@ def main():
 
     try:
         obj = parse_obj(argv[1])
+        # TODO: delete
         # obj = WingedEdgeShape.triangle(
         #     Vec3d.point(0, 0, 0), Vec3d.point(0, -1, 0), Vec3d.point(1, 0, 0),
         #     color.GRAY,
@@ -146,7 +147,7 @@ def main():
         #     color.GRAY,
         # )
         # obj = WingedEdgeShape()
-        # obj.add_face(
+        # obj.add_tri_face(
         #     Vec3d.point(0, 0, 0),
         #     Vec3d.point(0, -1, 0),
         #     Vec3d.point(1, 0, 0),
@@ -154,7 +155,8 @@ def main():
         #     color.GRAY,
         #     color.GRAY,
         # )
-        # obj.add_face(
+        # obj.scale(0.5, 0.5, 0.5)
+        # obj.add_tri_face(
         #     Vec3d.point(1, 0, 0),
         #     Vec3d.point(0, -1, 0),
         #     Vec3d.point(1, -1, 0),
@@ -162,7 +164,17 @@ def main():
         #     color.GRAY,
         #     color.GRAY,
         # )
-        # obj.add_face(
+        # obj.scale(0.5, 0.5, 0.5)
+        # obj.add_tri_face(
+        #     Vec3d.point(1, 0, 0),
+        #     Vec3d.point(1, -1, 0),
+        #     Vec3d.point(1.5, -0.5, 0),
+        #     color.GRAY,
+        #     color.GRAY,
+        #     color.GRAY,
+        # )
+        # obj.scale(0.5, 0.5, 0.5)
+        # obj.add_tri_face(
         #     Vec3d.point(1, 0, 0),
         #     Vec3d.point(1, -1, 0),
         #     Vec3d.point(1.5, -0.5, 0),

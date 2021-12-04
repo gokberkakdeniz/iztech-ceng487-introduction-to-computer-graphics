@@ -10,7 +10,3 @@ class Drawable(ABC):
     @abstractmethod
     def draw():
         pass
-
-    @abstractmethod
-    def draw_border():
-        pass
