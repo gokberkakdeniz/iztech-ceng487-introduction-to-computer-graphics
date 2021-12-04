@@ -1,7 +1,7 @@
-# CENG 487 Assignment3 by
+# CENG 487 Assignment4 by
 # Gokberk Akdeniz
 # StudentId:250201041
-# 10 2021
+# 12 2021
 
 from math import acos, cos, pi, sqrt
 from typing import Union
@@ -156,3 +156,6 @@ class Vec3d:
 
     def __setitem__(self, index: int, value: float) -> None:
         self.__setattr__(self.order[index], value)
+
+    def __hash__(self) -> int:
+        return hash((*self, *self.order))

@@ -1,7 +1,7 @@
-# CENG 487 Assignment3 by
+# CENG 487 Assignment4 by
 # Gokberk Akdeniz
 # StudentId:250201041
-# 10 2021
+# 12 2021
 
 from math import pi
 from OpenGL.GL import *
@@ -18,7 +18,7 @@ from lib.ui.elements import SubdivisionLevelElement, HelpButtonElement, HelpElem
 from lib.utils.reader import parse_obj
 
 
-class Assignment3Application(BaseApplication):
+class Assignment4Application(BaseApplication):
     def __init__(self, obj: Shape, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
@@ -177,9 +177,9 @@ def main():
         print("error: could not parse the file.")
         raise e
 
-    app = Assignment3Application(
+    app = Assignment4Application(
         obj,
-        "IZTECH CENG487 - 10 2021 - 250201041 [" + basename(argv[1]) + "]",
+        "IZTECH CENG487 - 12 2021 - 250201041 [" + basename(argv[1]) + "]",
         argv=argv[:2]
     )
     app.start()

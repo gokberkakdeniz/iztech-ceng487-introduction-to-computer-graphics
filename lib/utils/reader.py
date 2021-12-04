@@ -1,16 +1,17 @@
-# CENG 487 Assignment3 by
+# CENG 487 Assignment4 by
 # Gokberk Akdeniz
 # StudentId:250201041
-# 10 2021
+# 12 2021
 
-from ..shape import Object3d
+from typing import List
 from ..math import Vec3d
-from ..shape import Shape, color
+from ..shape import Shape, color, WingedEdgeShape
 
 
 def parse_obj(file):
-    vertices = []
-    faces = []
+    vertices: List[Vec3d] = []
+    obj = WingedEdgeShape()
+
     with open(file) as f:
         for line in f.readlines():
             line = line.strip()
@@ -22,7 +23,7 @@ def parse_obj(file):
             if cmd == "#":
                 continue
             elif cmd == "o":
-                pass
+                obj.name = line.split(" ")[1]
             elif cmd == "v":
                 x, y, z = list(map(float, line.split(" ")[1:]))
                 vertices.append(Vec3d.point(x, y, z))
@@ -31,8 +32,12 @@ def parse_obj(file):
                     lambda index: vertices[int(index)-1],
                     line.split(" ")[1:]
                 ))
-                face = Shape(vertices=face_vertices, color=color.GRAY)
-                faces.append(face)
+
+                obj.add_quad(face_vertices[0],
+                             face_vertices[3],
+                             face_vertices[2],
+                             face_vertices[1])
             else:
                 print("invalid line:", line)
-    return Object3d(subdivisions=faces)
+    print(obj)
+    return obj

@@ -1,7 +1,7 @@
-# CENG 487 Assignment3 by
+# CENG 487 Assignment4 by
 # Gokberk Akdeniz
 # StudentId:250201041
-# 10 2021
+# 12 2021
 
 from typing import Iterable, List, Set, Tuple, Union
 from ..shape import Shape, Object3d
@@ -47,7 +47,9 @@ class Scene:
                 obj, visible = el
 
                 if visible:
-                    if border:
-                        obj.draw_border()
-
-                    obj.draw()
+                    try:
+                        obj.draw(border)
+                    except Exception:
+                        obj.draw()
+                        if border:
+                            obj.draw_border()
