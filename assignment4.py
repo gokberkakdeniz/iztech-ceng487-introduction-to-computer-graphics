@@ -9,15 +9,17 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from sys import argv
 from os.path import basename
+from lib.math.vector import Vec3d
 
-from lib.shape import Object3d
+from lib.shape import Object3d, color, WingedEdgeShape
+from lib.shape.shape import Shape
 from lib.ui import BaseApplication, Camera, Scene
 from lib.ui.elements import SubdivisionLevelElement, HelpButtonElement, HelpElement
 from lib.utils.reader import parse_obj
 
 
 class Assignment3Application(BaseApplication):
-    def __init__(self, obj: Object3d, *args, **kwargs) -> None:
+    def __init__(self, obj: Shape, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.mouse_x = 0
@@ -49,8 +51,8 @@ class Assignment3Application(BaseApplication):
     def draw_gl_scene(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        level = self.scene_model.objects[0][0].level
-        self.element_subdivision_level.set_level(level)
+        # level = self.scene_model.objects[0][0].level
+        # self.element_subdivision_level.set_level(level)
         self.element_help_button.set_pos((self.size[0]-30, self.size[1]-30))
 
         self.scene_ui.draw()
@@ -127,13 +129,53 @@ def main():
 
     try:
         obj = parse_obj(argv[1])
+        # obj = WingedEdgeShape.triangle(
+        #     Vec3d.point(0, 0, 0), Vec3d.point(0, -1, 0), Vec3d.point(1, 0, 0),
+        #     color.GRAY,
+        #     color.GRAY,
+        #     color.GRAY,
+        # )
+        # obj = WingedEdgeShape.quadrilateral(
+        #     Vec3d.point(0, 0, 0),
+        #     Vec3d.point(0, -1, 0),
+        #     Vec3d.point(1, -1, 0),
+        #     Vec3d.point(1, 0, 0),
+        #     color.GRAY,
+        #     color.GRAY,
+        #     color.GRAY,
+        #     color.GRAY,
+        # )
+        # obj = WingedEdgeShape()
+        # obj.add_face(
+        #     Vec3d.point(0, 0, 0),
+        #     Vec3d.point(0, -1, 0),
+        #     Vec3d.point(1, 0, 0),
+        #     color.GRAY,
+        #     color.GRAY,
+        #     color.GRAY,
+        # )
+        # obj.add_face(
+        #     Vec3d.point(1, 0, 0),
+        #     Vec3d.point(0, -1, 0),
+        #     Vec3d.point(1, -1, 0),
+        #     color.GRAY,
+        #     color.GRAY,
+        #     color.GRAY,
+        # )
+        # obj.add_face(
+        #     Vec3d.point(1, 0, 0),
+        #     Vec3d.point(1, -1, 0),
+        #     Vec3d.point(1.5, -0.5, 0),
+        #     color.GRAY,
+        #     color.GRAY,
+        #     color.GRAY,
+        # )
     except FileNotFoundError:
         print("error: the given file does not exist.")
         exit(2)
     except Exception as e:
         print("error: could not parse the file.")
-        print("      ", e)
-        exit(3)
+        raise e
 
     app = Assignment3Application(
         obj,
