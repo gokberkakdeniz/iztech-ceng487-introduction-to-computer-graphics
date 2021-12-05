@@ -130,10 +130,10 @@ class Vec3d:
         return self * scalar
 
     def __truediv__(self, scalar: Union[int, float]) -> 'Vec3d':
-        return Vec3d(self.x / scalar, self.y / scalar, self.z / scalar, self.w)
+        return Vec3d(self.x / scalar, self.y / scalar, self.z / scalar, self.w / scalar)
 
     def __floordiv__(self, scalar: Union[int, float]) -> 'Vec3d':
-        return Vec3d(self.x // scalar, self.y // scalar, self.z // scalar, self.w)
+        return Vec3d(self.x // scalar, self.y // scalar, self.z // scalar, self.w / scalar)
 
     def __eq__(self, o: object) -> bool:
         return type(self) == type(o) and \

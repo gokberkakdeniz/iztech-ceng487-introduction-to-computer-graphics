@@ -72,7 +72,7 @@ class Assignment4Application(BaseApplication):
 
         if key == b'+':
             for obj in self.scene_model.objects:
-                obj[0].increase_subdivisions()
+                obj[0].subdivide_catmull_clark()
         elif key == b'-':
             for obj in self.scene_model.objects:
                 obj[0].decrease_subdivisions()

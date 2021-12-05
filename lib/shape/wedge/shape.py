@@ -50,8 +50,10 @@ class WingedEdgeShape(Shape):
             for v_id in self._vertices_cache:
                 self.__transform_vertices(v_id, self._matrix)
 
-        self.__printed = True
         self.__object_index += 1
+
+        self.__F = []
+        self.__E = []
 
     @staticmethod
     def quadrilateral(
@@ -88,19 +90,27 @@ class WingedEdgeShape(Shape):
         return obj
 
     def draw(self, border=True) -> None:
+        colors = [color.BLUE, color.CYAN, color.GREEN, color.RED, color.VIOLET]
         for f_id in range(len(self._adj_faces)):
             if self.__is_face_right_complement_of_quad(f_id):
                 continue
 
             v1, v2, v3, v4 = self.__get_face_vertices(f_id)
 
+            if len(self.__F) > 0:
+                glPointSize(2)
+                glColor3f(*colors[f_id % len(colors)])
+                glBegin(GL_POINTS)
+                glVertex(*self.__F[f_id])
+                glEnd()
+
             if border:
                 glLineWidth(2)
-                glColor3f(*color.RED)
+                glColor3f(*colors[f_id % len(colors)])
                 self.__gl_vertex_safe(v1, v2, v3, v4, border=True)
 
-            glColor3f(*color.GRAY)
-            self.__gl_vertex_safe(v1, v2, v3, v4, border=False)
+            # glColor3f(*colors[f_id % len(colors)])
+            # self.__gl_vertex_safe(v1, v2, v3, v4, border=False)
 
     def rotate(self, theta_0: float, theta_1: float, theta_2: float, order="xyz") -> None:
         R = Mat3d.rotation_matrix(theta_0, theta_1, theta_2, order)
@@ -238,9 +248,34 @@ class WingedEdgeShape(Shape):
         self._quad_complements.add(face1_index, face2_index)
 
     def subdivide_catmull_clark(self):
+        # TODO: check if fully quad mesh
+
+        # calculate face points
+        self.__F = [None] * len(self._adj_faces)
+        for f_id in range(len(self._adj_faces)):
+            print(self._adj_edges[self._adj_faces[f_id]])
+            v1, v2, v3, v4 = self.__get_face_vertices(f_id)
+            v_avg = (v1 + v2 + v3 + v4) / 4
+
+            self.__F[f_id] = v_avg
+
+        # calculate edge_points
+        self.__E = [None] * len(self._adj_edges)
         for f_id, e_id in enumerate(self._adj_faces):
-            if self.__is_face_tri(f_id):
-                break
+            if self.__E[e_id] is not None:
+                continue
+
+            e1 = self._adj_edges[e_id]
+            e2_id = None
+            e2 = None
+
+            if self.__is_face_left_complement_of_quad(f_id):
+                e2_id = e1.edge_left_back
+            else:
+                e2_id = e1.edge_left_forward
+            print(e1)
+            self.__E[e_id] = None
+            self.__E[e2_id] = None
 
     def __gl_vertex_safe(self, v1: Vec3d, v2: Vec3d, v3: Vec3d, v4: Union[Vec3d, None], border=False) -> None:
         is_quad = v4 is not None

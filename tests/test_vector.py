@@ -42,10 +42,10 @@ class vec3dTest(unittest.TestCase):
         self.assertEqual(pi * self.point, expected)
 
     def test_division_by_number(self):
-        self.assertEqual(self.point_one / 2, Vec3d.point(1/2, 1/2, 1/2))
-        self.assertEqual(self.point / 2, Vec3d.point(1/2, 2/2, 3/2))
-        self.assertEqual(self.point_one / pi, Vec3d.point(1/pi, 1/pi, 1/pi))
-        self.assertEqual(self.point / pi, Vec3d.point(1/pi, 2/pi, 3/pi))
+        self.assertEqual(self.point_one / 2, Vec3d(1/2, 1/2, 1/2, 1/2))
+        self.assertEqual(self.point / 2, Vec3d(1/2, 2/2, 3/2, 1/2))
+        self.assertEqual(self.point_one / pi, Vec3d(1/pi, 1/pi, 1/pi, 1/pi))
+        self.assertEqual(self.point / pi, Vec3d(1/pi, 2/pi, 3/pi, 1/pi))
 
     def test_vector_addition(self):
         self.assertEqual(self.vector + self.vector_one, Vec3d.vector(2, 3, 4))
@@ -98,8 +98,6 @@ class vec3dTest(unittest.TestCase):
         )
 
     def test_normalize(self):
-        self.assertEqual(self.point_one.normalize(),
-                         Vec3d.point(1/2, 1/2, 1/2))
         self.assertEqual(Vec3d.vector(3, 4, 0).normalize(),
                          Vec3d.vector(3/5, 4/5, 0))
 
