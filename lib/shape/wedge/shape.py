@@ -3,7 +3,7 @@
 # StudentId:250201041
 # 12 2021
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
 from copy import deepcopy
 from OpenGL.GL import *
 from OpenGL.GLUT import *
@@ -88,63 +88,19 @@ class WingedEdgeShape(Shape):
         return obj
 
     def draw(self, border=True) -> None:
-        if not self.__printed:
-            self.__repr__()
-
-        for f_id, e_id in enumerate(self._adj_faces):
-            e = self._adj_edges[e_id]
-            e_next: WingedEdge = self._adj_edges[e.edge_left_forward]
-
-            h_v1 = self._vertices.get_right(e.vert_origin)
-            h_v2 = self._vertices.get_right(e.vert_dest)
-            h_v3 = self._vertices.get_right(e_next.vert_dest)
-
-            v1 = self._vertices_cache[h_v1]
-            v2 = self._vertices_cache[h_v2]
-            v3 = self._vertices_cache[h_v3]
-            v4 = None
-
-            if self._quad_complements.has_left(f_id):
-                f_c_id = self._quad_complements.get_right(f_id)
-                e_c_id = self._adj_faces[f_c_id]
-                e_c = self._adj_edges[e_c_id]
-                e_c_next: WingedEdge = self._adj_edges[e_c.edge_left_forward]
-                h_v4 = self._vertices.get_right(e_c_next.vert_origin)
-                v4 = self._vertices_cache[h_v4]
-
-                # preserve ccw order
-                v2, v4 = v4, v2
-                v3, v4 = v4, v3
-            elif self._quad_complements.has_right(f_id):
+        for f_id in range(len(self._adj_faces)):
+            if self.__is_face_right_complement_of_quad(f_id):
                 continue
 
-            if not self.__printed:
-                print(e_id, "=>", e)
-                print(" ", "=>", v1, v2, v3, v4)
+            v1, v2, v3, v4 = self.__get_face_vertices(f_id)
 
             if border:
                 glLineWidth(2)
                 glColor3f(*color.RED)
-                glBegin(GL_LINE_STRIP)
-                glVertex4f(*v1)
-                glVertex4f(*v2)
-                glVertex4f(*v3)
-                if v4 is not None:
-                    glVertex4f(*v4)
-                glVertex4f(*v1)
-                glEnd()
+                self.__gl_vertex_safe(v1, v2, v3, v4, border=True)
 
             glColor3f(*color.GRAY)
-            # TODO: check performance
-            glBegin(GL_TRIANGLES if v4 is None else GL_POLYGON)
-            glVertex4f(*v1)
-            glVertex4f(*v2)
-            glVertex4f(*v3)
-            if v4 is not None:
-                glVertex4f(*v4)
-            glEnd()
-
-        self.__printed = True
+            self.__gl_vertex_safe(v1, v2, v3, v4, border=False)
 
     def rotate(self, theta_0: float, theta_1: float, theta_2: float, order="xyz") -> None:
         R = Mat3d.rotation_matrix(theta_0, theta_1, theta_2, order)
@@ -280,6 +236,76 @@ class WingedEdgeShape(Shape):
                           color3, color1, color2)
 
         self._quad_complements.add(face1_index, face2_index)
+
+    def subdivide_catmull_clark(self):
+        for f_id, e_id in enumerate(self._adj_faces):
+            if self.__is_face_tri(f_id):
+                break
+
+    def __gl_vertex_safe(self, v1: Vec3d, v2: Vec3d, v3: Vec3d, v4: Union[Vec3d, None], border=False) -> None:
+        is_quad = v4 is not None
+
+        if border:
+            glBegin(GL_LINE_STRIP)
+        elif is_quad:
+            glBegin(GL_POLYGON)
+        else:
+            glBegin(GL_TRIANGLES)
+
+        glVertex4f(*v1)
+        glVertex4f(*v2)
+        glVertex4f(*v3)
+
+        if v4 is not None:
+            glVertex4f(*v4)
+
+        if border:
+            glVertex4f(*v1)
+
+        glEnd()
+
+    def __get_face_vertices(self, face_id: int) -> List[Vec3d]:
+        if self.__is_face_right_complement_of_quad(face_id):
+            return self.__get_face_vertices(self._quad_complements.get_left(face_id))
+
+        edge_id = self._adj_faces[face_id]
+        edge = self._adj_edges[edge_id]
+        edge_next: WingedEdge = self._adj_edges[edge.edge_left_forward]
+
+        h_v1 = self._vertices.get_right(edge.vert_origin)
+        h_v2 = self._vertices.get_right(edge.vert_dest)
+        h_v3 = self._vertices.get_right(edge_next.vert_dest)
+
+        v1 = self._vertices_cache[h_v1]
+        v2 = self._vertices_cache[h_v2]
+        v3 = self._vertices_cache[h_v3]
+
+        if self.__is_face_left_complement_of_quad(face_id):
+            right_face_id = self._quad_complements.get_right(face_id)
+            right_edge_id = self._adj_faces[right_face_id]
+            right_edge = self._adj_edges[right_edge_id]
+            right_edge_next: WingedEdge = self._adj_edges[right_edge.edge_left_forward]
+
+            h_v4 = self._vertices.get_right(right_edge_next.vert_origin)
+            v4 = self._vertices_cache[h_v4]
+
+            # preserve ccw order
+            v2, v4 = v4, v2
+            v3, v4 = v4, v3
+
+        return [v1, v2, v3, v4]
+
+    def __is_face_left_complement_of_quad(self, face_id: int) -> bool:
+        return self._quad_complements.has_left(face_id)
+
+    def __is_face_right_complement_of_quad(self, face_id: int) -> bool:
+        return self._quad_complements.has_right(face_id)
+
+    def __is_face_quad(self, face_id: int) -> bool:
+        return self.__is_face_left_complement_of_quad(face_id) or self.__is_face_right_complement_of_quad(face_id)
+
+    def __is_face_tri(self, face_id: int) -> bool:
+        return not self.__is_face_quad(face_id)
 
     def __register_vertice(self, vertice: Vec3d) -> int:
         h_vertice = hash(vertice)
