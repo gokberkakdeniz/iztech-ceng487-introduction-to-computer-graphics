@@ -4,14 +4,13 @@
 # 12 2021
 
 from .drawable import Drawable
-from .object3d import Object3d
+from .indexed import IndexedTorus, IndexedBox, IndexedCylinder, IndexedShape, IndexedSphere, Object3d
 from .shape import Shape
-from .weshape import WingedEdgeShape
-from .box import Box
-from .cylinder import Cylinder
-from .sphere import Sphere
-from .torus import Torus
+from .wedge import WingedEdgeShape
+from .indexed import IndexedShape
 from . import color
 
-__all__ = [Drawable, Object3d, Shape, Box,
-           Cylinder, Sphere, Torus, WingedEdgeShape, color]
+__all__ = [Drawable, Shape,
+           WingedEdgeShape,
+           IndexedShape, IndexedTorus, IndexedBox, IndexedCylinder, IndexedShape, IndexedSphere, Object3d,
+           color]

@@ -11,12 +11,13 @@ from OpenGL.GLU import *
 
 from lib.utils.bidict import bidict
 
-from . import Drawable, color
-from ..math import Vec3d, Mat3d
+from .. import color
 from .edge import WingedEdge
+from ..shape import Shape
+from ...math import Vec3d, Mat3d
 
 
-class WingedEdgeShape(Drawable):
+class WingedEdgeShape(Shape):
     __object_index = 1
 
     def __init__(self,
@@ -294,7 +295,7 @@ class WingedEdgeShape(Drawable):
 
         return self._vertice_index
 
-    def __transform_vertices(self, matrix: Mat3d):
+    def __transform_vertices(self, matrix: Mat3d) -> None:
         for v_id in list(self._vertices_cache.keys()):
             self.__transform_vertice(v_id, matrix)
 

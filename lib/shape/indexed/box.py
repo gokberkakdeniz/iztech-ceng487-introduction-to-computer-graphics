@@ -3,52 +3,52 @@
 # StudentId:250201041
 # 12 2021
 
-from . import color
-from ..math import Vec3d
-from .shape import Shape
+from .. import color
+from ...math import Vec3d
+from .shape import IndexedShape
 from .object3d import Object3d
 
 
-class Box(Object3d):
+class IndexedBox(Object3d):
     def __init__(self):
         super().__init__(
             subdivisions=[
-                Shape.quadrilateral(  # Top
+                IndexedShape.quadrilateral(  # Top
                     Vec3d.point(1.0, 1.0, -1.0),
                     Vec3d.point(-1.0, 1.0, -1.0),
                     Vec3d.point(-1.0, 1.0, 1.0),
                     Vec3d.point(1.0, 1.0, 1.0),
                     color=color.GRAY
                 ),
-                Shape.quadrilateral(  # Bottom
+                IndexedShape.quadrilateral(  # Bottom
                     Vec3d.point(1.0, -1.0, 1.0),
                     Vec3d.point(-1.0, -1.0, 1.0),
                     Vec3d.point(-1.0, -1.0, -1.0),
                     Vec3d.point(1.0, -1.0, -1.0),
                     color=color.GRAY
                 ),
-                Shape.quadrilateral(  # Front
+                IndexedShape.quadrilateral(  # Front
                     Vec3d.point(1.0, 1.0, 1.0),
                     Vec3d.point(-1.0, 1.0, 1.0),
                     Vec3d.point(-1.0, -1.0, 1.0),
                     Vec3d.point(1.0, -1.0, 1.0),
                     color=color.GRAY
                 ),
-                Shape.quadrilateral(  # Back
+                IndexedShape.quadrilateral(  # Back
                     Vec3d.point(1.0, -1.0, -1.0),
                     Vec3d.point(-1.0, -1.0, -1.0),
                     Vec3d.point(-1.0, 1.0, -1.0),
                     Vec3d.point(1.0, 1.0, -1.0),
                     color=color.GRAY
                 ),
-                Shape.quadrilateral(  # Left
+                IndexedShape.quadrilateral(  # Left
                     Vec3d.point(-1.0, 1.0, 1.0),
                     Vec3d.point(-1.0, 1.0, -1.0),
                     Vec3d.point(-1.0, -1.0, -1.0),
                     Vec3d.point(-1.0, -1.0, 1.0),
                     color=color.GRAY
                 ),
-                Shape.quadrilateral(  # Right
+                IndexedShape.quadrilateral(  # Right
                     Vec3d.point(1.0, 1.0, -1.0),
                     Vec3d.point(1.0, 1.0, 1.0),
                     Vec3d.point(1.0, -1.0, 1.0),

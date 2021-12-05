@@ -7,7 +7,7 @@ import operator
 from functools import reduce
 from typing import List
 from .shape import color, Shape
-from . import Drawable
+from .. import Drawable
 
 
 class Object3d(Drawable):

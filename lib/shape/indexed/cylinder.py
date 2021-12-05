@@ -4,13 +4,13 @@
 # 12 2021
 
 from math import cos, pi, sin
-from . import color
-from ..math import Vec3d
+from .. import color
+from ...math import Vec3d
 from .object3d import Object3d
-from .shape import Shape
+from .shape import IndexedShape
 
 
-class Cylinder(Object3d):
+class IndexedCylinder(Object3d):
     def __init__(self):
         self.count = 8
         super().__init__(
@@ -35,18 +35,18 @@ class Cylinder(Object3d):
             top_vertices.append(Vec3d.point(x, 1, z))
             bottom_vertices.append(Vec3d.point(x, -1, z))
 
-        top = Shape(top_vertices,
-                    color=color.GRAY,
-                    state=(stack, matrix))
-        bottom = Shape(bottom_vertices,
-                       color=color.GRAY,
-                       state=(stack, matrix))
+        top = IndexedShape(top_vertices,
+                           color=color.GRAY,
+                           state=(stack, matrix))
+        bottom = IndexedShape(bottom_vertices,
+                              color=color.GRAY,
+                              state=(stack, matrix))
 
         shapes = [top, bottom]
 
         for i in range(point_count):
             shapes.append(
-                Shape.quadrilateral(
+                IndexedShape.quadrilateral(
                     top_vertices[i],
                     top_vertices[(i+1) % point_count],
                     bottom_vertices[(i+1) % point_count],

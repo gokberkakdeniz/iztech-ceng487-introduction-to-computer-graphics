@@ -4,24 +4,37 @@
 # 12 2021
 
 from math import cos, pi, sin
-
-from . import color
 from .object3d import Object3d
-from .shape import Shape
-from ..math import Vec3d, Mat3d
+from .shape import IndexedShape
+from .. import color
+from ...math import Vec3d
 
 
-class Torus(Object3d):
+class IndexedSphere(Object3d):
     def __init__(self):
-        self.circle_count = 7
+        self.circle_count = 4
         self.circle_point_count = 6
 
         super().__init__(
             subdivisions=self._calculate_subdivisions()
         )
-        self.rotate(pi/2, 0, 0)
+
+    def _calculate_unit_points(self):
+        unit_points = []
+
+        for i in range(self.circle_point_count):
+            theta = 2.0 * pi * i / self.circle_point_count
+
+            x = cos(theta)
+            z = sin(theta)
+
+            unit_points.append((x, z))
+
+        return unit_points
 
     def _calculate_subdivisions(self):
+        unit_points = self._calculate_unit_points()
+
         shapes = []
         previous_points = None
         stack = None
@@ -30,38 +43,26 @@ class Torus(Object3d):
             stack = self.subdivisions[0].stack
             matrix = self.subdivisions[0].matrix
 
-        theta_x = 2.0 * pi / self.circle_count
-        theta_y = 2.0 * pi / self.circle_point_count
-
-        for i in range(self.circle_count+1):
-            theta_xi = theta_x * i
-            Ry = Mat3d.rotation_y_matrix(-theta_xi)
-
-            center_x = 0.75 * cos(theta_xi)
-            center_z = 0.75 * sin(theta_xi)
+        for y in range(-self.circle_count, self.circle_count + 1):
+            y_fixed = y / self.circle_count
+            scale_factor = (1 - abs(y_fixed) ** 2) ** 0.5
 
             current_points = []
-            for j in range(self.circle_point_count):
-                theta_yj = theta_y * j
-
-                p_center = Vec3d.vector(center_x, 0, center_z)
-                p_origin = Vec3d.point(
-                    0.25 * cos(theta_yj),
-                    0.25 * sin(theta_yj),
-                    0
+            for x, z in unit_points:
+                current_points.append(
+                    Vec3d.point(
+                        x * scale_factor, y_fixed, z * scale_factor
+                    )
                 )
-                point = p_center + Ry @ p_origin
-
-                current_points.append(point)
 
             if previous_points is not None:
-                for i in range(self.circle_point_count+1):
+                for i in range(self.circle_point_count):
                     shapes.append(
-                        Shape.quadrilateral(
-                            previous_points[i % self.circle_point_count],
+                        IndexedShape.quadrilateral(
+                            previous_points[i],
                             previous_points[(i+1) % self.circle_point_count],
                             current_points[(i+1) % self.circle_point_count],
-                            current_points[i % self.circle_point_count],
+                            current_points[i],
                             color=color.GRAY,
                             state=(stack, matrix)
                         )
@@ -76,7 +77,7 @@ class Torus(Object3d):
         self.subdivisions = self._calculate_subdivisions()
 
     def decrease_subdivisions(self):
-        if self.circle_count < 7 or self.circle_point_count < 6:
+        if self.circle_count < 4 or self.circle_point_count < 6:
             return
 
         self.circle_count -= 1
