@@ -52,6 +52,40 @@ class WingedEdgeShape(Drawable):
         self.__printed = True
         self.__object_index += 1
 
+    @staticmethod
+    def quadrilateral(
+        vertice0=Vec3d,
+        vertice1=Vec3d,
+        vertice2=Vec3d,
+        vertice3=Vec3d,
+        color0: Tuple[int, int, int] = color.WHITE,
+        color1: Tuple[int, int, int] = color.WHITE,
+        color2: Tuple[int, int, int] = color.WHITE,
+        color3: Tuple[int, int, int] = color.WHITE
+    ):
+        obj = WingedEdgeShape()
+
+        obj.add_quad_face(vertice0, vertice1, vertice2, vertice3,
+                          color0,   color1,   color2,   color3)
+
+        return obj
+
+    @ staticmethod
+    def triangle(
+        vertice0=Vec3d,
+        vertice1=Vec3d,
+        vertice2=Vec3d,
+        color0: Tuple[int, int, int] = color.WHITE,
+        color1: Tuple[int, int, int] = color.WHITE,
+        color2: Tuple[int, int, int] = color.WHITE,
+    ):
+        obj = WingedEdgeShape()
+
+        obj.add_tri_face(vertice0, vertice1, vertice2,
+                         color0,   color1,   color2)
+
+        return obj
+
     def draw(self, border=True) -> None:
         if not self.__printed:
             self.__repr__()
@@ -187,6 +221,7 @@ class WingedEdgeShape(Drawable):
             color1: Tuple[int, int, int] = color.WHITE,
             color2: Tuple[int, int, int] = color.WHITE
     ):
+        # TODO: implement color support
         i_v0 = self.__register_vertice(vertice0)
         i_v1 = self.__register_vertice(vertice1)
         i_v2 = self.__register_vertice(vertice2)
@@ -275,79 +310,6 @@ class WingedEdgeShape(Drawable):
             self._vertices.get_left(v_id),
             new_id
         )
-
-    @staticmethod
-    def quadrilateral(
-        vertice0=Vec3d,
-        vertice1=Vec3d,
-        vertice2=Vec3d,
-        vertice3=Vec3d,
-        color0: Tuple[int, int, int] = color.WHITE,
-        color1: Tuple[int, int, int] = color.WHITE,
-        color2: Tuple[int, int, int] = color.WHITE,
-        color3: Tuple[int, int, int] = color.WHITE
-    ):
-        obj = WingedEdgeShape()
-
-        obj.add_quad_face(vertice0, vertice1, vertice2, vertice3,
-                          color0,   color1,   color2,   color3)
-
-        return obj
-
-    @ staticmethod
-    def triangle(
-        vertice0=Vec3d,
-        vertice1=Vec3d,
-        vertice2=Vec3d,
-        color0: Tuple[int, int, int] = color.WHITE,
-        color1: Tuple[int, int, int] = color.WHITE,
-        color2: Tuple[int, int, int] = color.WHITE,
-    ):
-        obj = WingedEdgeShape()
-
-        obj.add_tri_face(vertice0, vertice1, vertice2,
-                         color0,   color1,   color2)
-
-        return obj
-
-        # TODO: delete this
-        # h_v0 = hash(vertice0)
-        # h_v1 = hash(vertice1)
-        # h_v2 = hash(vertice2)
-
-        # obj._vertices[h_v0] = vertice0
-        # obj._vertices[h_v1] = vertice1
-        # obj._vertices[h_v2] = vertice2
-
-        # e0 = WingedEdge()
-        # e0.set_vert(h_v0, h_v1)
-        # e0.set_face(0, None)
-        # e0.set_edge(2, 1, None, None)
-        # obj._adj_edges.append(e0)
-
-        # e1 = WingedEdge()
-        # e1.set_vert(h_v1, h_v2)
-        # e1.set_face(0, None)
-        # e1.set_edge(0, 2, None, None)
-        # obj._adj_edges.append(e1)
-
-        # e2 = WingedEdge()
-        # e2.set_vert(h_v2, h_v0)
-        # e2.set_face(0, None)
-        # e2.set_edge(1, 0, None, None)
-        # obj._adj_edges.append(e2)
-
-        # obj._adj_faces.append(0)
-
-        # obj._adj_vertices[h_v0] = 0
-        # obj._adj_vertices[h_v1] = 1
-        # obj._adj_vertices[h_v2] = 2
-
-        # obj._colors.append(color0)
-        # obj._colors.append(color1)
-        # obj._colors.append(color2)
-
-        # return obj
 
     def __str__(self) -> str:
         len_face = len(self._adj_faces)
