@@ -3,6 +3,7 @@
 # StudentId:250201041
 # 12 2021
 
+from functools import cmp_to_key
 from typing import List
 from ..math import Vec3d
 from ..shape import Shape, color, WingedEdgeShape
@@ -10,6 +11,7 @@ from ..shape import Shape, color, WingedEdgeShape
 
 def parse_obj(file):
     vertices: List[Vec3d] = []
+    faces: List[Vec3d] = []
     obj = WingedEdgeShape()
 
     with open(file) as f:
@@ -26,27 +28,37 @@ def parse_obj(file):
                 obj.name = line.split(" ")[1]
             elif cmd == "v":
                 x, y, z = list(map(float, line.split(" ")[1:]))
-                vertices.append(Vec3d.point(x, y, z))
+                v = Vec3d.point(x, y, z)
+                vertices.append(v)
+                obj._register_vertice(v)
             elif cmd == "f":
                 face_vertices = list(map(
                     lambda index: vertices[int(index)-1],
                     line.split(" ")[1:]
                 ))
+
+                # faces.append(face_vertices)
                 face_vertice_count = len(face_vertices)
 
-                if face_vertice_count == 3:
-                    obj.add_tri_face(face_vertices[0],
-                                     face_vertices[1],
-                                     face_vertices[2])
-                elif face_vertice_count == 4:
-                    obj.add_quad_face(face_vertices[0],
-                                      face_vertices[3],
-                                      face_vertices[2],
-                                      face_vertices[1])
-                else:
+                if face_vertice_count != 4:
                     raise Exception(
                         "Only tri meshes and quad meshes are supported."
                     )
+
+                # v_center = (face_vertices[0] +
+                #             face_vertices[1] +
+                #             face_vertices[2] +
+                #             face_vertices[3]) / 4
+                # v_center.z = 0
+
+                # face_vertices.sort(cmp_to_key(
+                #     lambda v1, v2: v1 - v2.angle(v_center))
+                # )
+
+                obj.add_quad_face(face_vertices[0],
+                                  face_vertices[1],
+                                  face_vertices[2],
+                                  face_vertices[3])
 
             else:
                 print("invalid line:", line)

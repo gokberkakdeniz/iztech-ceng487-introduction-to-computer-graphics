@@ -130,22 +130,27 @@ def main():
     try:
         obj = parse_obj(argv[1])
         # TODO: delete
-        # obj = WingedEdgeShape.triangle(
-        #     Vec3d.point(0, 0, 0), Vec3d.point(0, -1, 0), Vec3d.point(1, 0, 0),
+        # obj = WingedEdgeShape.quadrilateral(
+        #     Vec3d.point(0, -1, 0),
+        #     Vec3d.point(1, -1, 0),
+        #     Vec3d.point(1, 0, 0),
+        #     Vec3d.point(0, 0, 0),
+        #     color.GRAY,
         #     color.GRAY,
         #     color.GRAY,
         #     color.GRAY,
         # )
-        # obj = WingedEdgeShape.quadrilateral(
-        #     Vec3d.point(0, 0, 0),
-        #     Vec3d.point(0, -1, 0),
+        # obj.add_quad_face(
         #     Vec3d.point(1, -1, 0),
+        #     Vec3d.point(2, -1, 0),
+        #     Vec3d.point(2, 0, 0),
         #     Vec3d.point(1, 0, 0),
         #     color.GRAY,
         #     color.GRAY,
         #     color.GRAY,
         #     color.GRAY,
         # )
+
         # obj = WingedEdgeShape()
         # obj.add_tri_face(
         #     Vec3d.point(0, 0, 0),

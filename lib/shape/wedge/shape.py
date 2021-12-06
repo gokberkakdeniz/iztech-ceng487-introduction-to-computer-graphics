@@ -17,6 +17,14 @@ from ..shape import Shape
 from ...math import Vec3d, Mat3d
 
 
+def debug(*args, **kwargs):
+    if not debug.__dict__["stop"]:
+        print(*args, **kwargs)
+
+
+debug.__dict__["stop"] = False
+
+
 class WingedEdgeShape(Shape):
     __object_index = 1
 
@@ -73,7 +81,7 @@ class WingedEdgeShape(Shape):
 
         return obj
 
-    @ staticmethod
+    @staticmethod
     def triangle(
         vertice0=Vec3d,
         vertice1=Vec3d,
@@ -90,15 +98,34 @@ class WingedEdgeShape(Shape):
         return obj
 
     def draw(self, border=True) -> None:
-        colors = [color.BLUE, color.CYAN, color.GREEN, color.RED, color.VIOLET]
+        debug("=========")
+
+        colors = [
+            (160/255, 81/255, 149/255),
+            color.BLUE,
+            (255/255, 166/255, 0/255),
+            color.CYAN,
+            (249/255, 93/255, 106/255),
+            color.RED,
+            (47/255, 75/255, 124/255),
+            color.GREEN,
+            (138/255, 171/255, 227/255),
+            color.VIOLET,
+            (56/255, 242/255, 161/255),
+            color.WHITE,
+            (242/255, 10/255, 122/255),
+        ]
         for f_id in range(len(self._adj_faces)):
             if self.__is_face_right_complement_of_quad(f_id):
                 continue
 
             v1, v2, v3, v4 = self.__get_face_vertices(f_id)
 
+            debug(f'F{f_id}:', *[self._vertices.get_left(hash(v))+1
+                  for v in [v1, v2, v3, v4]])
+
             if len(self.__F) > 0:
-                glPointSize(2)
+                glPointSize(4)
                 glColor3f(*colors[f_id % len(colors)])
                 glBegin(GL_POINTS)
                 glVertex(*self.__F[f_id])
@@ -111,6 +138,10 @@ class WingedEdgeShape(Shape):
 
             # glColor3f(*colors[f_id % len(colors)])
             # self.__gl_vertex_safe(v1, v2, v3, v4, border=False)
+        debug("=========")
+        for e in self._adj_edges:
+            debug(e)
+        debug.__dict__["stop"] = True
 
     def rotate(self, theta_0: float, theta_1: float, theta_2: float, order="xyz") -> None:
         R = Mat3d.rotation_matrix(theta_0, theta_1, theta_2, order)
@@ -188,43 +219,60 @@ class WingedEdgeShape(Shape):
             color1: Tuple[int, int, int] = color.WHITE,
             color2: Tuple[int, int, int] = color.WHITE
     ):
+        # raise Exception("Not implemented exception! (will be fixed...)")
         # TODO: implement color support
         i_v0 = self.__register_vertice(vertice0)
         i_v1 = self.__register_vertice(vertice1)
         i_v2 = self.__register_vertice(vertice2)
 
+        debug(i_v0, i_v1, i_v2)
+
         f_index = len(self._adj_faces)
 
-        e0_index = self._adj_vertices.get(i_v0)
-        e0 = self._adj_edges[e0_index] if e0_index is not None else None
+        e0_index = self.__get_edge_index_safe(i_v0, i_v1)
+        e1_index = self.__get_edge_index_safe(i_v1, i_v2)
+        e2_index = self.__get_edge_index_safe(i_v2, i_v0)
 
-        e1_index = len(self._adj_edges)
-        e2_index = e1_index + 1
+        e0 = self._adj_edges[e0_index]
+        e1 = self._adj_edges[e1_index]
+        e2 = self._adj_edges[e2_index]
 
-        e1 = WingedEdge()
-        e1.set_vert(i_v1, i_v2)
-        e1.set_face(f_index, None)
-        e1.set_edge(e0_index,
-                    e2_index,
-                    self._adj_vertices.get(i_v1),
-                    None)
-        self._adj_edges.append(e1)
+        debug(e0)
+        debug(e1)
+        debug(e2)
 
-        e2 = WingedEdge()
-        e2.set_vert(i_v2, i_v0)
-        e2.set_face(f_index, None)
-        e2.set_edge(e1_index,
-                    e0_index,
-                    None,
-                    self._adj_vertices.get(i_v0))
-        self._adj_edges.append(e2)
-
-        self._adj_faces.append(e1_index)
-
-        self._adj_vertices[i_v2] = e1_index
-
-        if e0 is not None:
+        if e0.vert_origin == None:
+            e0.set_vert(i_v0, i_v1)
+            e0.face_left = f_index
+            e0.set_edge_left(e2_index, e1_index)
+            self._adj_vertices[i_v0] = e0_index
+        else:
+            e0.face_right = f_index
             e0.set_edge_right(e1_index, e2_index)
+
+        if e1.vert_origin == None:
+            e1.set_vert(i_v1, i_v2)
+            e1.face_left = f_index
+            e1.set_edge_left(e0_index, e2_index)
+            self._adj_vertices[i_v1] = e1_index
+        else:
+            e1.face_right = f_index
+            e1.set_edge_right(e2_index, e0_index)
+
+        if e2.vert_origin == None:
+            e2.set_vert(i_v2, i_v0)
+            e2.face_left = f_index
+            e2.set_edge_left(e1_index, e0_index)
+            self._adj_vertices[i_v2] = e2_index
+        else:
+            e2.face_right = f_index
+            e2.set_edge_right(e0_index, e1_index)
+
+        self._adj_faces.append(e2_index)
+
+        debug(e0)
+        debug(e1)
+        debug(e2)
 
     def add_quad_face(
         self,
@@ -240,10 +288,12 @@ class WingedEdgeShape(Shape):
         face1_index = len(self._adj_faces)
         face2_index = face1_index + 1
 
-        self.add_tri_face(vertice0, vertice1, vertice3,
-                          color0, color1, color3)
-        self.add_tri_face(vertice3, vertice1, vertice2,
-                          color3, color1, color2)
+        self.add_tri_face(vertice0, vertice1, vertice2,
+                          color0, color1, color2)
+        self.add_tri_face(vertice2, vertice0, vertice3,
+                          color2, color0, color3)
+
+        print(repr(self))
 
         self._quad_complements.add(face1_index, face2_index)
 
@@ -253,7 +303,7 @@ class WingedEdgeShape(Shape):
         # calculate face points
         self.__F = [None] * len(self._adj_faces)
         for f_id in range(len(self._adj_faces)):
-            print(self._adj_edges[self._adj_faces[f_id]])
+            # debug(self._adj_edges[self._adj_faces[f_id]])
             v1, v2, v3, v4 = self.__get_face_vertices(f_id)
             v_avg = (v1 + v2 + v3 + v4) / 4
 
@@ -273,9 +323,87 @@ class WingedEdgeShape(Shape):
                 e2_id = e1.edge_left_back
             else:
                 e2_id = e1.edge_left_forward
-            print(e1)
-            self.__E[e_id] = None
-            self.__E[e2_id] = None
+            # debug(e1)
+            # self.__E[e_id] = None
+            # self.__E[e2_id] = None
+
+    def __get_edge_index_safe(self, vert_origin_id: int, vert_dest_id) -> int:
+        e_id = self._adj_vertices.get(vert_origin_id)
+
+        if e_id is not None:
+            e = self._adj_edges[e_id]
+            if not self.__is_edge_of(e, vert_origin_id, vert_dest_id):
+                e_id = self.__find_edge(e_id, vert_origin_id, vert_dest_id)
+
+        if e_id is None:
+            e_id = len(self._adj_edges)
+            e = WingedEdge()
+            self._adj_edges.append(e)
+
+        return e_id
+
+    def __find_edge(self, e_start_id: int, vert_origin_id: int, vert_dest_id: int) -> int:
+        # TODO: fix traversing...
+        # e_id = e_start_id
+        # e = self._adj_edges[e_id]
+
+        # debug(repr(self))
+        # debug(
+        #     f'searching v{vert_origin_id} -> v{vert_dest_id} from starting e{e_start_id}'
+        # )
+
+        # return self.__find_edge_ccw(e_start_id, vert_origin_id, vert_dest_id) \
+        #     or self.__find_edge_cw(e_start_id, vert_origin_id, vert_dest_id)
+
+        for e_id, e in enumerate(self._adj_edges):
+            if self.__is_edge_of(e, vert_origin_id, vert_dest_id):
+                return e_id
+
+        return None
+
+    def __find_edge_ccw(self, e_start_id: int, vert_origin_id: int, vert_dest_id: int) -> int:
+        e_id = e_start_id
+        e = self._adj_edges[e_id]
+
+        while e is not None:
+            e_id = e.edge_left_forward
+
+            if e_id is None:
+                break
+
+            e = self._adj_edges[e_id]
+            # debug(
+            #     f'searching v{vert_origin_id} -> v{vert_dest_id} starting from v{self._adj_edges[e_start_id].vert_origin} -> v{self._adj_edges[e_start_id].vert_dest} :: {e.vert_origin} -> {e.vert_dest}'
+            # )
+
+            if self.__is_edge_of(e, vert_origin_id, vert_dest_id):
+                return e_id
+            elif e.vert_dest == self._adj_edges[e_start_id].vert_origin:
+                return None
+
+    def __find_edge_cw(self, e_start_id: int, vert_origin_id: int, vert_dest_id: int) -> int:
+        e_id = e_start_id
+        e = self._adj_edges[e_id]
+
+        while e is not None:
+            e_id = e.edge_right_forward
+
+            if e_id is None:
+                break
+
+            e = self._adj_edges[e_id]
+            # debug(
+            #     f'searching v{vert_origin_id} -> v{vert_dest_id} starting from v{self._adj_edges[e_start_id].vert_origin} -> v{self._adj_edges[e_start_id].vert_dest} :: {e.vert_origin} -> {e.vert_dest}'
+            # )
+
+            if self.__is_edge_of(e, vert_origin_id, vert_dest_id):
+                return e_id
+            elif e.vert_dest == self._adj_edges[e_start_id].vert_origin:
+                return None
+
+    def __is_edge_of(self, e: WingedEdge, vert_origin_id: int, vert_dest_id: int):
+        return (e.vert_origin == vert_origin_id and e.vert_dest == vert_dest_id)  \
+            or (e.vert_origin == vert_dest_id and e.vert_dest == vert_origin_id)
 
     def __gl_vertex_safe(self, v1: Vec3d, v2: Vec3d, v3: Vec3d, v4: Union[Vec3d, None], border=False) -> None:
         is_quad = v4 is not None
@@ -314,19 +442,24 @@ class WingedEdgeShape(Shape):
         v1 = self._vertices_cache[h_v1]
         v2 = self._vertices_cache[h_v2]
         v3 = self._vertices_cache[h_v3]
+        v4 = None
+
+        debug(f"F{face_id}: e{edge_id} -> e{edge.edge_left_forward}")
 
         if self.__is_face_left_complement_of_quad(face_id):
             right_face_id = self._quad_complements.get_right(face_id)
             right_edge_id = self._adj_faces[right_face_id]
             right_edge = self._adj_edges[right_edge_id]
-            right_edge_next: WingedEdge = self._adj_edges[right_edge.edge_left_forward]
+            # debug(
+            #     f"F{right_face_id}: {right_edge}"
+            # )
+            # right_edge_next: WingedEdge = self._adj_edges[right_edge.edge_right_forward]
 
-            h_v4 = self._vertices.get_right(right_edge_next.vert_origin)
+            h_v4 = self._vertices.get_right(right_edge.vert_origin)
             v4 = self._vertices_cache[h_v4]
 
-            # preserve ccw order
-            v2, v4 = v4, v2
-            v3, v4 = v4, v3
+            # # preserve ccw order
+            v2, v3 = v3, v2
 
         return [v1, v2, v3, v4]
 
@@ -381,36 +514,47 @@ class WingedEdgeShape(Shape):
         return f'Shape(name={self.name}, faces={len_face}, edges={len_edge}, points={len_vert})'
 
     def __repr__(self) -> str:
-        print("____________________________________________________\n")
-        print("name:", self.name)
-        print("____________________________________________________\n")
+        result = []
+        result.append("____________________________________________________\n")
+        result.append("name: " + self.name)
+        result.append("____________________________________________________\n")
 
-        print("v_id".ljust(25), "v")
-        for v_id, v in self._vertices_cache.items():
-            print(str(v_id).ljust(25), v)
+        result.append("v_id".ljust(5) + " v")
+        for v_id, v_hash in self._vertices.l2r.items():
+            result.append(
+                f'{str(v_id).ljust(5)} {self._vertices_cache[v_hash]}'
+            )
 
-        print("____________________________________________________\n")
+        result.append("____________________________________________________\n")
 
-        print("f_id".ljust(5), "e_id")
+        result.append("f_id".ljust(5) + " e_id")
         for f_id, e_id in enumerate(self._adj_faces):
-            print(str(f_id).ljust(5), e_id)
+            result.append(
+                f'{str(f_id).ljust(5)} {e_id}'
+            )
 
-        print("____________________________________________________\n")
+        result.append("____________________________________________________\n")
 
-        # print("e_id".ljust(5), "e")
-        # for e_id, e in enumerate(self._adj_edges):
-        #     v = f'{self._vertices.get(e.vert_origin)}, {self._vertices.get(e.vert_dest)}'
-        #     f = f'{e.face_left}, {e.face_right}'
-        #     e = f'{e.edge_left_back}, {e.edge_left_forward}, {e.edge_right_back}, {e.edge_right_forward}'
-        #     print(str(e_id).ljust(5), f'Edge(v=({v}); f=({f}); e=({e}))')
+        result.append("e_id".ljust(5) + " e")
+        for e_id, e in enumerate(self._adj_edges):
+            v = f'{e.vert_origin}, {e.vert_dest}'
+            f = f'{e.face_left}, {e.face_right}'
+            e = f'{e.edge_left_back}, {e.edge_left_forward}, {e.edge_right_back}, {e.edge_right_forward}'
+            result.append(
+                f'{str(e_id).ljust(5)} Edge(v=({v}); f=({f}); e=({e}))'
+            )
 
-        print("____________________________________________________\n")
+        result.append("____________________________________________________\n")
 
-        # print("v_id".ljust(35), "e_id")
-        # for v_id, e_id in self._adj_vertices.items():
-        #     print(str(self._vertices[v_id]).ljust(35), e_id)
+        result.append("v_id".ljust(5) + " e_id")
+        for v_id, e_id in self._adj_vertices.items():
+            result.append(f'{str(v_id).ljust(5)} {e_id}')
 
-        print("____________________________________________________\n")
+        result.append("____________________________________________________\n")
+
+        return "\n".join(result)
+
+    _register_vertice = __register_vertice
 
 
 __all__ = [WingedEdgeShape]
