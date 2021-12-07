@@ -119,9 +119,17 @@ class WingedEdgeShape(Shape):
             if self.__is_face_right_complement_of_quad(f_id):
                 continue
 
-            v1, v2, v3, v4 = self.__get_face_vertices(f_id)
+            v1, v2, v3 = self.__get_face_vertices(f_id)
+            v4 = None
 
-            debug(f'F{f_id}:', *[self._vertices.get_left(hash(v))+1
+            if self.__is_face_left_complement_of_quad(f_id):
+                fc_id = self._quad_complements.get_right(f_id)
+                v4, _, _ = self.__get_face_vertices(fc_id)
+
+                # keep in ccw order
+                v2, v3 = v3, v2
+
+            debug(f'F{f_id}:', *[self._vertices.get_left(hash(v))
                   for v in [v1, v2, v3, v4]])
 
             if len(self.__F) > 0:
@@ -133,11 +141,12 @@ class WingedEdgeShape(Shape):
 
             if border:
                 glLineWidth(2)
-                glColor3f(*colors[f_id % len(colors)])
+                # glColor3f(*colors[f_id % len(colors)])
+                glColor(*color.BLACK)
                 self.__gl_vertex_safe(v1, v2, v3, v4, border=True)
 
-            # glColor3f(*colors[f_id % len(colors)])
-            # self.__gl_vertex_safe(v1, v2, v3, v4, border=False)
+            glColor3f(*colors[f_id % len(colors)])
+            self.__gl_vertex_safe(v1, v2, v3, v4, border=False)
         debug("=========")
         for e in self._adj_edges:
             debug(e)
@@ -288,6 +297,18 @@ class WingedEdgeShape(Shape):
         face1_index = len(self._adj_faces)
         face2_index = face1_index + 1
 
+        # vertice_center = (vertice0 + vertice1 + vertice2 + vertice3) / 4
+
+        # self.add_tri_face(vertice0, vertice1, vertice_center,
+        #                   color0, color1, color2)
+        # self.add_tri_face(vertice_center, vertice2, vertice1,
+        #                   color0, color1, color2)
+
+        # self.add_tri_face(vertice3, vertice_center, vertice2,
+        #                   color2, color0, color3)
+        # self.add_tri_face(vertice_center, vertice0, vertice3,
+        #                   color2, color0, color3)
+
         self.add_tri_face(vertice0, vertice1, vertice2,
                           color0, color1, color2)
         self.add_tri_face(vertice2, vertice0, vertice3,
@@ -428,40 +449,40 @@ class WingedEdgeShape(Shape):
         glEnd()
 
     def __get_face_vertices(self, face_id: int) -> List[Vec3d]:
-        if self.__is_face_right_complement_of_quad(face_id):
-            return self.__get_face_vertices(self._quad_complements.get_left(face_id))
-
         edge_id = self._adj_faces[face_id]
         edge = self._adj_edges[edge_id]
-        edge_next: WingedEdge = self._adj_edges[edge.edge_left_forward]
 
         h_v1 = self._vertices.get_right(edge.vert_origin)
         h_v2 = self._vertices.get_right(edge.vert_dest)
-        h_v3 = self._vertices.get_right(edge_next.vert_dest)
+
+        if edge.face_left == face_id:
+            edge_next: WingedEdge = self._adj_edges[edge.edge_left_forward]
+
+            debug(
+                f"F{face_id}: e{edge_id} -> e{edge.edge_left_forward} [LEFT]"
+            )
+
+            if edge_next.vert_dest == edge.vert_dest or edge_next.vert_dest == edge.vert_origin:
+                h_v3 = self._vertices.get_right(edge_next.vert_origin)
+            else:
+                h_v3 = self._vertices.get_right(edge_next.vert_dest)
+        else:
+            edge_next: WingedEdge = self._adj_edges[edge.edge_right_forward]
+
+            debug(
+                f"F{face_id}: e{edge_id} -> e{edge.edge_right_forward} :: dest [RIGHT]"
+            )
+
+            if edge_next.vert_dest == edge.vert_dest or edge_next.vert_dest == edge.vert_origin:
+                h_v3 = self._vertices.get_right(edge_next.vert_origin)
+            else:
+                h_v3 = self._vertices.get_right(edge_next.vert_dest)
 
         v1 = self._vertices_cache[h_v1]
         v2 = self._vertices_cache[h_v2]
         v3 = self._vertices_cache[h_v3]
-        v4 = None
 
-        debug(f"F{face_id}: e{edge_id} -> e{edge.edge_left_forward}")
-
-        if self.__is_face_left_complement_of_quad(face_id):
-            right_face_id = self._quad_complements.get_right(face_id)
-            right_edge_id = self._adj_faces[right_face_id]
-            right_edge = self._adj_edges[right_edge_id]
-            # debug(
-            #     f"F{right_face_id}: {right_edge}"
-            # )
-            # right_edge_next: WingedEdge = self._adj_edges[right_edge.edge_right_forward]
-
-            h_v4 = self._vertices.get_right(right_edge.vert_origin)
-            v4 = self._vertices_cache[h_v4]
-
-            # # preserve ccw order
-            v2, v3 = v3, v2
-
-        return [v1, v2, v3, v4]
+        return [v1, v2, v3]
 
     def __is_face_left_complement_of_quad(self, face_id: int) -> bool:
         return self._quad_complements.has_left(face_id)
