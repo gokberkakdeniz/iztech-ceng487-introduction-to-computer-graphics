@@ -48,3 +48,12 @@ class bidict(Generic[L, R]):
     def delete(self, left: L, right: R):
         del self.l2r[left]
         del self.r2l[right]
+
+    def lefts(self):
+        return self.l2r.items()
+
+    def rights(self):
+        return self.r2l.items()
+
+    def items(self):
+        return self.l2r.items()
