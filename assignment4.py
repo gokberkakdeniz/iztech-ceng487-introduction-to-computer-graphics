@@ -129,6 +129,7 @@ def main():
 
     try:
         obj = parse_obj(argv[1])
+        print(repr(obj))
         # TODO: delete
         # obj = WingedEdgeShape.quadrilateral(
         #     Vec3d.point(0, -1, 0),
