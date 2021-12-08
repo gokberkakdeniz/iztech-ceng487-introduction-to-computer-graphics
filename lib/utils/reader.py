@@ -36,17 +36,7 @@ def parse_obj(file):
                     line.split(" ")[1:]
                 ))
 
-                # obj.add_quad_face(face_vertices)
-
-                # face_vertice_count = len(face_vertices)
-
-                # if face_vertice_count != 4:
-                #     raise Exception(
-                #         "Only tri meshes and quad meshes are supported."
-                #     )
-
-                obj.add_face(face_vertices, [])
-
+                obj.add_face(face_vertices, ())
             else:
                 print("invalid line:", line)
     print(obj)

@@ -31,7 +31,9 @@ class WingedEdgeShape(Shape):
     def __init__(self,
                  name: str = None,
                  state=(None, None)):
+        # object properties
         self.name = name or f'shape_{self.__object_index}'
+        self.level = 0
 
         # Dictionary: hash(vec3d) -> vec3d
         # the hashes cannot be used as index because when the vertices
@@ -51,9 +53,11 @@ class WingedEdgeShape(Shape):
         # self._quad_complements: bidict[int, int] = bidict()
         self._colors = []
 
+        # transformation matrix and stack
         self._stack = (state[0] or []).copy()
         self._matrix = state[1] or Mat3d.identity()
 
+        # load given state
         if state[0] is not None:
             for v_id in self._vertices_cache:
                 self.__transform_vertices(v_id, self._matrix)
@@ -73,8 +77,8 @@ class WingedEdgeShape(Shape):
     ):
         obj = WingedEdgeShape()
 
-        obj.add_quad_face(vertice0, vertice1, vertice2, vertice3,
-                          color0,   color1,   color2,   color3)
+        obj.add_face((vertice0, vertice1, vertice2, vertice3),
+                     (color0, color1, color2, color3))
 
         return obj
 
@@ -89,8 +93,8 @@ class WingedEdgeShape(Shape):
     ):
         obj = WingedEdgeShape()
 
-        obj.add_tri_face(vertice0, vertice1, vertice2,
-                         color0,   color1,   color2)
+        obj.add_face((vertice0, vertice1, vertice2),
+                     (color0, color1, color2))
 
         return obj
 
@@ -185,121 +189,7 @@ class WingedEdgeShape(Shape):
         self._stack.pop()
 
     def clone(self) -> 'WingedEdgeShape':
-        # TODO: delete this
-        # obj = WingedEdgeShape()
-
-        # obj.name = self.name
-        # obj._vertices = deepcopy(self._vertices)
-        # obj._adj_edges = deepcopy(self._adj_edges)
-        # obj._adj_faces = deepcopy(self._adj_faces)
-        # obj._adj_vertices = deepcopy(self._adj_vertices)
-        # obj._stack = deepcopy(self._stack)
-        # obj._colors = deepcopy(self._colors)
-        # obj._matrix = deepcopy(self._matrix)
-
         return deepcopy(self)
-
-    def add_tri_face(
-            self,
-            vertice0=Vec3d,
-            vertice1=Vec3d,
-            vertice2=Vec3d,
-            color0: Tuple[int, int, int] = color.WHITE,
-            color1: Tuple[int, int, int] = color.WHITE,
-            color2: Tuple[int, int, int] = color.WHITE
-    ):
-        # raise Exception("Not implemented exception! (will be fixed...)")
-        # TODO: implement color support
-        i_v0 = self.__register_vertice(vertice0)
-        i_v1 = self.__register_vertice(vertice1)
-        i_v2 = self.__register_vertice(vertice2)
-
-        debug(i_v0, i_v1, i_v2)
-
-        f_index = len(self._adj_faces)
-
-        e0_index = self.__get_edge_index_safe(i_v0, i_v1)
-        e1_index = self.__get_edge_index_safe(i_v1, i_v2)
-        e2_index = self.__get_edge_index_safe(i_v2, i_v0)
-
-        e0 = self._adj_edges[e0_index]
-        e1 = self._adj_edges[e1_index]
-        e2 = self._adj_edges[e2_index]
-
-        debug(e0)
-        debug(e1)
-        debug(e2)
-
-        if e0.vert_origin is None:
-            e0.set_vert(i_v0, i_v1)
-            e0.face_left = f_index
-            e0.set_edge_left(e2_index, e1_index)
-            self._adj_vertices[i_v0] = e0_index
-        else:
-            e0.face_right = f_index
-            e0.set_edge_right(e1_index, e2_index)
-
-        if e1.vert_origin is None:
-            e1.set_vert(i_v1, i_v2)
-            e1.face_left = f_index
-            e1.set_edge_left(e0_index, e2_index)
-            self._adj_vertices[i_v1] = e1_index
-        else:
-            e1.face_right = f_index
-            e1.set_edge_right(e2_index, e0_index)
-
-        if e2.vert_origin is None:
-            e2.set_vert(i_v2, i_v0)
-            e2.face_left = f_index
-            e2.set_edge_left(e1_index, e0_index)
-            self._adj_vertices[i_v2] = e2_index
-        else:
-            e2.face_right = f_index
-            e2.set_edge_right(e0_index, e1_index)
-
-        self._adj_faces.append(e2_index)
-
-        debug(e0)
-        debug(e1)
-        debug(e2)
-
-    def add_quad_face(
-        self,
-        vertice0=Vec3d,
-        vertice1=Vec3d,
-        vertice2=Vec3d,
-        vertice3=Vec3d,
-        color0: Tuple[int, int, int] = color.WHITE,
-        color1: Tuple[int, int, int] = color.WHITE,
-        color2: Tuple[int, int, int] = color.WHITE,
-        color3: Tuple[int, int, int] = color.WHITE
-    ):
-        face1_index = len(self._adj_faces)
-        face2_index = face1_index + 1
-
-        # SECTION: 1 QUAD = 2 TRIANGLE
-        self.add_face((vertice0, vertice1, vertice2),
-                      (color0, color1, color2))
-        self.add_face((vertice2, vertice0, vertice3),
-                      (color2, color0, color3))
-        # SECTION END
-
-        # SECTION: 1 QUAD = 4 TRIANGLE
-        # vertice_center = (vertice0 + vertice1 + vertice2 + vertice3) / 4
-        # self.add_tri_face(vertice0, vertice1, vertice_center,
-        #                   color0, color1, color2)
-        # self.add_tri_face(vertice_center, vertice2, vertice1,
-        #                   color0, color1, color2)
-
-        # self.add_tri_face(vertice3, vertice_center, vertice2,
-        #                   color2, color0, color3)
-        # self.add_tri_face(vertice_center, vertice0, vertice3,
-        #                   color2, color0, color3)
-        # SECTION END
-
-        # self._quad_complements.add(face1_index, face2_index)
-
-        print(repr(self))
 
     def add_face(self, vertices: List[Vec3d], colors: List[Vec3d]):
         v_indexes = [self._register_vertice(v) for v in vertices]
@@ -334,8 +224,6 @@ class WingedEdgeShape(Shape):
         self._adj_faces.append(self.__get_edge_index_safe(v_indexes[0], v_indexes[1]))
 
     def subdivide_catmull_clark(self):
-        # TODO: check if fully quad mesh
-
         # calculate face points
         face_points: List[Vec3d] = [None] * len(self._adj_faces)
         for f_id in range(len(self._adj_faces)):
@@ -365,8 +253,6 @@ class WingedEdgeShape(Shape):
             e_id = self._adj_vertices[i_v]
 
             r = Vec3d.point(0, 0, 0)
-            f = Vec3d.point(0, 0, 0)
-
             n = 0
             face_ids = set()
             for edge in chain(self.__get_edges_of_vertice(i_v)):
@@ -377,17 +263,17 @@ class WingedEdgeShape(Shape):
                 face_ids.add(edge.face_right)
 
                 n += 1
+            r = r / (2*n)
+            print(len(face_ids), n)
 
-            r = r / (n)
-
+            f = Vec3d.point(0, 0, 0)
             for f_id in face_ids:
                 f += face_points[f_id]
+            f = f / n
 
-            f = f / (2*n)
+            new_points[i_v] = (f + 2*r + (n - 3) * p) / n
 
-            p_new = (f + 2*r + (n - 3) * p) / n
-            new_points[i_v] = p_new
-
+        # calculate new faces
         new_faces = []
         for f_id in range(len(self._adj_faces)):
             face_new_points = tuple(new_points[v_id] for v_id in self.__get_face_vertice_indexes(f_id))
@@ -408,6 +294,7 @@ class WingedEdgeShape(Shape):
         self._adj_vertices: dict[int, int] = {}
         self._colors = []
 
+        # add new faces
         for new_face in new_faces:
             self.add_face(new_face, [])
 
@@ -423,6 +310,8 @@ class WingedEdgeShape(Shape):
         # print(repr(self))
 
         # exit()
+
+        self.level += 1
 
     def __get_edges_of_vertice(self, v_id: int):
         # TODO: find by traversing

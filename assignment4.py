@@ -51,8 +51,8 @@ class Assignment4Application(BaseApplication):
     def draw_gl_scene(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        # level = self.scene_model.objects[0][0].level
-        # self.element_subdivision_level.set_level(level)
+        level = self.scene_model.objects[0][0].level
+        self.element_subdivision_level.set_level(level)
         self.element_help_button.set_pos((self.size[0]-30, self.size[1]-30))
 
         self.scene_ui.draw()
@@ -78,6 +78,10 @@ class Assignment4Application(BaseApplication):
                 obj[0].decrease_subdivisions()
         elif key == b'r':
             self.scene_model.active_camera.reset()
+        elif key == b's':
+            print("# TODO: draw mode")
+        elif key == b'e':
+            print("# TODO: draw mode")
 
     def on_special_key_press(self, key, x, y):
         if key == GLUT_KEY_LEFT:
@@ -129,65 +133,8 @@ def main():
 
     try:
         obj = parse_obj(argv[1])
-        print(repr(obj))
-        # TODO: delete
-        # obj = WingedEdgeShape.quadrilateral(
-        #     Vec3d.point(0, -1, 0),
-        #     Vec3d.point(1, -1, 0),
-        #     Vec3d.point(1, 0, 0),
-        #     Vec3d.point(0, 0, 0),
-        #     color.GRAY,
-        #     color.GRAY,
-        #     color.GRAY,
-        #     color.GRAY,
-        # )
-        # obj.add_quad_face(
-        #     Vec3d.point(1, -1, 0),
-        #     Vec3d.point(2, -1, 0),
-        #     Vec3d.point(2, 0, 0),
-        #     Vec3d.point(1, 0, 0),
-        #     color.GRAY,
-        #     color.GRAY,
-        #     color.GRAY,
-        #     color.GRAY,
-        # )
 
-        # obj = WingedEdgeShape()
-        # obj.add_tri_face(
-        #     Vec3d.point(0, 0, 0),
-        #     Vec3d.point(0, -1, 0),
-        #     Vec3d.point(1, 0, 0),
-        #     color.GRAY,
-        #     color.GRAY,
-        #     color.GRAY,
-        # )
-        # obj.scale(0.5, 0.5, 0.5)
-        # obj.add_tri_face(
-        #     Vec3d.point(1, 0, 0),
-        #     Vec3d.point(0, -1, 0),
-        #     Vec3d.point(1, -1, 0),
-        #     color.GRAY,
-        #     color.GRAY,
-        #     color.GRAY,
-        # )
-        # obj.scale(0.5, 0.5, 0.5)
-        # obj.add_tri_face(
-        #     Vec3d.point(1, 0, 0),
-        #     Vec3d.point(1, -1, 0),
-        #     Vec3d.point(1.5, -0.5, 0),
-        #     color.GRAY,
-        #     color.GRAY,
-        #     color.GRAY,
-        # )
-        # obj.scale(0.5, 0.5, 0.5)
-        # obj.add_tri_face(
-        #     Vec3d.point(1, 0, 0),
-        #     Vec3d.point(1, -1, 0),
-        #     Vec3d.point(1.5, -0.5, 0),
-        #     color.GRAY,
-        #     color.GRAY,
-        #     color.GRAY,
-        # )
+        print(repr(obj))
     except FileNotFoundError:
         print("error: the given file does not exist.")
         exit(2)

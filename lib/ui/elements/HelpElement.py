@@ -28,6 +28,9 @@ class HelpElement(Element):
         self.draw_camera_title()
         self.draw_camera_table()
 
+        self.draw_drawing_title()
+        self.draw_drawing_table()
+
     draw_keyboard_shortcuts_title = staticmethod(
         create_ascii_table_header("keyboard shortcuts")
     )
@@ -53,5 +56,14 @@ class HelpElement(Element):
             ("UPARROW",      "rotate around x axis (cw)"),
             ("DOWNARROW",    "rotate around x axis (ccw)"),
             ("R",            "reset object"),
+        ])
+    )
+    draw_drawing_title = staticmethod(
+        create_ascii_table_header("drawing")
+    )
+    draw_drawing_table = staticmethod(
+        create_ascii_table([
+            ("S",            "toggle surface drawing"),
+            ("E",            "toggle edge drawing"),
         ])
     )
