@@ -62,6 +62,7 @@ class WingedEdgeShape(Shape):
 
         self.__F = []
         self.__E = []
+        self.__P = []
 
     @staticmethod
     def quadrilateral(
@@ -125,12 +126,12 @@ class WingedEdgeShape(Shape):
             debug(f'F{f_id}:', *[self._vertices.get_left(hash(v))
                   for v in [v1, v2, v3, v4]])
 
-            if len(self.__F) > 0:
-                glPointSize(4)
-                glColor3f(*colors[f_id % len(colors)])
-                glBegin(GL_POINTS)
-                glVertex(*self.__F[f_id])
-                glEnd()
+            # if len(self.__F) > 0:
+            #     glPointSize(4)
+            #     glColor3f(*colors[f_id % len(colors)])
+            #     glBegin(GL_POINTS)
+            #     glVertex(*self.__F[f_id])
+            #     glEnd()
 
             if border:
                 glLineWidth(2)
@@ -139,16 +140,34 @@ class WingedEdgeShape(Shape):
                 glColor3f(*colors[f_id % len(colors)])
                 self.__gl_vertex_safe(v1, v2, v3, v4, border=True)
 
-            glColor3f(*colors[f_id % len(colors)])
-            self.__gl_vertex_safe(v1, v2, v3, v4, border=False)
-        debug("=========")
-        for ep_id, ep in enumerate(self.__E):
+            # glColor3f(*colors[f_id % len(colors)])
+            # self.__gl_vertex_safe(v1, v2, v3, v4, border=False)
+
+        for ep_id, ep in enumerate(self.__F):
             if ep is not None:
                 glPointSize(4)
-                glColor3f(*colors[ep_id % len(colors)])
+                glColor3f(*color.BLUE)
                 glBegin(GL_POINTS)
                 glVertex(*ep)
                 glEnd()
+
+        for ep_id, ep in enumerate(self.__E):
+            if ep is not None:
+                glPointSize(4)
+                glColor3f(*color.RED)
+                glBegin(GL_POINTS)
+                glVertex(*ep)
+                glEnd()
+
+        for ep_id, ep in enumerate(self.__P):
+            if ep is not None:
+                glPointSize(4)
+                glColor3f(*color.GREEN)
+                glBegin(GL_POINTS)
+                glVertex(*ep)
+                glEnd()
+
+        debug("=========")
         for e in self._adj_edges:
             debug(e)
         debug.__dict__["stop"] = True
@@ -298,8 +317,15 @@ class WingedEdgeShape(Shape):
         face1_index = len(self._adj_faces)
         face2_index = face1_index + 1
 
-        # vertice_center = (vertice0 + vertice1 + vertice2 + vertice3) / 4
+        # SECTION: 1 QUAD = 2 TRIANGLE
+        self.add_tri_face(vertice0, vertice1, vertice2,
+                          color0, color1, color2)
+        self.add_tri_face(vertice2, vertice0, vertice3,
+                          color2, color0, color3)
+        # SECTION END
 
+        # SECTION: 1 QUAD = 4 TRIANGLE
+        # vertice_center = (vertice0 + vertice1 + vertice2 + vertice3) / 4
         # self.add_tri_face(vertice0, vertice1, vertice_center,
         #                   color0, color1, color2)
         # self.add_tri_face(vertice_center, vertice2, vertice1,
@@ -309,15 +335,11 @@ class WingedEdgeShape(Shape):
         #                   color2, color0, color3)
         # self.add_tri_face(vertice_center, vertice0, vertice3,
         #                   color2, color0, color3)
-
-        self.add_tri_face(vertice0, vertice1, vertice2,
-                          color0, color1, color2)
-        self.add_tri_face(vertice2, vertice0, vertice3,
-                          color2, color0, color3)
-
-        print(repr(self))
+        # SECTION END
 
         self._quad_complements.add(face1_index, face2_index)
+
+        print(repr(self))
 
     def subdivide_catmull_clark(self):
         # TODO: check if fully quad mesh
@@ -332,7 +354,7 @@ class WingedEdgeShape(Shape):
 
             self.__F[f_id] = f_p
 
-        # calculate edge_points
+        # calculate edge points
         self.__E = [None] * len(self._adj_edges)
         for e_id in self._adj_faces:
             if self.__E[e_id] is not None:
@@ -349,16 +371,58 @@ class WingedEdgeShape(Shape):
 
             self.__E[e_id] = ep
 
+        # calculate and set new position of the original points
+        self.__P = [None] * len(self._vertices_cache)
         for i_v, h_v in self._vertices.items():
-            v = self._vertices_cache[h_v]
+            p = self._vertices_cache[h_v]
             e_id = self._adj_vertices[i_v]
 
-            r = None
-            f = None
+            r = Vec3d.point(0, 0, 0)
+            f = Vec3d.point(0, 0, 0)
 
-            print("@", i_v, e_id)
+            n = 0
+            face_ids = set()
             for edge in chain(self.__get_edges_of_vertice(i_v)):
-                print(" ", edge)
+                r += self._vertices_cache[self._vertices.get_right(edge.vert_origin)] \
+                    + self._vertices_cache[self._vertices.get_right(edge.vert_dest)]
+
+                if self.__is_face_left_complement_of_quad(edge.face_left):
+                    face_ids.add(edge.face_left)
+                else:
+                    face_ids.add(edge.face_right)
+
+                n += 1
+
+            r = r / (2 * n)
+
+            for f_id in face_ids:
+                f += self.__F[f_id]
+
+            f = f / n
+
+            p_new = (f + 2*r + (n - 3) * p) / n
+
+            # replace original points with new ones
+            del self._vertices_cache[hash(p)]
+            self._vertices.update_right(i_v, hash(p_new))
+            self._vertices_cache[hash(p_new)] = p_new
+
+        # split edges
+        for e_id, (e, ep) in enumerate(zip(self._adj_edges, self.__E)):
+            ep_id = self.__register_vertice(ep)
+            e_new_id = self.__get_edge_index_safe(ep_id, e.vert_dest)
+            e_new = self._adj_edges[e_new_id]
+
+            e.set_vert(e.vert_origin, ep_id)
+            e_new.set_vert(ep_id, e.vert_dest)
+
+            e_new.edge_left_back = e_id
+            e_new.edge_right_back = None
+            e_new.edge_left_forward = e.edge_left_forward
+            e_new.edge_right_forward = e.edge_left_forward
+
+            e.edge_left_forward = e_new_id
+            e.edge_right_forward = None
 
     def __traverse_ccw(self, e_id: int):
         e = self._adj_edges[e_id]
@@ -373,19 +437,32 @@ class WingedEdgeShape(Shape):
                 break
 
     def __get_edges_of_vertice(self, v_id: int):
-        e = self._adj_edges[self._adj_vertices[v_id]]
-        e_c = e
+        for edge in self._adj_edges:
+            if edge.vert_dest == v_id or edge.vert_origin == v_id:
+                yield edge
 
-        for i in range(50):
-            yield e_c
+        # TODO: again i cannot traversing without trapping in loop...
+        # e = self._adj_edges[self._adj_vertices[v_id]]
+        # e_c = e
 
-            if e.vert_origin == v_id:
-                e_c = self._adj_edges[e_c.edge_left_back]
-            else:
-                e_c = self._adj_edges[e_c.edge_right_forward]
+        # ccw = True
+        # for i in range(50):
+        #     yield i, e_c
 
-            if e_c == e:
-                break
+        #     if e_c.vert_origin == v_id:
+        #         e_c = self._adj_edges[e_c.edge_left_back]
+
+        #         ccw = True
+        #     else:
+        #         if ccw:
+        #             e_c = self._adj_edges[e_c.edge_right_back]
+        #         else:
+        #             e_c = self._adj_edges[e_c.edge_left_forward]
+
+        #         ccw = False
+
+        #     if e_c == e:
+        #         break
 
     def __get_edge_index_safe(self, vert_origin_id: int, vert_dest_id) -> int:
         e_id = self._adj_vertices.get(vert_origin_id)
