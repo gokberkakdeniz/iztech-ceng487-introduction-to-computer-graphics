@@ -318,10 +318,10 @@ class WingedEdgeShape(Shape):
         face2_index = face1_index + 1
 
         # SECTION: 1 QUAD = 2 TRIANGLE
-        self.add_face([vertice0, vertice1, vertice2],
-                      [color0, color1, color2])
-        self.add_face([vertice2, vertice0, vertice3],
-                      [color2, color0, color3])
+        self.add_face((vertice0, vertice1, vertice2),
+                      (color0, color1, color2))
+        self.add_face((vertice2, vertice0, vertice3),
+                      (color2, color0, color3))
         # SECTION END
 
         # SECTION: 1 QUAD = 4 TRIANGLE

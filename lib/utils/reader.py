@@ -26,12 +26,12 @@ def parse_obj(file):
             elif cmd == "o":
                 obj.name = line.split(" ")[1]
             elif cmd == "v":
-                x, y, z = list(map(float, line.split(" ")[1:]))
+                x, y, z = tuple(map(float, line.split(" ")[1:]))
                 v = Vec3d.point(x, y, z)
                 vertices.append(v)
                 obj._register_vertice(v)
             elif cmd == "f":
-                face_vertices = list(map(
+                face_vertices = tuple(map(
                     lambda index: vertices[int(index)-1],
                     line.split(" ")[1:]
                 ))
