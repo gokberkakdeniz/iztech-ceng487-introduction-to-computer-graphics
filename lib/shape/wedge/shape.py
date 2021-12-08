@@ -140,8 +140,8 @@ class WingedEdgeShape(Shape):
                 glColor3f(*colors[f_id % len(colors)])
                 self.__gl_vertex_safe(v1, v2, v3, v4, border=True)
 
-            # glColor3f(*colors[f_id % len(colors)])
-            # self.__gl_vertex_safe(v1, v2, v3, v4, border=False)
+            glColor3f(*colors[f_id % len(colors)])
+            self.__gl_vertex_safe(v1, v2, v3, v4, border=False)
 
         for ep_id, ep in enumerate(self.__F):
             if ep is not None:
@@ -318,10 +318,10 @@ class WingedEdgeShape(Shape):
         face2_index = face1_index + 1
 
         # SECTION: 1 QUAD = 2 TRIANGLE
-        self.add_tri_face(vertice0, vertice1, vertice2,
-                          color0, color1, color2)
-        self.add_tri_face(vertice2, vertice0, vertice3,
-                          color2, color0, color3)
+        self.add_face([vertice0, vertice1, vertice2],
+                      [color0, color1, color2])
+        self.add_face([vertice2, vertice0, vertice3],
+                      [color2, color0, color3])
         # SECTION END
 
         # SECTION: 1 QUAD = 4 TRIANGLE
@@ -340,6 +340,34 @@ class WingedEdgeShape(Shape):
         self._quad_complements.add(face1_index, face2_index)
 
         print(repr(self))
+
+    def add_face(self, vertices: List[Vec3d], colors: List[Vec3d]):
+        v_indexes = [self._register_vertice(v) for v in vertices]
+        f_index = len(self._adj_faces)
+
+        for i in range(len(v_indexes)):
+            j = (i + 1) % len(v_indexes)
+            k = (i + 2) % len(v_indexes)
+
+            e0_index = self.__get_edge_index_safe(v_indexes[i], v_indexes[j])
+            e1_index = self.__get_edge_index_safe(v_indexes[j], v_indexes[k])
+            e2_index = self.__get_edge_index_safe(v_indexes[k], v_indexes[i])
+
+            e0 = self._adj_edges[e0_index]
+
+            i_v0 = v_indexes[i]
+            i_v1 = v_indexes[j]
+
+            if e0.vert_origin is None:
+                e0.set_vert(i_v0, i_v1)
+                e0.face_left = f_index
+                e0.set_edge_left(e2_index, e1_index)
+                self._adj_vertices[i_v0] = e0_index
+            else:
+                e0.face_right = f_index
+                e0.set_edge_right(e1_index, e2_index)
+
+        self._adj_faces.append(self.__get_edge_index_safe(v_indexes[-1], v_indexes[0]))
 
     def subdivide_catmull_clark(self):
         # TODO: check if fully quad mesh
