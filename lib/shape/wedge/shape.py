@@ -195,7 +195,7 @@ class WingedEdgeShape(Shape):
         self._adj_faces.append(self.__get_edge_index_safe(v_indexes[0], v_indexes[1]))
 
     def subdivide_catmull_clark(self):
-        if self.level == 4:
+        if self.level == 3:
             return
 
         # calculate face points
