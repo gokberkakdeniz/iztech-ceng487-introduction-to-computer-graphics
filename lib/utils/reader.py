@@ -3,10 +3,9 @@
 # StudentId:250201041
 # 12 2021
 
-from functools import cmp_to_key
 from typing import List
 from ..math import Vec3d
-from ..shape import Shape, color, WingedEdgeShape
+from ..shape import WingedEdgeShape
 
 
 def parse_obj(file):
@@ -26,7 +25,7 @@ def parse_obj(file):
             elif cmd == "o":
                 obj.name = line.split(" ")[1]
             elif cmd == "v":
-                x, y, z = tuple(map(float, line.split(" ")[1:]))
+                x, y, z = tuple(map(float, line.split(" ")[1:4]))
                 v = Vec3d.point(x, y, z)
                 vertices.append(v)
                 obj._register_vertice(v)

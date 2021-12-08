@@ -9,9 +9,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from sys import argv
 from os.path import basename
-from lib.math.vector import Vec3d
 
-from lib.shape import Object3d, color, WingedEdgeShape
 from lib.shape.shape import Shape
 from lib.ui import BaseApplication, Camera, Scene
 from lib.ui.elements import SubdivisionLevelElement, HelpButtonElement, HelpElement
