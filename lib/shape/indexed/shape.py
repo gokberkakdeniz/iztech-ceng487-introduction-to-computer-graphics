@@ -35,7 +35,7 @@ class IndexedShape(Shape):
             self.vertices = [self.matrix @
                              vertice for vertice in self.vertices]
 
-    def draw(self, border=True):
+    def draw(self, border=True, background=True):
         is_multicolored = type(self.color) is list
         color_itr = None
 
@@ -50,14 +50,14 @@ class IndexedShape(Shape):
                 glLineWidth(2)
                 glBegin(GL_LINE_LOOP)
                 glColor3f(*color.RED)
-                glVertex4f(*vertice)
+                glVertex3f(vertice.x, vertice.y, vertice.z)
                 glEnd()
 
             if is_multicolored:
                 color = next(color_itr)
                 glColor3f(*color)
 
-                glVertex4f(*vertice)
+                glVertex3f(vertice.x, vertice.y, vertice.z)
         glEnd()
 
     def __getitem__(self, index: Union[int, slice]):

@@ -14,7 +14,7 @@ class HelpElement(Element):
     def __init__(self) -> None:
         super().__init__()
 
-    def draw(self, border=None):
+    def draw(self, background=None, border=None):
         glColor3f(0.0, 1.0, 1.0)
         glRasterPos2i(-1, 2)
         self.draw_keyboard_shortcuts_title()
@@ -63,7 +63,7 @@ class HelpElement(Element):
     )
     draw_drawing_table = staticmethod(
         create_ascii_table([
-            ("S",            "toggle surface drawing"),
-            ("E",            "toggle edge drawing"),
+            ("S", "toggle background drawing "),
+            ("E", "toggle border drawing "),
         ])
     )

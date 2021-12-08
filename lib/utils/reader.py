@@ -39,5 +39,5 @@ def parse_obj(file):
                 obj.add_face(face_vertices, ())
             else:
                 print("invalid line:", line)
-    print(obj)
+
     return obj

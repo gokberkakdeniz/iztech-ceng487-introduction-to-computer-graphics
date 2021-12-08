@@ -8,5 +8,5 @@ from abc import ABC, abstractmethod
 
 class Drawable(ABC):
     @abstractmethod
-    def draw(border=True):
+    def draw(self, border=True, background=True):
         pass

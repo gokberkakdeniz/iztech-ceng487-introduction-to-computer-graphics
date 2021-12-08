@@ -75,13 +75,13 @@ class Assignment4Application(BaseApplication):
                 obj[0].subdivide_catmull_clark()
         elif key == b'-':
             for obj in self.scene_model.objects:
-                obj[0].decrease_subdivisions()
+                obj[0].reverse_subdivide_catmull_clark()
         elif key == b'r':
             self.scene_model.active_camera.reset()
         elif key == b's':
-            print("# TODO: draw mode")
+            self.scene_model.set_mode(background=not self.scene_model.mode_background)
         elif key == b'e':
-            print("# TODO: draw mode")
+            self.scene_model.set_mode(border=not self.scene_model.mode_border)
 
     def on_special_key_press(self, key, x, y):
         if key == GLUT_KEY_LEFT:
@@ -133,8 +133,6 @@ def main():
 
     try:
         obj = parse_obj(argv[1])
-
-        print(repr(obj))
     except FileNotFoundError:
         print("error: the given file does not exist.")
         exit(2)

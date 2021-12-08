@@ -59,9 +59,9 @@ class Object3d(Drawable):
         self.subdivisions = new_subdivisions
         self.level -= 1
 
-    def draw(self, border=True):
+    def draw(self, border=True, background=True):
         for division in self.subdivisions:
-            division.draw(border)
+            division.draw(border, background)
 
     def rotate(self, theta_0, theta_1, theta_2, order="xyz"):
         for division in self.subdivisions:

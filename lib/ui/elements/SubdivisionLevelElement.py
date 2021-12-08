@@ -18,7 +18,7 @@ class SubdivisionLevelElement(Element):
     def set_level(self, level: int):
         self.level = level
 
-    def draw(self, border=None):
+    def draw(self, background=None, border=None):
         glColor3f(0.0, 1.0, 1.0)
         glRasterPos2i(-3, -2)
         glutBitmapString(GLUT_BITMAP_9_BY_15,

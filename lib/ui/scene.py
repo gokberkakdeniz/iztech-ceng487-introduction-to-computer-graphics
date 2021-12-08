@@ -14,9 +14,17 @@ class Scene:
         self.cameras: Set[Camera] = list(cameras)
         self.active_camera = self.cameras[0]
         self.visible = visible
+        self.mode_border = True
+        self.mode_background = True
 
     def set_visibility(self, visible: bool):
         self.visible = visible
+
+    def set_mode(self, background: bool = None, border: bool = None):
+        if background is not None:
+            self.mode_background = background
+        if border is not None:
+            self.mode_border = border
 
     def set_visibility_of(self, element: Union[Shape, Object3d], visible: bool) -> bool:
         for i in range(len(self.objects)):
@@ -40,11 +48,11 @@ class Scene:
 
         return False
 
-    def draw(self, border=True):
+    def draw(self):
         self.active_camera.look()
         if self.visible:
             for el in self.objects:
                 obj, visible = el
 
                 if visible:
-                    obj.draw(border)
+                    obj.draw(background=self.mode_border,  border=self.mode_background)

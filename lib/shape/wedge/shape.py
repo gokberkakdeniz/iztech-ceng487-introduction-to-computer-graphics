@@ -8,21 +8,12 @@ from copy import deepcopy
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
-from itertools import chain
 from lib.utils.bidict import bidict
 
 from .. import color
 from .edge import WingedEdge
 from ..shape import Shape
 from ...math import Vec3d, Mat3d
-
-
-def debug(*args, **kwargs):
-    if not debug.__dict__["stop"]:
-        print(*args, **kwargs)
-
-
-debug.__dict__["stop"] = True
 
 
 class WingedEdgeShape(Shape):
@@ -62,7 +53,9 @@ class WingedEdgeShape(Shape):
             for v_id in self._vertices_cache:
                 self.__transform_vertices(v_id, self._matrix)
 
+        # private properties
         self.__object_index += 1
+        self.__history: List[WingedEdgeShape] = []
 
     @staticmethod
     def quadrilateral(
@@ -98,43 +91,21 @@ class WingedEdgeShape(Shape):
 
         return obj
 
-    def draw(self, border=True) -> None:
-        debug("=========")
+    def draw(self, border=True, background=True) -> None:
+        if not border and not background:
+            return
 
-        colors = [
-            (160/255, 81/255, 149/255),
-            color.BLUE,
-            (255/255, 166/255, 0/255),
-            color.CYAN,
-            (249/255, 93/255, 106/255),
-            color.RED,
-            (47/255, 75/255, 124/255),
-            color.GREEN,
-            (138/255, 171/255, 227/255),
-            color.VIOLET,
-            (56/255, 242/255, 161/255),
-            color.WHITE,
-            (242/255, 10/255, 122/255),
-        ]
         for f_id in range(len(self._adj_faces)):
             vertices = tuple(self.__get_face_vertices(f_id))
-
-            debug(f'F{f_id}:', *[self._vertices.get_left(hash(v)) for v in vertices])
 
             if border:
                 glLineWidth(2)
                 glColor(*color.RED)
-                # glColor3f(*colors[f_id % len(colors)])
                 self.__gl_vertex(vertices, border=True)
 
-            # glColor3f(*colors[f_id % len(colors)])
-            glColor3f(*color.GRAY)
-            self.__gl_vertex(vertices, border=False)
-
-        debug("=========")
-        for e in self._adj_edges:
-            debug(e)
-        debug.__dict__["stop"] = True
+            if background:
+                glColor3f(*color.GRAY)
+                self.__gl_vertex(vertices, border=False)
 
     def rotate(self, theta_0: float, theta_1: float, theta_2: float, order="xyz") -> None:
         R = Mat3d.rotation_matrix(theta_0, theta_1, theta_2, order)
@@ -224,10 +195,12 @@ class WingedEdgeShape(Shape):
         self._adj_faces.append(self.__get_edge_index_safe(v_indexes[0], v_indexes[1]))
 
     def subdivide_catmull_clark(self):
+        if self.level == 4:
+            return
+
         # calculate face points
         face_points: List[Vec3d] = [None] * len(self._adj_faces)
         for f_id in range(len(self._adj_faces)):
-            # debug(self._adj_edges[self._adj_faces[f_id]])
             v1, v2, v3, v4 = self.__get_face_vertices(f_id)
 
             f_p = (v1 + v2 + v3 + v4) / 4
@@ -255,7 +228,7 @@ class WingedEdgeShape(Shape):
             r = Vec3d.point(0, 0, 0)
             n = 0
             face_ids = set()
-            for edge in chain(self.__get_edges_of_vertice(i_v)):
+            for edge in self.__get_edges_of_vertice(i_v):
                 r += (self._vertices_cache[self._vertices.get_right(edge.vert_origin)]
                       + self._vertices_cache[self._vertices.get_right(edge.vert_dest)])
 
@@ -264,7 +237,6 @@ class WingedEdgeShape(Shape):
 
                 n += 1
             r = r / (2*n)
-            print(len(face_ids), n)
 
             f = Vec3d.point(0, 0, 0)
             for f_id in face_ids:
@@ -285,7 +257,8 @@ class WingedEdgeShape(Shape):
             new_faces.append([face_point, face_edge_points[1], face_new_points[2], face_edge_points[2]])
             new_faces.append([face_edge_points[3], face_point, face_edge_points[2], face_new_points[3]])
 
-        # reset
+        # cache and reset
+        self.__history.append(self.clone())
         self._vertices_cache: dict[int, Vec3d] = {}
         self._vertices: bidict[int, int] = bidict()
         self._vertice_index = -1
@@ -298,20 +271,13 @@ class WingedEdgeShape(Shape):
         for new_face in new_faces:
             self.add_face(new_face, [])
 
-        # for f_id in range(len(self._adj_faces)):
-        #     print(f'# face = {f_id}')
-        #     i = 0
-        #     for v_id in self.__get_face_vertice_indexes(f_id):
-        #         print(f'  [{i}] {v_id}')
-        #         i += 1
-        #         if i == 20:
-        #             break
-
-        # print(repr(self))
-
-        # exit()
-
         self.level += 1
+
+    def reverse_subdivide_catmull_clark(self):
+        if len(self.__history) == 0:
+            return
+
+        self.__dict__ = self.__history.pop().__dict__.copy()
 
     def __get_edges_of_vertice(self, v_id: int):
         # TODO: find by traversing
@@ -356,10 +322,10 @@ class WingedEdgeShape(Shape):
             glBegin(GL_TRIANGLES)
 
         for vertice in vertices:
-            glVertex4f(*vertice)
+            glVertex3f(vertice.x, vertice.y, vertice.z)
 
         if border:
-            glVertex4f(*vertices[0])
+            glVertex3f(vertices[0].x, vertices[0].y, vertices[0].z)
 
         glEnd()
 

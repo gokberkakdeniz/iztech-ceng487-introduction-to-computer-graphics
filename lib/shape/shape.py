@@ -9,7 +9,7 @@ from . import Drawable
 
 class Shape(Drawable, ABC):
     @abstractmethod
-    def draw(self, border=True):
+    def draw(self, border=True, background=True):
         pass
 
     @abstractmethod
