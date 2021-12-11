@@ -6,6 +6,7 @@
 from math import acos, cos, pi, sqrt
 from typing import Union
 from ..utils import ensure
+import numpy as np
 
 
 class Vec3d:
@@ -26,14 +27,42 @@ class Vec3d:
         ensure.number(y, "z")
         ensure.number(w, "w")
 
-        self.x = float(x)
-        self.y = float(y)
-        self.z = float(z)
-        self.w = float(w)
-        self.order = ["x", "y", "z", "w"]
+        self.__cords = np.array([x, y, z, w], dtype=np.float)
+
+    @property
+    def x(self):
+        return self.__cords[0]
+
+    @x.setter
+    def x(self, value: float):
+        self.__cords[0] = value
+
+    @property
+    def y(self):
+        return self.__cords[1]
+
+    @y.setter
+    def y(self, value: float):
+        self.__cords[1] = value
+
+    @property
+    def z(self):
+        return self.__cords[2]
+
+    @z.setter
+    def z(self, value: float):
+        self.__cords[2] = value
+
+    @property
+    def w(self):
+        return self.__cords[3]
+
+    @w.setter
+    def w(self, value: float):
+        self.__cords[3] = value
 
     def to_array(self):
-        return [self.x, self.y, self.z, self.w]
+        return self.__cords
 
     @staticmethod
     def point(x: float, y: float, z: float) -> 'Vec3d':
@@ -149,13 +178,10 @@ class Vec3d:
         return Vec3d(round(self.x, ndigits), round(self.y, ndigits), round(self.z, ndigits), round(self.w, ndigits))
 
     def __getitem__(self, index: Union[int, slice]) -> float:
-        if isinstance(index, int):
-            return self.__getattribute__(self.order[index])
-
-        return list(map(lambda p: self.__getattribute__(p), self.order)).__getitem__(index)
+        return self.__cords[index]
 
     def __setitem__(self, index: int, value: float) -> None:
-        self.__setattr__(self.order[index], value)
+        self.__cords[index] = value
 
     def __hash__(self) -> int:
-        return hash((*self, *self.order))
+        return hash(tuple(self.__cords))

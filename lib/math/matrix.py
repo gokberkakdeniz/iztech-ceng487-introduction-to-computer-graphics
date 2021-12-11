@@ -7,6 +7,7 @@ from typing import Union
 from math import sin, cos
 from ..utils import ensure
 from .vector import Vec3d
+import numpy as np
 
 
 class Mat3d:
@@ -30,7 +31,7 @@ class Mat3d:
         self.matrix = [r1, r2, r3, r4]
 
     def to_array(self):
-        return [self.matrix[j][i] for i in range(len(self.matrix)) for j in range(4)]
+        return np.array([self.matrix[j][i] for i in range(len(self.matrix)) for j in range(4)], dtype=np.float)
 
     @staticmethod
     def translation_matrix(tx: float, ty: float, tz: float) -> 'Mat3d':
