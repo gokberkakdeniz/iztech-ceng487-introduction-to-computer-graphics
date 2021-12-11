@@ -164,7 +164,7 @@ class Mat3d:
         )
 
     def __eq__(self, o: object) -> bool:
-        return type(o) and type(self) and \
+        return type(o) == type(self) and \
             self.matrix[0] == o.matrix[0] and \
             self.matrix[1] == o.matrix[1] and \
             self.matrix[2] == o.matrix[2] and \
