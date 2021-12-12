@@ -10,8 +10,7 @@ from OpenGL.GLU import *
 from sys import argv
 from os.path import basename
 
-from lib.shape.shape import Shape
-from lib.shape.wedge.grid import Grid
+from lib.shape import Shape, Grid
 from lib.ui import BaseApplication, Camera, Scene
 from lib.ui.elements import SubdivisionLevelElement, HelpButtonElement, HelpElement
 from lib.utils.reader import parse_obj
@@ -101,6 +100,9 @@ class Assignment4Application(BaseApplication):
         elif button == GLUT_CURSOR_HELP and state == GLUT_UP:
             self.scene_model.active_camera.zoom_out()
 
+        self.mouse_x = x
+        self.mouse_y = y
+
     def on_mouse_drag(self, x, y):
         width, height = self.size
 
@@ -110,7 +112,7 @@ class Assignment4Application(BaseApplication):
         self.mouse_x = x
         self.mouse_y = y
 
-        self.scene_model.active_camera.rotate(dy, dx, 0)
+        self.scene_model.active_camera.rotate(dx, dy, 0)
 
     def on_mouse_move(self, x, y):
         if y < 30 and x > self.size[0] - 30:

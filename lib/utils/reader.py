@@ -26,7 +26,12 @@ def parse_obj(file):
 
             cmd = line[0]
             if cmd == "#":
-                continue
+                words = line[1:].strip().split(" ")
+                # unofficial color support
+                if words[0] == "ceng487":
+                    if words[1] == "face_color":
+                        r, g, b = tuple(map(float, words[2:]))
+                        face_color = color.RGBA(r, g, b, 1.0)
             elif cmd == "g":
                 continue
             elif cmd == "o":
