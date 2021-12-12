@@ -187,4 +187,4 @@ class Vec3d:
         self.__cords[index] = value
 
     def __hash__(self) -> int:
-        return hash(tuple(self.__cords))
+        return hash((tuple(self.__cords), int(self.x * 57 + self.y * 5 + self.z * 17 + self.w * 31)))

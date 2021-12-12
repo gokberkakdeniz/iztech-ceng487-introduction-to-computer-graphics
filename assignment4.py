@@ -11,6 +11,7 @@ from sys import argv
 from os.path import basename
 
 from lib.shape.shape import Shape
+from lib.shape.wedge.grid import Grid
 from lib.ui import BaseApplication, Camera, Scene
 from lib.ui.elements import SubdivisionLevelElement, HelpButtonElement, HelpElement
 from lib.utils.reader import parse_obj
@@ -29,6 +30,7 @@ class Assignment4Application(BaseApplication):
 
         # model scene
         self.scene_model = Scene(cameras=(self.camera_model,))
+        self.scene_model.register(Grid((10, 10)))
         self.scene_model.register(obj)
 
         # model ui scene
@@ -131,7 +133,9 @@ def main():
 
     try:
         print(f'info: loading "{argv[1]}"...')
+
         obj = parse_obj(argv[1])
+
         print(f'info: "{argv[1]}" loaded.')
     except FileNotFoundError:
         print("error: the given file does not exist.")
