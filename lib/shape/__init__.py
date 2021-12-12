@@ -4,13 +4,11 @@
 # 12 2021
 
 from .drawable import Drawable
-from .indexed import IndexedTorus, IndexedBox, IndexedCylinder, IndexedShape, IndexedSphere, Object3d
+from .deprecated import DeprecatedTorus, DeprecatedBox, DeprecatedCylinder, DeprecatedShape, DeprecatedSphere, Object3d
 from .shape import Shape
 from .wedge import WingedEdgeShape
-from .indexed import IndexedShape
 from . import color
 
-__all__ = [Drawable, Shape,
-           WingedEdgeShape,
-           IndexedShape, IndexedTorus, IndexedBox, IndexedCylinder, IndexedShape, IndexedSphere, Object3d,
+__all__ = [Drawable, Shape, WingedEdgeShape,
+           DeprecatedShape, DeprecatedTorus, DeprecatedBox, DeprecatedCylinder, DeprecatedShape, DeprecatedSphere, Object3d,
            color]

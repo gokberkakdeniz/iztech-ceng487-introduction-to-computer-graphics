@@ -7,10 +7,10 @@ from math import cos, pi, sin
 from .. import color
 from ...math import Vec3d
 from .object3d import Object3d
-from .shape import IndexedShape
+from .shape import DeprecatedShape
 
 
-class IndexedCylinder(Object3d):
+class DeprecatedCylinder(Object3d):
     def __init__(self):
         self.count = 8
         super().__init__(
@@ -35,18 +35,18 @@ class IndexedCylinder(Object3d):
             top_vertices.append(Vec3d.point(x, 1, z))
             bottom_vertices.append(Vec3d.point(x, -1, z))
 
-        top = IndexedShape(top_vertices,
-                           color=color.GRAY,
-                           state=(stack, matrix))
-        bottom = IndexedShape(bottom_vertices,
+        top = DeprecatedShape(top_vertices,
                               color=color.GRAY,
                               state=(stack, matrix))
+        bottom = DeprecatedShape(bottom_vertices,
+                                 color=color.GRAY,
+                                 state=(stack, matrix))
 
         shapes = [top, bottom]
 
         for i in range(point_count):
             shapes.append(
-                IndexedShape.quadrilateral(
+                DeprecatedShape.quadrilateral(
                     top_vertices[i],
                     top_vertices[(i+1) % point_count],
                     bottom_vertices[(i+1) % point_count],

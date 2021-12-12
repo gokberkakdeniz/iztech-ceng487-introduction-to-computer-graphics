@@ -16,7 +16,7 @@ from ...math import Vec3d, Mat3d
 from .. import color
 
 
-class IndexedShape(Shape):
+class DeprecatedShape(Shape):
     def __init__(
         self,
         vertices: List[Vec3d],

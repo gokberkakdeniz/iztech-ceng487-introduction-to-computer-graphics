@@ -5,50 +5,50 @@
 
 from .. import color
 from ...math import Vec3d
-from .shape import IndexedShape
+from .shape import DeprecatedShape
 from .object3d import Object3d
 
 
-class IndexedBox(Object3d):
+class DeprecatedBox(Object3d):
     def __init__(self):
         super().__init__(
             subdivisions=[
-                IndexedShape.quadrilateral(  # Top
+                DeprecatedShape.quadrilateral(  # Top
                     Vec3d.point(1.0, 1.0, -1.0),
                     Vec3d.point(-1.0, 1.0, -1.0),
                     Vec3d.point(-1.0, 1.0, 1.0),
                     Vec3d.point(1.0, 1.0, 1.0),
                     color=color.GRAY
                 ),
-                IndexedShape.quadrilateral(  # Bottom
+                DeprecatedShape.quadrilateral(  # Bottom
                     Vec3d.point(1.0, -1.0, 1.0),
                     Vec3d.point(-1.0, -1.0, 1.0),
                     Vec3d.point(-1.0, -1.0, -1.0),
                     Vec3d.point(1.0, -1.0, -1.0),
                     color=color.GRAY
                 ),
-                IndexedShape.quadrilateral(  # Front
+                DeprecatedShape.quadrilateral(  # Front
                     Vec3d.point(1.0, 1.0, 1.0),
                     Vec3d.point(-1.0, 1.0, 1.0),
                     Vec3d.point(-1.0, -1.0, 1.0),
                     Vec3d.point(1.0, -1.0, 1.0),
                     color=color.GRAY
                 ),
-                IndexedShape.quadrilateral(  # Back
+                DeprecatedShape.quadrilateral(  # Back
                     Vec3d.point(1.0, -1.0, -1.0),
                     Vec3d.point(-1.0, -1.0, -1.0),
                     Vec3d.point(-1.0, 1.0, -1.0),
                     Vec3d.point(1.0, 1.0, -1.0),
                     color=color.GRAY
                 ),
-                IndexedShape.quadrilateral(  # Left
+                DeprecatedShape.quadrilateral(  # Left
                     Vec3d.point(-1.0, 1.0, 1.0),
                     Vec3d.point(-1.0, 1.0, -1.0),
                     Vec3d.point(-1.0, -1.0, -1.0),
                     Vec3d.point(-1.0, -1.0, 1.0),
                     color=color.GRAY
                 ),
-                IndexedShape.quadrilateral(  # Right
+                DeprecatedShape.quadrilateral(  # Right
                     Vec3d.point(1.0, 1.0, -1.0),
                     Vec3d.point(1.0, 1.0, 1.0),
                     Vec3d.point(1.0, -1.0, 1.0),
