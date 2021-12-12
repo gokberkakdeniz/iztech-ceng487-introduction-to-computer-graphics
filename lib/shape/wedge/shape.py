@@ -3,17 +3,18 @@
 # StudentId:250201041
 # 12 2021
 
-from typing import Generator, Iterable, List, Tuple, Union
+import numpy as np
+from typing import Generator, List, Tuple
 from copy import deepcopy
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from lib.utils.bidict import bidict
-
 from .. import color
 from .edge import WingedEdge
 from ..shape import Shape
 from ...math import Vec3d, Mat3d
+from ...utils.itertools import pairwise
 
 
 class WingedEdgeShape(Shape):
@@ -56,6 +57,11 @@ class WingedEdgeShape(Shape):
         # private properties
         self.__object_index += 1
         self.__history: List[WingedEdgeShape] = []
+        self.__VBO_face = None
+        self.__VBO_border = None
+        self.__should_reload_buffer = True
+        self.__face_buffer_length = 0
+        self.__border_buffer_length = 0
 
     @staticmethod
     def quadrilateral(
@@ -95,17 +101,31 @@ class WingedEdgeShape(Shape):
         if not border and not background:
             return
 
-        for f_id in range(len(self._adj_faces)):
-            vertices = tuple(self.__get_face_vertices(f_id))
+        if self.__should_reload_buffer:
+            self.__reload_buffer()
 
-            if border:
-                glLineWidth(2)
-                glColor(*color.RED)
-                self.__gl_vertex(vertices, border=True)
+        if border:
+            glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_border)
+            glEnableVertexAttribArray(0)
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
 
-            if background:
-                glColor3f(*color.GRAY)
-                self.__gl_vertex(vertices, border=False)
+            glLineWidth(2)
+            glColor(*color.RED)
+            glDrawArrays(GL_LINES, 0, self.__border_buffer_length)
+
+            glDisableVertexAttribArray(0)
+            glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+        if background:
+            glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_face)
+            glEnableVertexAttribArray(0)
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
+
+            glColor(*color.GRAY)
+            glDrawArrays(GL_TRIANGLES, 0, self.__face_buffer_length)
+
+            glDisableVertexAttribArray(0)
+            glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     def rotate(self, theta_0: float, theta_1: float, theta_2: float, order="xyz") -> None:
         R = Mat3d.rotation_matrix(theta_0, theta_1, theta_2, order)
@@ -193,6 +213,7 @@ class WingedEdgeShape(Shape):
                 e0.set_edge_right(e1_index, e2_index)
 
         self._adj_faces.append(self.__get_edge_index_safe(v_indexes[0], v_indexes[1]))
+        self.__should_reload_buffer = True
 
     def subdivide_catmull_clark(self):
         if self.level == 3:
@@ -272,12 +293,14 @@ class WingedEdgeShape(Shape):
             self.add_face(new_face, [])
 
         self.level += 1
+        self.__should_reload_buffer = True
 
     def reverse_subdivide_catmull_clark(self):
         if len(self.__history) == 0:
             return
 
         self.__dict__ = self.__history.pop().__dict__.copy()
+        self.__should_reload_buffer = True
 
     def __get_edges_of_vertice(self, v_id: int):
         # TODO: find by traversing
@@ -310,24 +333,6 @@ class WingedEdgeShape(Shape):
     def __is_edge_of(self, e: WingedEdge, vert_origin_id: int, vert_dest_id: int):
         return (e.vert_origin == vert_origin_id and e.vert_dest == vert_dest_id)  \
             or (e.vert_origin == vert_dest_id and e.vert_dest == vert_origin_id)
-
-    def __gl_vertex(self, vertices: List[Vec3d], border=False) -> None:
-        is_polygon = len(vertices) > 3
-
-        if border:
-            glBegin(GL_LINE_STRIP)
-        elif is_polygon:
-            glBegin(GL_POLYGON)
-        else:
-            glBegin(GL_TRIANGLES)
-
-        for vertice in vertices:
-            glVertex3f(vertice.x, vertice.y, vertice.z)
-
-        if border:
-            glVertex3f(vertices[0].x, vertices[0].y, vertices[0].z)
-
-        glEnd()
 
     def __get_face_vertice_indexes(self, face_id) -> Generator[int, None, None]:
         edge = self._adj_edges[self._adj_faces[face_id]]
@@ -390,6 +395,7 @@ class WingedEdgeShape(Shape):
     def __transform_vertices(self, matrix: Mat3d) -> None:
         for v_id in list(self._vertices_cache.keys()):
             self.__transform_vertice(v_id, matrix)
+        self.__should_reload_buffer = True
 
     def __transform_vertice(self, v_id: int, matrix: Mat3d) -> None:
         old = self._vertices_cache[v_id]
@@ -451,6 +457,45 @@ class WingedEdgeShape(Shape):
         result.append("____________________________________________________\n")
 
         return "\n".join(result)
+
+    def __reload_buffer(self):
+        face_vertices = []
+        border_vertices = []
+
+        for f_id in range(len(self._adj_faces)):
+            itr = self.__get_face_vertices(f_id)
+            v1 = next(itr)
+
+            border_vertices.extend(v1.to_list()[:3])
+
+            for v2, v3 in pairwise(itr):
+                border_vertices.extend(v2.to_list()[:3])
+                border_vertices.extend(v2.to_list()[:3])
+
+                face_vertices.extend(v1.to_list()[:3])
+                face_vertices.extend(v2.to_list()[:3])
+                face_vertices.extend(v3.to_list()[:3])
+
+            border_vertices.extend(v3.to_list()[:3])
+            border_vertices.extend(v3.to_list()[:3])
+            border_vertices.extend(v1.to_list()[:3])
+
+        self.__face_buffer_length = len(face_vertices)
+        self.__border_buffer_length = len(border_vertices)
+
+        if self.__VBO_face is None:
+            self.__VBO_face = glGenBuffers(1)
+
+        glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_face)
+        glBufferData(GL_ARRAY_BUFFER, np.array(face_vertices, dtype="float32"), GL_STATIC_DRAW)
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+        if self.__VBO_border is None:
+            self.__VBO_border = glGenBuffers(1)
+
+        glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_border)
+        glBufferData(GL_ARRAY_BUFFER, np.array(border_vertices, dtype="float32"), GL_STATIC_DRAW)
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     _register_vertice = __register_vertice
 

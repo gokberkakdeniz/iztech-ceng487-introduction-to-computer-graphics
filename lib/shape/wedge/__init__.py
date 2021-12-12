@@ -4,5 +4,6 @@
 # 12 2021
 
 from .shape import WingedEdgeShape
+from .grid import Grid
 
-__all__ = [WingedEdgeShape]
+__all__ = [WingedEdgeShape, Grid]

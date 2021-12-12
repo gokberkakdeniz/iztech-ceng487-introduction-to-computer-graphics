@@ -9,8 +9,9 @@ from ..shape import WingedEdgeShape
 
 
 def parse_obj(file):
-    vertices: List[Vec3d] = []
     obj = WingedEdgeShape()
+
+    vertices: List[Vec3d] = []
 
     with open(file) as f:
         for line in f.readlines():
@@ -22,13 +23,14 @@ def parse_obj(file):
             cmd = line[0]
             if cmd == "#":
                 continue
+            elif cmd == "g":
+                continue
             elif cmd == "o":
                 obj.name = line.split(" ")[1]
             elif cmd == "v":
                 x, y, z = tuple(map(float, line.split(" ")[1:4]))
                 v = Vec3d.point(x, y, z)
                 vertices.append(v)
-                obj._register_vertice(v)
             elif cmd == "f":
                 face_vertices = tuple(map(
                     lambda index: vertices[int(index)-1],

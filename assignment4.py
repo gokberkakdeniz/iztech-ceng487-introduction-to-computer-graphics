@@ -130,7 +130,9 @@ def main():
         exit(1)
 
     try:
+        print(f'info: loading "{argv[1]}"...')
         obj = parse_obj(argv[1])
+        print(f'info: "{argv[1]}" loaded.')
     except FileNotFoundError:
         print("error: the given file does not exist.")
         exit(2)

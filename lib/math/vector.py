@@ -64,6 +64,9 @@ class Vec3d:
     def to_array(self):
         return self.__cords
 
+    def to_list(self):
+        return self.__cords.tolist()
+
     @staticmethod
     def point(x: float, y: float, z: float) -> 'Vec3d':
         return Vec3d(x, y, z, 1)

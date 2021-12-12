@@ -6,9 +6,9 @@
 from .drawable import Drawable
 from .deprecated import DeprecatedTorus, DeprecatedBox, DeprecatedCylinder, DeprecatedShape, DeprecatedSphere, Object3d
 from .shape import Shape
-from .wedge import WingedEdgeShape
+from .wedge import WingedEdgeShape, Grid
 from . import color
 
-__all__ = [Drawable, Shape, WingedEdgeShape,
+__all__ = [Drawable, Shape, WingedEdgeShape, Grid,
            DeprecatedShape, DeprecatedTorus, DeprecatedBox, DeprecatedCylinder, DeprecatedShape, DeprecatedSphere, Object3d,
            color]
