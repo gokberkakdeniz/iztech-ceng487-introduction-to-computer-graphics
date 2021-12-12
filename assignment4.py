@@ -51,7 +51,7 @@ class Assignment4Application(BaseApplication):
     def draw_gl_scene(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        level = self.scene_model.objects[0][0].level
+        level = self.scene_model.objects[1][0].level
         self.element_subdivision_level.set_level(level)
         self.element_help_button.set_pos((self.size[0]-30, self.size[1]-30))
 
@@ -71,11 +71,13 @@ class Assignment4Application(BaseApplication):
         super().on_key_press(key, x, y)
 
         if key == b'+':
-            for obj in self.scene_model.objects:
-                obj[0].subdivide_catmull_clark()
+            for obj in self.scene_model.objects[1:]:
+                if hasattr(obj[0], "subdivide_catmull_clark"):
+                    obj[0].subdivide_catmull_clark()
         elif key == b'-':
-            for obj in self.scene_model.objects:
-                obj[0].reverse_subdivide_catmull_clark()
+            for obj in self.scene_model.objects[1:]:
+                if hasattr(obj[0], "reverse_subdivide_catmull_clark"):
+                    obj[0].reverse_subdivide_catmull_clark()
         elif key == b'r':
             self.scene_model.active_camera.reset()
         elif key == b's':

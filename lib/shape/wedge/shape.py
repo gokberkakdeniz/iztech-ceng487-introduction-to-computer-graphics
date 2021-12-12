@@ -195,12 +195,9 @@ class WingedEdgeShape(Shape):
             e2_index = self.__get_edge_index_safe(v_indexes[k], v_indexes[l])
 
             e0 = self._adj_edges[e0_index]
-            e1 = self._adj_edges[e1_index]
-            e2 = self._adj_edges[e2_index]
 
             i_v0 = v_indexes[i]
             i_v1 = v_indexes[j]
-            i_v2 = v_indexes[k]
 
             if e0.face_left is None and e0.face_right is None:
                 e0.set_vert(i_v0, i_v1)
@@ -273,10 +270,14 @@ class WingedEdgeShape(Shape):
             face_edge_points = tuple(edge_points[e_id] for e_id in self.__get_face_edge_indexes(f_id))
             face_point = face_points[f_id]
 
-            new_faces.append([face_new_points[0], face_edge_points[0], face_point, face_edge_points[3]])
-            new_faces.append([face_edge_points[0], face_new_points[1], face_edge_points[1], face_point])
-            new_faces.append([face_point, face_edge_points[1], face_new_points[2], face_edge_points[2]])
-            new_faces.append([face_edge_points[3], face_point, face_edge_points[2], face_new_points[3]])
+            new_faces.append(([face_new_points[0], face_edge_points[0], face_point, face_edge_points[3]],
+                              self._colors[f_id]))
+            new_faces.append(([face_edge_points[0], face_new_points[1], face_edge_points[1], face_point],
+                              self._colors[f_id]))
+            new_faces.append(([face_point, face_edge_points[1], face_new_points[2], face_edge_points[2]],
+                              self._colors[f_id]))
+            new_faces.append(([face_edge_points[3], face_point, face_edge_points[2], face_new_points[3]],
+                              self._colors[f_id]))
 
         # cache and reset
         self.__history.append(self.clone())
@@ -289,8 +290,8 @@ class WingedEdgeShape(Shape):
         self._colors = []
 
         # add new faces
-        for new_face in new_faces:
-            self.add_face(new_face, [])
+        for new_face, (face_color, border_color) in new_faces:
+            self.add_face(new_face, face_color, border_color)
 
         self.level += 1
         self.__should_reload_buffer = True
