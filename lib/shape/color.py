@@ -26,6 +26,30 @@ class RGBA:
 
         self.__cords = np.array([r, g, b, a], dtype=np.float)
 
+    @staticmethod
+    def red():
+        return RGBA(1.0, 0.0, 0.0, 1.0)
+
+    @staticmethod
+    def green():
+        return RGBA(0.0, 1.0, 0.0, 1.0)
+
+    @staticmethod
+    def blue():
+        return RGBA(0.0, 0.0, 1.0, 1.0)
+
+    @staticmethod
+    def white():
+        return RGBA(1.0, 1.0, 1.0, 1.0)
+
+    @staticmethod
+    def gray():
+        return RGBA(0.4, 0.4, 0.4, 1.0)
+
+    @staticmethod
+    def black():
+        return RGBA(0.0, 0.0, 0.0, 1.0)
+
     @property
     def r(self):
         return self.__cords[0]
@@ -60,3 +84,9 @@ class RGBA:
 
     def to_array(self):
         return self.__cords
+
+    def to_list(self):
+        return self.__cords.tolist()
+
+    def __hash__(self) -> int:
+        return self.r * 255 * 10e9 + self.g * 255 * 10e6 + self.b * 255 * 10e3 + self.a * 255

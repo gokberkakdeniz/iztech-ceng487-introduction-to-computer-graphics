@@ -42,8 +42,7 @@ class WingedEdgeShape(Shape):
         self._adj_faces: List[int] = []
         self._adj_vertices: dict[int, int] = {}
 
-        # self._quad_complements: bidict[int, int] = bidict()
-        self._colors = []
+        self._colors: List[Tuple[color.RGBA]] = []
 
         # transformation matrix and stack
         self._stack = (state[0] or []).copy()
@@ -110,7 +109,7 @@ class WingedEdgeShape(Shape):
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
 
             glLineWidth(2)
-            glColor(*color.RED)
+            glColor4f(*self._colors[0][1].to_list())
             glDrawArrays(GL_LINES, 0, self.__border_buffer_length)
 
             glDisableVertexAttribArray(0)
@@ -121,7 +120,7 @@ class WingedEdgeShape(Shape):
             glEnableVertexAttribArray(0)
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
 
-            glColor(*color.GRAY)
+            glColor4f(*self._colors[0][0].to_list())
             glDrawArrays(GL_TRIANGLES, 0, self.__face_buffer_length)
 
             glDisableVertexAttribArray(0)
@@ -182,7 +181,7 @@ class WingedEdgeShape(Shape):
     def clone(self) -> 'WingedEdgeShape':
         return deepcopy(self)
 
-    def add_face(self, vertices: List[Vec3d], colors: List[Vec3d]):
+    def add_face(self, vertices: List[Vec3d], face_color: color.RGBA, border_color: color.RGBA):
         v_indexes = [self._register_vertice(v) for v in vertices]
         f_index = len(self._adj_faces)
 
@@ -213,6 +212,7 @@ class WingedEdgeShape(Shape):
                 e0.set_edge_right(e1_index, e2_index)
 
         self._adj_faces.append(self.__get_edge_index_safe(v_indexes[0], v_indexes[1]))
+        self._colors.append((face_color, border_color))
         self.__should_reload_buffer = True
 
     def subdivide_catmull_clark(self):

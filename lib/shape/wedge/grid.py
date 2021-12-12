@@ -6,7 +6,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
 from ...math import Vec3d
-from .shape import WingedEdgeShape
+from .shape import WingedEdgeShape, color
 
 
 class Grid(WingedEdgeShape):
@@ -17,7 +17,7 @@ class Grid(WingedEdgeShape):
         self.shape = shape
 
         size_x, size_z = self.shape
-
+        border_color = color.RGBA.gray()
         for xi in range(size_x):
             x = xi - size_x / 2
             for zi in range(size_z):
@@ -26,7 +26,9 @@ class Grid(WingedEdgeShape):
                 self.add_face([Vec3d.point(x, 0, z),
                                Vec3d.point(x+1, 0, z),
                                Vec3d.point(x+1, 0, z+1),
-                               Vec3d.point(x, 0, z+1)], ())
+                               Vec3d.point(x, 0, z+1)],
+                              None,
+                              border_color)
 
     def draw(self, border=True, background=False) -> None:
         size_x, size_z = self.shape

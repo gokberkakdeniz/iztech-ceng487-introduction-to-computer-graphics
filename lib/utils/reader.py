@@ -4,14 +4,18 @@
 # 12 2021
 
 from typing import List
+
 from ..math import Vec3d
-from ..shape import WingedEdgeShape
+from ..shape import WingedEdgeShape, color
 
 
 def parse_obj(file):
     obj = WingedEdgeShape()
 
     vertices: List[Vec3d] = []
+
+    face_color = color.RGBA.gray()
+    border_color = color.RGBA.red()
 
     with open(file) as f:
         for line in f.readlines():
@@ -37,7 +41,7 @@ def parse_obj(file):
                     line.split(" ")[1:]
                 ))
 
-                obj.add_face(face_vertices, ())
+                obj.add_face(face_vertices, face_color, border_color)
             else:
                 print("invalid line:", line)
 
