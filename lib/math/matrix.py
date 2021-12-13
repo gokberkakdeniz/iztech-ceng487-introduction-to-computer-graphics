@@ -31,7 +31,7 @@ class Mat3d:
         self.matrix = [r1, r2, r3, r4]
 
     def to_array(self):
-        return np.array([self.matrix[j][i] for i in range(len(self.matrix)) for j in range(4)], dtype=np.float)
+        return np.array([self.matrix[j][i] for i in range(len(self.matrix)) for j in range(4)], dtype="float32")
 
     @staticmethod
     def translation_matrix(tx: float, ty: float, tz: float) -> 'Mat3d':

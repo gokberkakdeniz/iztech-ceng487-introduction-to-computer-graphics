@@ -3,14 +3,14 @@
 # StudentId:250201041
 # 12 2021
 
-from typing import Iterable, List, Set, Tuple, Union
-from ..shape import Shape, Object3d
+from typing import Iterable, List, Set, Tuple
+from ..shape import WingedEdgeShape
 from .camera import Camera
 
 
 class Scene:
     def __init__(self, cameras: Iterable[Camera], visible=True) -> None:
-        self.objects: List[Tuple[Union[Shape, Object3d], bool]] = []
+        self.objects: List[Tuple[WingedEdgeShape, bool]] = []
         self.cameras: Set[Camera] = list(cameras)
         self.active_camera = self.cameras[0]
         self.visible = visible
@@ -26,7 +26,7 @@ class Scene:
         if border is not None:
             self.mode_border = border
 
-    def set_visibility_of(self, element: Union[Shape, Object3d], visible: bool) -> bool:
+    def set_visibility_of(self, element: WingedEdgeShape, visible: bool) -> bool:
         for i in range(len(self.objects)):
             obj = self.objects[i]
 
@@ -36,10 +36,10 @@ class Scene:
 
         return False
 
-    def register(self, obj: Union[Shape, Object3d], visible=True):
+    def register(self, obj: WingedEdgeShape, visible=True):
         self.objects.append([obj, visible])
 
-    def unregister(self, element: Union[Shape, Object3d]) -> bool:
+    def unregister(self, element: WingedEdgeShape) -> bool:
         for i in range(len(self.objects)):
             if self.objects[i][0] == element:
                 del self.objects[i]
@@ -49,10 +49,10 @@ class Scene:
         return False
 
     def draw(self):
-        self.active_camera.look()
         if self.visible:
             for el in self.objects:
                 obj, visible = el
 
                 if visible:
+                    self.active_camera.look(obj.program if hasattr(obj, "program") else None)
                     obj.draw(background=self.mode_border,  border=self.mode_background)

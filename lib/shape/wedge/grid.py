@@ -18,6 +18,7 @@ class Grid(WingedEdgeShape):
 
         size_x, size_z = self.shape
         border_color = color.RGBA.gray()
+        face_color = color.RGBA(0, 0, 0, 0)
         for xi in range(size_x):
             x = xi - size_x / 2
             for zi in range(size_z):
@@ -27,7 +28,7 @@ class Grid(WingedEdgeShape):
                                Vec3d.point(x+1, 0, z),
                                Vec3d.point(x+1, 0, z+1),
                                Vec3d.point(x, 0, z+1)],
-                              None,
+                              face_color,
                               border_color)
 
     def draw(self, border=True, background=False) -> None:

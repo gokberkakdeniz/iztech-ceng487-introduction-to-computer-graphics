@@ -8,16 +8,17 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from sys import argv
-from os.path import basename
+from os.path import basename, join, dirname
 
-from lib.shape import Shape, Grid
+from lib.shape import WingedEdgeShape,  Grid, Shader
+from lib.shape.shader import Program
 from lib.ui import BaseApplication, Camera, Scene
 from lib.ui.elements import SubdivisionLevelElement, HelpButtonElement, HelpElement
 from lib.utils.reader import parse_obj
 
 
 class Assignment4Application(BaseApplication):
-    def __init__(self, obj: Shape, *args, **kwargs) -> None:
+    def __init__(self, obj: WingedEdgeShape, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.mouse_x = 0
@@ -29,7 +30,9 @@ class Assignment4Application(BaseApplication):
 
         # model scene
         self.scene_model = Scene(cameras=(self.camera_model,))
-        self.scene_model.register(Grid((10, 10)))
+        grid = Grid((10, 10))
+        self.scene_model.register(grid)
+        self.scene_model.set_visibility_of(grid, False)
         self.scene_model.register(obj)
 
         # model ui scene
@@ -46,6 +49,17 @@ class Assignment4Application(BaseApplication):
 
         self.element_help = HelpElement()
         self.scene_help.register(self.element_help)
+
+    def init_gl(self):
+        super().init_gl()
+        root = dirname(__file__)
+        f = Shader(join(root, "shaders", "model.frag"))
+        v = Shader(join(root, "shaders", "model.vert"))
+        print(f.id)
+        print(v.id)
+        self.program = Program([f, v])
+        print(self.program.id)
+        self.scene_model.objects[1][0].use_program(self.program)
 
     def draw_gl_scene(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)

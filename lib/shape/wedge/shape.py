@@ -9,6 +9,7 @@ from copy import deepcopy
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
+from lib.shape.shader import Program
 from lib.utils.bidict import bidict
 from .. import color
 from .edge import WingedEdge
@@ -43,6 +44,8 @@ class WingedEdgeShape(Shape):
         self._adj_vertices: dict[int, int] = {}
 
         self._colors: List[Tuple[color.RGBA]] = []
+
+        self.program = None
 
         # transformation matrix and stack
         self._stack = (state[0] or []).copy()
@@ -103,28 +106,76 @@ class WingedEdgeShape(Shape):
         if self.__should_reload_buffer:
             self.__reload_buffer()
 
-        if border:
-            glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_border)
-            glEnableVertexAttribArray(0)
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
+        element_size = np.dtype(np.float32).itemsize
 
-            glLineWidth(2)
-            glColor4f(*self._colors[0][1].to_list())
+        if border:
+            offset = 0
+
+            if self.program is not None:
+                glUseProgram(self.program.id)
+
+            glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_border)
+            glVertexAttribPointer(0,
+                                  3,
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  element_size * 3,
+                                  ctypes.c_void_p(offset))
+            glEnableVertexAttribArray(0)
+
+            offset += self.__border_buffer_length * element_size
+            glVertexAttribPointer(1,
+                                  4,
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  element_size * 4,
+                                  ctypes.c_void_p(offset))
+            glEnableVertexAttribArray(1)
+
             glDrawArrays(GL_LINES, 0, self.__border_buffer_length)
 
             glDisableVertexAttribArray(0)
+            glDisableVertexAttribArray(1)
             glBindBuffer(GL_ARRAY_BUFFER, 0)
 
-        if background:
-            glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_face)
-            glEnableVertexAttribArray(0)
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
+            if self.program is not None:
+                glUseProgram(0)
 
-            glColor4f(*self._colors[0][0].to_list())
+        if background:
+            offset = 0
+
+            if self.program is not None:
+                glUseProgram(self.program.id)
+
+            glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_face)
+            glVertexAttribPointer(0,
+                                  3,
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  element_size * 3,
+                                  ctypes.c_void_p(offset))
+            glEnableVertexAttribArray(0)
+
+            offset += self.__face_buffer_length * element_size
+            glVertexAttribPointer(1,
+                                  4,
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  element_size * 4,
+                                  ctypes.c_void_p(offset))
+            glEnableVertexAttribArray(1)
+
             glDrawArrays(GL_TRIANGLES, 0, self.__face_buffer_length)
 
             glDisableVertexAttribArray(0)
+            glDisableVertexAttribArray(1)
             glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+            if self.program is not None:
+                glUseProgram(0)
+
+    def use_program(self, program: Program):
+        self.program = program
 
     def rotate(self, theta_0: float, theta_1: float, theta_2: float, order="xyz") -> None:
         R = Mat3d.rotation_matrix(theta_0, theta_1, theta_2, order)
@@ -461,7 +512,9 @@ class WingedEdgeShape(Shape):
 
     def __reload_buffer(self):
         face_vertices = []
+        face_colors = []
         border_vertices = []
+        border_colors = []
 
         for f_id in range(len(self._adj_faces)):
             itr = self.__get_face_vertices(f_id)
@@ -472,14 +525,18 @@ class WingedEdgeShape(Shape):
             for v2, v3 in pairwise(itr):
                 border_vertices.extend(v2.to_list()[:3])
                 border_vertices.extend(v2.to_list()[:3])
+                border_colors.extend(self._colors[f_id][1].to_list() * 2)
 
                 face_vertices.extend(v1.to_list()[:3])
                 face_vertices.extend(v2.to_list()[:3])
                 face_vertices.extend(v3.to_list()[:3])
 
+                face_colors.extend(self._colors[f_id][0].to_list() * 3)
+
             border_vertices.extend(v3.to_list()[:3])
             border_vertices.extend(v3.to_list()[:3])
             border_vertices.extend(v1.to_list()[:3])
+            border_colors.extend(self._colors[f_id][1].to_list() * 4)
 
         self.__face_buffer_length = len(face_vertices)
         self.__border_buffer_length = len(border_vertices)
@@ -488,14 +545,18 @@ class WingedEdgeShape(Shape):
             self.__VBO_face = glGenBuffers(1)
 
         glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_face)
-        glBufferData(GL_ARRAY_BUFFER, np.array(face_vertices, dtype="float32"), GL_STATIC_DRAW)
+        glBufferData(GL_ARRAY_BUFFER,
+                     np.array(face_vertices + face_colors, dtype="float32"),
+                     GL_STATIC_DRAW)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
 
         if self.__VBO_border is None:
             self.__VBO_border = glGenBuffers(1)
 
         glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_border)
-        glBufferData(GL_ARRAY_BUFFER, np.array(border_vertices, dtype="float32"), GL_STATIC_DRAW)
+        glBufferData(GL_ARRAY_BUFFER,
+                     np.array(border_vertices + border_colors, dtype="float32"),
+                     GL_STATIC_DRAW)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     _register_vertice = __register_vertice
