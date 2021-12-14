@@ -28,7 +28,7 @@ class BaseApplication(ABC):
         glClearDepth(1.0)
         glDepthFunc(GL_LESS)
         glEnable(GL_DEPTH_TEST)
-        glShadeModel(GL_SMOOTH)
+        glShadeModel(GL_FLAT)
 
     def start(self):
         glutInit(self.argv)
@@ -69,7 +69,6 @@ class BaseApplication(ABC):
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        gluPerspective(45.0, float(width)/float(height), 0.1, 100.0)
         glMatrixMode(GL_MODELVIEW)
 
     def on_key_press(self, key, x, y):

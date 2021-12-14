@@ -4,7 +4,7 @@
 # 12 2021
 
 import numpy as np
-from typing import Generator, List, Tuple
+from typing import Callable, Generator, List, Tuple
 from copy import deepcopy
 from OpenGL.GL import *
 from OpenGL.GLUT import *
@@ -104,7 +104,7 @@ class WingedEdgeShape(Shape):
             return
 
         if self.__should_reload_buffer:
-            self.__reload_buffer()
+            self.__reload_buffer(border, background)
 
         element_size = np.dtype(np.float32).itemsize
 
@@ -131,7 +131,6 @@ class WingedEdgeShape(Shape):
                                   element_size * 4,
                                   ctypes.c_void_p(offset))
             glEnableVertexAttribArray(1)
-
             glDrawArrays(GL_LINES, 0, self.__border_buffer_length)
 
             glDisableVertexAttribArray(0)
@@ -510,53 +509,76 @@ class WingedEdgeShape(Shape):
 
         return "\n".join(result)
 
-    def __reload_buffer(self):
+    def _get_face_array_for_buffer(self, filter_fn: Callable[[Vec3d, Vec3d, Vec3d], bool] = None):
         face_vertices = []
         face_colors = []
-        border_vertices = []
-        border_colors = []
 
         for f_id in range(len(self._adj_faces)):
             itr = self.__get_face_vertices(f_id)
             v1 = next(itr)
 
             for v2, v3 in pairwise(itr):
+                if filter_fn is not None and not filter_fn(v1, v2, v3):
+                    continue
+
                 face_vertices.extend(v1.to_list()[:3])
                 face_vertices.extend(v2.to_list()[:3])
                 face_vertices.extend(v3.to_list()[:3])
 
                 face_colors.extend(self._colors[f_id][0].to_list() * 3)
 
+        return (face_vertices, face_colors)
+
+    def _get_border_array_for_buffer(self, filter_fn: Callable[[Vec3d, Vec3d], bool] = None):
+        border_vertices = []
+        border_colors = []
+
         for edge in self._adj_edges:
             v1 = self._vertices_cache[self._vertices.get_right(edge.vert_origin)]
             v2 = self._vertices_cache[self._vertices.get_right(edge.vert_dest)]
 
+            if filter_fn is not None and not filter_fn(v1, v2):
+                continue
+
             border_vertices.extend(v1.to_list()[:3])
             border_vertices.extend(v2.to_list()[:3])
+            border_colors.extend(
+                self._colors[edge.face_right if edge.face_left is None else edge.face_left][1].to_list()
+            )
+            border_colors.extend(
+                self._colors[edge.face_left if edge.face_right is None else edge.face_right][1].to_list()
+            )
 
-            border_colors.extend(self._colors[edge.face_left][1].to_list())
-            border_colors.extend(self._colors[edge.face_right][1].to_list())
+        return (border_vertices, border_colors)
 
-        self.__face_buffer_length = len(face_vertices)
-        self.__border_buffer_length = len(border_vertices)
+    def __reload_buffer(self, border=True, background=True):
+        if background:
+            face_vertices, face_colors = self._get_face_array_for_buffer()
 
-        if self.__VBO_face is None:
-            self.__VBO_face = glGenBuffers(1)
+            self.__face_buffer_length = len(face_vertices)
 
-        glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_face)
-        glBufferData(GL_ARRAY_BUFFER,
-                     np.array(face_vertices + face_colors, dtype="float32"),
-                     GL_STATIC_DRAW)
-        glBindBuffer(GL_ARRAY_BUFFER, 0)
+            if self.__VBO_face is None:
+                self.__VBO_face = glGenBuffers(1)
 
-        if self.__VBO_border is None:
-            self.__VBO_border = glGenBuffers(1)
+            glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_face)
+            glBufferData(GL_ARRAY_BUFFER,
+                         np.array(face_vertices + face_colors, dtype="float32"),
+                         GL_STATIC_DRAW)
+            glBindBuffer(GL_ARRAY_BUFFER, 0)
 
-        glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_border)
-        glBufferData(GL_ARRAY_BUFFER,
-                     np.array(border_vertices + border_colors, dtype="float32"),
-                     GL_STATIC_DRAW)
-        glBindBuffer(GL_ARRAY_BUFFER, 0)
+        if border:
+            border_vertices, border_colors = self._get_border_array_for_buffer()
+
+            self.__border_buffer_length = len(border_vertices)
+
+            if self.__VBO_border is None:
+                self.__VBO_border = glGenBuffers(1)
+
+            glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_border)
+            glBufferData(GL_ARRAY_BUFFER,
+                         np.array(border_vertices + border_colors, dtype="float32"),
+                         GL_STATIC_DRAW)
+            glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     _register_vertice = __register_vertice
 

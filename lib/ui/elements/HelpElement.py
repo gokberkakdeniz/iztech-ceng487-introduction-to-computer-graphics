@@ -16,11 +16,11 @@ class HelpElement(Element):
 
     def draw(self, background=None, border=None):
         glColor3f(0.0, 1.0, 1.0)
-        glRasterPos2i(-1, 2)
+        glWindowPos2f(20, 440)
         self.draw_keyboard_shortcuts_title()
 
         glColor3f(1.0, 1.0, 1.0)
-        glRasterPos2i(-3, 2)
+        glRasterPos2i(8, 8)
 
         self.draw_quality_title()
         self.draw_quality_table()
@@ -65,5 +65,6 @@ class HelpElement(Element):
         create_ascii_table([
             ("S", "toggle background drawing "),
             ("E", "toggle border drawing "),
+            ("G", "toggle grid "),
         ])
     )

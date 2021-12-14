@@ -36,6 +36,15 @@ class Scene:
 
         return False
 
+    def get_visibility_of(self, element: WingedEdgeShape) -> bool:
+        for i in range(len(self.objects)):
+            obj = self.objects[i]
+
+            if obj[0] == element:
+                return obj[1]
+
+        return None
+
     def register(self, obj: WingedEdgeShape, visible=True):
         self.objects.append([obj, visible])
 

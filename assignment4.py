@@ -30,9 +30,8 @@ class Assignment4Application(BaseApplication):
 
         # model scene
         self.scene_model = Scene(cameras=(self.camera_model,))
-        grid = Grid((10, 10))
-        self.scene_model.register(grid)
-        self.scene_model.set_visibility_of(grid, False)
+        self.element_grid = Grid((10, 10))
+        self.scene_model.register(self.element_grid)
         self.scene_model.register(obj)
 
         # model ui scene
@@ -53,13 +52,13 @@ class Assignment4Application(BaseApplication):
     def init_gl(self):
         super().init_gl()
         root = dirname(__file__)
-        f = Shader(join(root, "shaders", "model.frag"))
-        v = Shader(join(root, "shaders", "model.vert"))
-        print(f.id)
-        print(v.id)
-        self.program = Program([f, v])
-        print(self.program.id)
-        self.scene_model.objects[1][0].use_program(self.program)
+        program = Program([
+            Shader(join(root, "shaders", "model.frag")),
+            Shader(join(root, "shaders", "model.vert"))
+        ])
+
+        self.scene_model.objects[0][0].use_program(program)
+        self.scene_model.objects[1][0].use_program(program)
 
     def draw_gl_scene(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -97,6 +96,9 @@ class Assignment4Application(BaseApplication):
             self.scene_model.set_mode(background=not self.scene_model.mode_background)
         elif key == b'e':
             self.scene_model.set_mode(border=not self.scene_model.mode_border)
+        elif key == b'g':
+            self.scene_model.set_visibility_of(self.element_grid,
+                                               not self.scene_model.get_visibility_of(self.element_grid))
 
     def on_special_key_press(self, key, x, y):
         if key == GLUT_KEY_LEFT:

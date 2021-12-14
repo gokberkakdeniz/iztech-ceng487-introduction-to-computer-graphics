@@ -20,6 +20,6 @@ class SubdivisionLevelElement(Element):
 
     def draw(self, background=None, border=None):
         glColor3f(0.0, 1.0, 1.0)
-        glRasterPos2i(-3, -2)
+        glWindowPos2f(20, 20)
         glutBitmapString(GLUT_BITMAP_9_BY_15,
                          (f"Level: {self.level}").encode("utf-8"))

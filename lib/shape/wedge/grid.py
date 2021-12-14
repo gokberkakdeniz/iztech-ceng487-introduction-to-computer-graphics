@@ -14,15 +14,16 @@ class Grid(WingedEdgeShape):
                  shape: Tuple[int, int],
                  name: str = None):
         super().__init__(name=name)
-        self.shape = shape
+        self.size_x, self.size_z = shape
 
-        size_x, size_z = self.shape
-        border_color = color.RGBA.gray()
-        face_color = color.RGBA(0, 0, 0, 0)
-        for xi in range(size_x):
-            x = xi - size_x / 2
-            for zi in range(size_z):
-                z = zi - size_z / 2
+        gray = color.RGBA.gray()
+        face_color = gray
+        border_color = gray
+
+        for xi in range(self.size_x):
+            x = xi - self.size_x / 2
+            for zi in range(self.size_z):
+                z = zi - self.size_z / 2
 
                 self.add_face([Vec3d.point(x, 0, z),
                                Vec3d.point(x+1, 0, z),
@@ -31,31 +32,29 @@ class Grid(WingedEdgeShape):
                               face_color,
                               border_color)
 
-    def draw(self, border=True, background=False) -> None:
-        size_x, size_z = self.shape
+    def _get_border_array_for_buffer(self):
+        green = color.RGBA.green()
+        blue = color.RGBA.blue()
 
-        size_x = size_x / 2
-        size_z = size_z / 2
+        border_vertices, border_colors = super()._get_border_array_for_buffer(
+            lambda v1, v2: (v1.x != 0 or v2.x != 0) and (v1.z != 0 or v2.z != 0)
+        )
 
-        glPointSize(4)
-        glBegin(GL_POINTS)
+        border_vertices.extend((
+            *Vec3d.point(-self.size_x/2, 0, 0).to_list()[:3],
+            *Vec3d.point(self.size_x/2, 0, 0).to_list()[:3],
+            *Vec3d.point(0, 0, -self.size_z/2).to_list()[:3],
+            *Vec3d.point(0, 0, self.size_z/2).to_list()[:3],
+        ))
 
-        glColor3f(0, 1, 0)
-        glVertex3f(0, 0, 0)
+        border_colors.extend((
+            *green.to_list(),
+            *green.to_list(),
+            *blue.to_list(),
+            *blue.to_list(),
+        ))
 
-        glEnd()
+        return (border_vertices, border_colors)
 
-        glLineWidth(4)
-        glBegin(GL_LINES)
-
-        glColor3f(0, 1, 0)
-        glVertex3f(-size_x, 0, 0)
-        glVertex3f(+size_x, 0, 0)
-
-        glColor3f(0, 0, 1)
-        glVertex3f(0, 0, -size_z)
-        glVertex3f(0, 0, size_z)
-
-        glEnd()
-
-        super().draw(border=border, background=False)
+    def draw(self, border=None, background=None) -> None:
+        super().draw(border=True, background=False)
