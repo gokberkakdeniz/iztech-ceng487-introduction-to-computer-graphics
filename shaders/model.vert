@@ -9,6 +9,6 @@ uniform mat4 camera;
 
 void main()
 {
-   gl_Position = gl_ModelViewProjectionMatrix * vec4(vertexPosition, 1.0);
+   gl_Position = camera * vec4(vertexPosition, 1.0);
    fragColor = vertexColor;
 }

@@ -520,23 +520,22 @@ class WingedEdgeShape(Shape):
             itr = self.__get_face_vertices(f_id)
             v1 = next(itr)
 
-            border_vertices.extend(v1.to_list()[:3])
-
             for v2, v3 in pairwise(itr):
-                border_vertices.extend(v2.to_list()[:3])
-                border_vertices.extend(v2.to_list()[:3])
-                border_colors.extend(self._colors[f_id][1].to_list() * 2)
-
                 face_vertices.extend(v1.to_list()[:3])
                 face_vertices.extend(v2.to_list()[:3])
                 face_vertices.extend(v3.to_list()[:3])
 
                 face_colors.extend(self._colors[f_id][0].to_list() * 3)
 
-            border_vertices.extend(v3.to_list()[:3])
-            border_vertices.extend(v3.to_list()[:3])
+        for edge in self._adj_edges:
+            v1 = self._vertices_cache[self._vertices.get_right(edge.vert_origin)]
+            v2 = self._vertices_cache[self._vertices.get_right(edge.vert_dest)]
+
             border_vertices.extend(v1.to_list()[:3])
-            border_colors.extend(self._colors[f_id][1].to_list() * 4)
+            border_vertices.extend(v2.to_list()[:3])
+
+            border_colors.extend(self._colors[edge.face_left][1].to_list())
+            border_colors.extend(self._colors[edge.face_right][1].to_list())
 
         self.__face_buffer_length = len(face_vertices)
         self.__border_buffer_length = len(border_vertices)
