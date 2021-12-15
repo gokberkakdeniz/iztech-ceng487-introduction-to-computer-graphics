@@ -7,4 +7,8 @@ from ..shape import Drawable
 
 
 class Element(Drawable):
-    pass
+    def __init__(self) -> 'Element':
+        self.pos = (0, 0)
+
+    def set_pos(self, pos):
+        self.pos = pos

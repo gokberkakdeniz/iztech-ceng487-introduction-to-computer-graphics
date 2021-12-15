@@ -11,13 +11,6 @@ from ..element import Element
 
 
 class HelpButtonElement(Element):
-    def __init__(self) -> None:
-        super().__init__()
-        self.pos = (0, 0)
-
-    def set_pos(self, pos):
-        self.pos = pos
-
     def draw(self, background=None, border=None):
         glColor3f(0.0, 1.0, 1.0)
         glWindowPos2d(*self.pos)

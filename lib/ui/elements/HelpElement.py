@@ -11,16 +11,13 @@ from .. import create_ascii_table, create_ascii_table_header, Element
 
 
 class HelpElement(Element):
-    def __init__(self) -> None:
-        super().__init__()
-
     def draw(self, background=None, border=None):
         glColor3f(0.0, 1.0, 1.0)
-        glWindowPos2f(20, 440)
+        glWindowPos2f(*self.pos)
         self.draw_keyboard_shortcuts_title()
 
         glColor3f(1.0, 1.0, 1.0)
-        glRasterPos2i(8, 8)
+        glWindowPos2f(self.pos[0], self.pos[1] - 30)
 
         self.draw_quality_title()
         self.draw_quality_table()

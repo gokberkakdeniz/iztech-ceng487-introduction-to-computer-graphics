@@ -1,7 +1,9 @@
-# humanoid_quad.obj
-# created by TEC_TO_OBJ.F90.
+# file.obj
+# created by OBJ_WRITE.
 # source: https://people.sc.fsu.edu/~jburkardt/data/obj/obj.html
- 
+# ceng487 random_face_color on
+# ceng487 rotate 45 45 45
+
 v 3.25000 -2.48000 14.0000
 v 3.25000 -2.48000 9.01000
 v 3.25000 2.48000 9.01000

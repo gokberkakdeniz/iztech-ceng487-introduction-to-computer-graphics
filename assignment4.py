@@ -60,12 +60,19 @@ class Assignment4Application(BaseApplication):
         self.scene_model.objects[0][0].use_program(program)
         self.scene_model.objects[1][0].use_program(program)
 
+    def on_resize(self, width, height):
+        super().on_resize(width, height)
+
+        self.element_help_button.set_pos((self.size[0]-30, self.size[1]-30))
+        self.element_help.set_pos((30, self.size[1]-40))
+        self.camera_model.aspect = self.size[0] / self.size[1]
+        self.camera_ui = self.size[0] / self.size[1]
+
     def draw_gl_scene(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         level = self.scene_model.objects[1][0].level
         self.element_subdivision_level.set_level(level)
-        self.element_help_button.set_pos((self.size[0]-30, self.size[1]-30))
 
         self.scene_ui.draw()
         self.scene_help.draw()

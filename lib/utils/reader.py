@@ -3,8 +3,8 @@
 # StudentId:250201041
 # 12 2021
 
+import numpy as np
 from typing import List
-
 from ..math import Vec3d
 from ..shape import WingedEdgeShape, color
 
@@ -16,6 +16,7 @@ def parse_obj(file):
 
     face_color = color.RGBA.gray()
     border_color = color.RGBA.red()
+    random_face_color = False
 
     with open(file) as f:
         for line in f.readlines():
@@ -32,6 +33,8 @@ def parse_obj(file):
                     if words[1] == "face_color":
                         r, g, b = tuple(map(float, words[2:]))
                         face_color = color.RGBA(r, g, b, 1.0)
+                    elif words[1] == "random_face_color":
+                        random_face_color = words[2] == "on"
             elif cmd == "g":
                 continue
             elif cmd == "o":
@@ -45,8 +48,11 @@ def parse_obj(file):
                     lambda index: vertices[int(index)-1],
                     line.split(" ")[1:]
                 ))
+                current_face_color = face_color
+                if random_face_color:
+                    current_face_color = color.RGBA(*np.random.rand(3,), 1)
 
-                obj.add_face(face_vertices, face_color, border_color)
+                obj.add_face(face_vertices, current_face_color, border_color)
             else:
                 print("invalid line:", line)
 
