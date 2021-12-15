@@ -9,7 +9,7 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from sys import argv
-from os.path import basename, join, dirname
+from os.path import join, dirname
 
 from lib.shape import WingedEdgeShape,  Grid, Shader
 from lib.shape.shader import Program
@@ -27,6 +27,8 @@ class Assignment4Application(BaseApplication):
         self.show_help = False
 
         self.camera_model = Camera()
+        self.camera_model.zoom_out(0.4)
+        self.camera_model.rotate(pi/4, pi/8, 0)
         self.camera_ui = Camera()
 
         # model scene
@@ -184,7 +186,7 @@ def main():
         print("info: loading humanoid_quad.obj")
         humanoid_quad = parse_obj(join(root, "assets", "humanoid_quad.obj"))
         humanoid_quad.rotate(-pi/2, 0, 0)
-        humanoid_quad.translate(-2, -0.5, +5)
+        humanoid_quad.translate(-2.5, -0.5, +4)
         objs.append(humanoid_quad)
 
         print("info: loading violin_case.obj")
