@@ -14,7 +14,7 @@ from os.path import join, dirname
 from lib.shape import WingedEdgeShape,  Grid, Shader
 from lib.shape.shader import Program
 from lib.ui import BaseApplication, Camera, Scene
-from lib.ui.elements import SubdivisionLevelElement, HelpButtonElement, HelpElement
+from lib.ui.elements import StatisticsElement, HelpButtonElement, HelpElement
 from lib.utils.reader import parse_obj
 
 
@@ -35,14 +35,16 @@ class Assignment4Application(BaseApplication):
         self.scene_model = Scene(cameras=(self.camera_model,))
         self.element_grid = Grid((10, 10))
         self.scene_model.register(self.element_grid)
+
         for obj in objs:
             self.scene_model.register(obj)
 
         # model ui scene
         self.scene_ui = Scene(cameras=(self.camera_ui,))
 
-        self.element_subdivision_level = SubdivisionLevelElement()
-        self.scene_ui.register(self.element_subdivision_level)
+        self.element_stats = StatisticsElement()
+        self.__recalculate_stats()
+        self.scene_ui.register(self.element_stats)
 
         self.element_help_button = HelpButtonElement()
         self.scene_ui.register(self.element_help_button)
@@ -76,9 +78,6 @@ class Assignment4Application(BaseApplication):
     def draw_gl_scene(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        level = self.scene_model.objects[1][0].level
-        self.element_subdivision_level.set_level(level)
-
         self.scene_ui.draw()
         self.scene_help.draw()
         self.scene_model.draw()
@@ -98,10 +97,12 @@ class Assignment4Application(BaseApplication):
             for obj in self.scene_model.objects[1:]:
                 if hasattr(obj[0], "subdivide_catmull_clark"):
                     obj[0].subdivide_catmull_clark()
+            self.__recalculate_stats()
         elif key == b'-':
             for obj in self.scene_model.objects[1:]:
                 if hasattr(obj[0], "reverse_subdivide_catmull_clark"):
                     obj[0].reverse_subdivide_catmull_clark()
+            self.__recalculate_stats()
         elif key == b'r':
             self.scene_model.active_camera.reset()
         elif key == b's':
@@ -154,6 +155,16 @@ class Assignment4Application(BaseApplication):
             self.scene_ui.set_visibility(True)
             self.scene_model.set_visibility(True)
 
+    def __recalculate_stats(self):
+        f_count, v_count = 0, 0
+        for obj, _ in self.scene_model.objects:
+            f_count += len(obj._adj_faces)
+            v_count += len(obj._adj_vertices)
+        self.element_stats.set_face_count(f_count)
+        self.element_stats.set_vertice_count(v_count)
+        level = self.scene_model.objects[1][0].level
+        self.element_stats.set_level(level)
+
 
 def main():
     argc = len(argv)
@@ -168,6 +179,7 @@ def main():
         ecube = parse_obj(join(root, "assets", "ecube.obj"))
         print("info: cloning ecube.obj")
         ecube2 = ecube.clone()
+        ecube2.name += "2"
         ecube.scale(1.1, 1.1, 1.1)
         ecube.translate(4, 1.1, 0)
         objs.append(ecube)
@@ -189,11 +201,18 @@ def main():
         humanoid_quad.translate(-2.5, -0.5, +4)
         objs.append(humanoid_quad)
 
+        print("info: loading sphere.obj")
+        sphere = parse_obj(join(root, "assets", "sphere.obj"))
+        sphere.translate(+3.5, 3.5, -3.5)
+        sphere.max_level = 0
+        objs.append(sphere)
+
         print("info: loading violin_case.obj")
         violin_case = parse_obj(join(root, "assets", "violin_case.obj"))
         violin_case.translate(+2, 0, +3)
         violin_case.max_level = 0
         objs.append(violin_case)
+
     else:
         try:
             print(f'info: loading "{argv[1]}"...')
