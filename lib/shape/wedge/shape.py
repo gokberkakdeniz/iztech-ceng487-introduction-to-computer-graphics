@@ -263,7 +263,7 @@ class WingedEdgeShape(Shape):
         self.__should_reload_buffer = True
 
     def subdivide_catmull_clark(self):
-        if self.level == 3:
+        if self.level == 2:
             return
 
         # calculate face points

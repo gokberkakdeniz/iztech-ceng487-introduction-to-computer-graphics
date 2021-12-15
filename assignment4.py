@@ -4,6 +4,7 @@
 # 12 2021
 
 from math import pi
+from typing import List
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
@@ -18,7 +19,7 @@ from lib.utils.reader import parse_obj
 
 
 class Assignment4Application(BaseApplication):
-    def __init__(self, obj: WingedEdgeShape, *args, **kwargs) -> None:
+    def __init__(self, objs: List[WingedEdgeShape], *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.mouse_x = 0
@@ -32,7 +33,8 @@ class Assignment4Application(BaseApplication):
         self.scene_model = Scene(cameras=(self.camera_model,))
         self.element_grid = Grid((10, 10))
         self.scene_model.register(self.element_grid)
-        self.scene_model.register(obj)
+        for obj in objs:
+            self.scene_model.register(obj)
 
         # model ui scene
         self.scene_ui = Scene(cameras=(self.camera_ui,))
@@ -51,14 +53,15 @@ class Assignment4Application(BaseApplication):
 
     def init_gl(self):
         super().init_gl()
+
         root = dirname(__file__)
         program = Program([
             Shader(join(root, "shaders", "model.frag")),
             Shader(join(root, "shaders", "model.vert"))
         ])
 
-        self.scene_model.objects[0][0].use_program(program)
-        self.scene_model.objects[1][0].use_program(program)
+        for obj, _ in self.scene_model.objects:
+            obj.use_program(program)
 
     def on_resize(self, width, height):
         super().on_resize(width, height)
@@ -152,28 +155,47 @@ class Assignment4Application(BaseApplication):
 
 def main():
     argc = len(argv)
-    obj = None
+    objs = []
 
     if argc < 2:
-        print("error: object file must be given.")
-        exit(1)
+        print("info: no file given, loading defaults...")
 
-    try:
-        print(f'info: loading "{argv[1]}"...')
+        root = dirname(__file__)
 
-        obj = parse_obj(argv[1])
+        ecube = parse_obj(join(root, "assets", "ecube.obj"))
+        ecube.scale(1.1, 1.1, 1.1)
+        ecube.translate(4, 1.1, 0)
+        objs.append(ecube)
 
-        print(f'info: "{argv[1]}" loaded.')
-    except FileNotFoundError:
-        print("error: the given file does not exist.")
-        exit(2)
-    except Exception as e:
-        print("error: could not parse the file.")
-        raise e
+        ecube2 = parse_obj(join(root, "assets", "ecube.obj"))
+        ecube2.rotate(pi/4, 0, pi/4)
+        ecube2.scale(0.5, 0.5, 0.5)
+        ecube2.translate(4, 4, 0)
+        objs.append(ecube2)
 
+        tori = parse_obj(join(root, "assets", "tori.obj"))
+        tori.scale(1.1, 1.1, 1.1)
+        tori.translate(-1.5, 1.1, 0)
+
+        objs.append(tori)
+    else:
+        try:
+            print(f'info: loading "{argv[1]}"...')
+
+            objs.append(parse_obj(argv[1]))
+
+            print(f'info: "{argv[1]}" loaded.')
+        except FileNotFoundError:
+            print("error: the given file does not exist.")
+            exit(2)
+        except Exception as e:
+            print("error: could not parse the file.")
+            raise e
+
+    obj_names = ", ".join(map(lambda o: o.name, objs))
     app = Assignment4Application(
-        obj,
-        "IZTECH CENG487 - 12 2021 - 250201041 [" + basename(argv[1]) + "]",
+        objs,
+        "IZTECH CENG487 - 12 2021 - 250201041 [" + obj_names + "]",
         argv=argv[:2]
     )
     app.start()

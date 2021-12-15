@@ -14,7 +14,7 @@ class Scene:
         self.cameras: Set[Camera] = list(cameras)
         self.active_camera = self.cameras[0]
         self.visible = visible
-        self.mode_border = True
+        self.mode_border = False
         self.mode_background = True
 
     def set_visibility(self, visible: bool):
@@ -64,4 +64,4 @@ class Scene:
 
                 if visible:
                     self.active_camera.look(obj.program if hasattr(obj, "program") else None)
-                    obj.draw(background=self.mode_border,  border=self.mode_background)
+                    obj.draw(background=self.mode_background,  border=self.mode_border)
