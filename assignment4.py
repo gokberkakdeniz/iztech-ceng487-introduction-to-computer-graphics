@@ -162,22 +162,36 @@ def main():
 
         root = dirname(__file__)
 
+        print("info: loading ecube.obj")
         ecube = parse_obj(join(root, "assets", "ecube.obj"))
+        print("info: cloning ecube.obj")
+        ecube2 = ecube.clone()
         ecube.scale(1.1, 1.1, 1.1)
         ecube.translate(4, 1.1, 0)
         objs.append(ecube)
 
-        ecube2 = parse_obj(join(root, "assets", "ecube.obj"))
         ecube2.rotate(pi/4, 0, pi/4)
         ecube2.scale(0.5, 0.5, 0.5)
         ecube2.translate(4, 4, 0)
         objs.append(ecube2)
 
+        print("info: loading tori.obj")
         tori = parse_obj(join(root, "assets", "tori.obj"))
         tori.scale(1.1, 1.1, 1.1)
         tori.translate(-1.5, 1.1, 0)
-
         objs.append(tori)
+
+        print("info: loading humanoid_quad.obj")
+        humanoid_quad = parse_obj(join(root, "assets", "humanoid_quad.obj"))
+        humanoid_quad.rotate(-pi/2, 0, 0)
+        humanoid_quad.translate(-2, -0.5, +5)
+        objs.append(humanoid_quad)
+
+        print("info: loading violin_case.obj")
+        violin_case = parse_obj(join(root, "assets", "violin_case.obj"))
+        violin_case.translate(+2, 0, +3)
+        violin_case.max_level = 0
+        objs.append(violin_case)
     else:
         try:
             print(f'info: loading "{argv[1]}"...')

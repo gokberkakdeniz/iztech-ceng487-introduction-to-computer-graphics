@@ -75,6 +75,7 @@ v 0.198750 0.612500 2.002500
 v 0.198750 0.612500 0.762500
 # 64 vertices, 0 vertices normals
 
+# ceng487 face_color 0.8 0.8 0.5
 f 2 3 4 1
 f 6 2 1 5
 f 8 6 5 7

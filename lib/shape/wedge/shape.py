@@ -27,6 +27,7 @@ class WingedEdgeShape(Shape):
         # object properties
         self.name = name or f'shape_{self.__object_index}'
         self.level = 0
+        self.max_level = 2
 
         # Dictionary: hash(vec3d) -> vec3d
         # the hashes cannot be used as index because when the vertices
@@ -131,7 +132,7 @@ class WingedEdgeShape(Shape):
                                   element_size * 4,
                                   ctypes.c_void_p(offset))
             glEnableVertexAttribArray(1)
-            glDrawArrays(GL_LINES, 0, self.__border_buffer_length)
+            glDrawArrays(GL_LINES, 0, self.__border_buffer_length // 3)
 
             glDisableVertexAttribArray(0)
             glDisableVertexAttribArray(1)
@@ -164,7 +165,7 @@ class WingedEdgeShape(Shape):
                                   ctypes.c_void_p(offset))
             glEnableVertexAttribArray(1)
 
-            glDrawArrays(GL_TRIANGLES, 0, self.__face_buffer_length)
+            glDrawArrays(GL_TRIANGLES, 0, self.__face_buffer_length // 3)
 
             glDisableVertexAttribArray(0)
             glDisableVertexAttribArray(1)
@@ -263,7 +264,7 @@ class WingedEdgeShape(Shape):
         self.__should_reload_buffer = True
 
     def subdivide_catmull_clark(self):
-        if self.level == 2:
+        if self.level == self.max_level:
             return
 
         # calculate face points
