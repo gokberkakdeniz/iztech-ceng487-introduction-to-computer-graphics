@@ -85,6 +85,9 @@ class Assignment4Application(BaseApplication):
         elif key == b'e':
             self.scene_model.set_mode(border=not self.scene_model.mode_border)
 
+        self.mouse_x = x
+        self.mouse_y = y
+
     def on_special_key_press(self, key, x, y):
         if key == GLUT_KEY_LEFT:
             self.scene_model.active_camera.rotate(0, -pi/8, 0)
@@ -95,22 +98,26 @@ class Assignment4Application(BaseApplication):
         elif key == GLUT_KEY_DOWN:
             self.scene_model.active_camera.rotate(+pi/8, 0, 0)
 
+        self.mouse_x = x
+        self.mouse_y = y
+
     def on_mouse_click(self, button, state, x, y):
         if button == GLUT_CURSOR_DESTROY and state == GLUT_UP:
             self.scene_model.active_camera.zoom_in()
         elif button == GLUT_CURSOR_HELP and state == GLUT_UP:
             self.scene_model.active_camera.zoom_out()
 
-    def on_mouse_drag(self, x, y):
-        width, height = self.size
-
-        dx = (pi/2) * (y - self.mouse_y)/width
-        dy = (pi/2) * (x - self.mouse_x)/height
-
         self.mouse_x = x
         self.mouse_y = y
 
-        self.scene_model.active_camera.rotate(dy, dx, 0)
+    def on_mouse_drag(self, x, y):
+        dx = 0.005 * (y - self.mouse_y)
+        dy = 0.005 * (x - self.mouse_x)
+
+        self.scene_model.active_camera.rotate(dx, dy, 0)
+
+        self.mouse_x = x
+        self.mouse_y = y
 
     def on_mouse_move(self, x, y):
         if y < 30 and x > self.size[0] - 30:
@@ -123,6 +130,9 @@ class Assignment4Application(BaseApplication):
             self.scene_help.set_visibility(False)
             self.scene_ui.set_visibility(True)
             self.scene_model.set_visibility(True)
+
+        self.mouse_x = x
+        self.mouse_y = y
 
 
 def main():
