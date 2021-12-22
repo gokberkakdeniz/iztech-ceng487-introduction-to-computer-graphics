@@ -9,7 +9,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from sys import argv
 from os.path import basename
-
+from time import time
 from lib.shape.shape import Shape
 from lib.ui import BaseApplication, Camera, Scene
 from lib.ui.elements import SubdivisionLevelElement, HelpButtonElement, HelpElement
@@ -70,7 +70,11 @@ class Assignment4Application(BaseApplication):
 
         if key == b'+':
             for obj in self.scene_model.objects:
+                start_time = time()
                 obj[0].subdivide_catmull_clark()
+                level = obj[0].level
+                time_diff = time() - start_time
+                print(f'Catmull clark subdivision (L{level}) performed in {time_diff:.2f}s.')
         elif key == b'-':
             for obj in self.scene_model.objects:
                 obj[0].reverse_subdivide_catmull_clark()

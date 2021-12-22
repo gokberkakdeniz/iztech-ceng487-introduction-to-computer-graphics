@@ -195,9 +195,6 @@ class WingedEdgeShape(Shape):
         self._adj_faces.append(self.__get_edge_index_safe(v_indexes[0], v_indexes[1]))
 
     def subdivide_catmull_clark(self):
-        if self.level == 3:
-            return
-
         # calculate face points
         face_points: List[Vec3d] = [None] * len(self._adj_faces)
         for f_id in range(len(self._adj_faces)):
