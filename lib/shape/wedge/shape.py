@@ -40,7 +40,7 @@ class WingedEdgeShape(Shape):
         self._vertices: bidict[int, int] = bidict()  # bidirectional hash table
         self._vertice_index = -1
 
-        self._adj_edges: List[WingedEdge] = []
+        self._adj_edges: dict[int, WingedEdge] = {}
         self._adj_faces: List[int] = []
         self._adj_vertices: dict[int, int] = {}
 
@@ -277,8 +277,8 @@ class WingedEdgeShape(Shape):
             face_points[f_id] = f_p
 
         # calculate edge points
-        edge_points: List[Vec3d] = [None] * len(self._adj_edges)
-        for e_id, e in enumerate(self._adj_edges):
+        edge_points: dict[int, Vec3d] = {}
+        for e_id, e in self._adj_edges.items():
             ev_o = self._vertices_cache[self._vertices.get_right(e.vert_origin)]
             ev_f = self._vertices_cache[self._vertices.get_right(e.vert_dest)]
             fp_l = face_points[e.face_left]
@@ -335,7 +335,7 @@ class WingedEdgeShape(Shape):
         self._vertices_cache: dict[int, Vec3d] = {}
         self._vertices: bidict[int, int] = bidict()
         self._vertice_index = -1
-        self._adj_edges: List[WingedEdge] = []
+        self._adj_edges: dict[int, WingedEdge] = {}
         self._adj_faces: List[int] = []
         self._adj_vertices: dict[int, int] = {}
         self._colors = []
@@ -357,7 +357,7 @@ class WingedEdgeShape(Shape):
     def __get_edges_of_vertice(self, v_id: int):
         # TODO: find by traversing
 
-        for edge in self._adj_edges:
+        for edge in self._adj_edges.values():
             if edge.vert_dest == v_id or edge.vert_origin == v_id:
                 yield edge
 
@@ -365,20 +365,21 @@ class WingedEdgeShape(Shape):
         e_id = self.__find_edge(vert_origin_id, vert_dest_id)
 
         if e_id is None:
-            e_id = len(self._adj_edges)
             e = WingedEdge()
-            e.vert_origin = vert_origin_id
-            e.vert_dest = vert_dest_id
-            self._adj_edges.append(e)
+            e.set_vert(vert_origin_id, vert_dest_id)
+            e_id = hash(e)
+            self._adj_edges[e_id] = e
 
         return e_id
 
     def __find_edge(self, vert_origin_id: int, vert_dest_id: int) -> int:
-        # TODO: find by traversing
+        e_id = hash((vert_origin_id, vert_dest_id))
+        if e_id in self._adj_edges:
+            return e_id
 
-        for e_id, e in enumerate(self._adj_edges):
-            if self.__is_edge_of(e, vert_origin_id, vert_dest_id):
-                return e_id
+        e_id = hash((vert_dest_id, vert_origin_id))
+        if e_id in self._adj_edges:
+            return e_id
 
         return None
 
@@ -492,7 +493,7 @@ class WingedEdgeShape(Shape):
         result.append("____________________________________________________\n")
 
         result.append("e_id".ljust(5) + " e")
-        for e_id, e in enumerate(self._adj_edges):
+        for e_id, e in self._adj_edges.items():
             v = f'{e.vert_origin}, {e.vert_dest}'
             f = f'{e.face_left}, {e.face_right}'
             e = f'{e.edge_left_back}, {e.edge_left_forward}, {e.edge_right_back}, {e.edge_right_forward}'
@@ -534,7 +535,7 @@ class WingedEdgeShape(Shape):
         border_vertices = []
         border_colors = []
 
-        for edge in self._adj_edges:
+        for edge in self._adj_edges.values():
             v1 = self._vertices_cache[self._vertices.get_right(edge.vert_origin)]
             v2 = self._vertices_cache[self._vertices.get_right(edge.vert_dest)]
 

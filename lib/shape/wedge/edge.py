@@ -59,3 +59,6 @@ class WingedEdge:
         e = f'{self.edge_left_back}, {self.edge_left_forward}, {self.edge_right_back}, {self.edge_right_forward}'
 
         return f'Edge(v=({v}); f=({f}); e=({e}))'
+
+    def __hash__(self) -> int:
+        return hash((self.vert_origin, self.vert_dest))
