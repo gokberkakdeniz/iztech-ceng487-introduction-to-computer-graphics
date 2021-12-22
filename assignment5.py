@@ -1,4 +1,4 @@
-# CENG 487 Assignment4 by
+# CENG 487 Assignment5 by
 # Gokberk Akdeniz
 # StudentId:250201041
 # 12 2021
@@ -18,7 +18,7 @@ from lib.ui.elements import StatisticsElement, HelpButtonElement, HelpElement
 from lib.utils.reader import parse_obj
 
 
-class Assignment4Application(BaseApplication):
+class Assignment5Application(BaseApplication):
     def __init__(self, objs: List[WingedEdgeShape], *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
@@ -228,7 +228,7 @@ def main():
             raise e
 
     obj_names = ", ".join(map(lambda o: o.name, objs))
-    app = Assignment4Application(
+    app = Assignment5Application(
         objs,
         "IZTECH CENG487 - 12 2021 - 250201041 [" + obj_names + "]",
         argv=argv[:2]
