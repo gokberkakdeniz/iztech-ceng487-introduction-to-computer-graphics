@@ -16,6 +16,7 @@ from .edge import WingedEdge
 from ..shape import Shape
 from ...math import Vec3d, Mat3d
 from ...utils.itertools import pairwise
+from math import inf
 
 
 class WingedEdgeShape(Shape):
@@ -27,7 +28,7 @@ class WingedEdgeShape(Shape):
         # object properties
         self.name = name or f'shape_{self.__object_index}'
         self.level = 0
-        self.max_level = 2
+        self.max_level = inf
 
         # Dictionary: hash(vec3d) -> vec3d
         # the hashes cannot be used as index because when the vertices
