@@ -20,6 +20,9 @@ class Scene:
     def set_visibility(self, visible: bool):
         self.visible = visible
 
+    def get_visibility(self):
+        return self.visible
+
     def set_mode(self, background: bool = None, border: bool = None):
         if background is not None:
             self.mode_background = background

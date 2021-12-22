@@ -10,7 +10,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from sys import argv
 from os.path import join, dirname
-
+from time import time
 from lib.shape import WingedEdgeShape,  Grid, Shader
 from lib.shape.shader import Program
 from lib.ui import BaseApplication, Camera, Scene
@@ -25,6 +25,7 @@ class Assignment5Application(BaseApplication):
         self.mouse_x = 0
         self.mouse_y = 0
         self.show_help = False
+        self.rerender = False
 
         self.camera_model = Camera()
         self.camera_model.zoom_out(0.4)
@@ -88,15 +89,24 @@ class Assignment5Application(BaseApplication):
         return self.draw_gl_scene()
 
     def on_idle(self):
-        return self.draw_gl_scene()
+        if self.rerender:
+            self.rerender = False
+            return self.draw_gl_scene()
 
     def on_key_press(self, key, x, y):
         super().on_key_press(key, x, y)
 
         if key == b'+':
+            print("======== Catmull Clark Subdivision ========")
             for obj in self.scene_model.objects[1:]:
                 if hasattr(obj[0], "subdivide_catmull_clark"):
+                    start_time = time()
                     obj[0].subdivide_catmull_clark()
+                    level = obj[0].level
+                    time_diff = time() - start_time
+                    if level > 0:
+                        print(f' {obj[0].name:20s}\tL{level}\t{time_diff:.2f}s')
+            print("===========================================\n")
             self.__recalculate_stats()
         elif key == b'-':
             for obj in self.scene_model.objects[1:]:
@@ -115,6 +125,7 @@ class Assignment5Application(BaseApplication):
 
         self.mouse_x = x
         self.mouse_y = y
+        self.rerender = True
 
     def on_special_key_press(self, key, x, y):
         if key == GLUT_KEY_LEFT:
@@ -128,15 +139,26 @@ class Assignment5Application(BaseApplication):
 
         self.mouse_x = x
         self.mouse_y = y
+        self.rerender = True
 
     def on_mouse_click(self, button, state, x, y):
-        if button == GLUT_CURSOR_DESTROY and state == GLUT_UP:
+        if button == GLUT_LEFT_BUTTON and state == GLUT_UP \
+            and y < 30 and x > self.size[0] - 30 \
+                and not self.scene_help.get_visibility():
+            self.scene_help.set_visibility(True)
+            self.scene_ui.set_visibility(False)
+            self.scene_model.set_visibility(False)
+        elif button == GLUT_CURSOR_DESTROY and state == GLUT_UP:
             self.scene_model.active_camera.zoom_in()
         elif button == GLUT_CURSOR_HELP and state == GLUT_UP:
             self.scene_model.active_camera.zoom_out()
-
+        elif button == GLUT_LEFT_BUTTON and state == GLUT_UP and self.scene_help.get_visibility():
+            self.scene_help.set_visibility(False)
+            self.scene_ui.set_visibility(True)
+            self.scene_model.set_visibility(True)
         self.mouse_x = x
         self.mouse_y = y
+        self.rerender = True
 
     def on_mouse_drag(self, x, y):
         dx = 0.005 * (y - self.mouse_y)
@@ -146,27 +168,23 @@ class Assignment5Application(BaseApplication):
 
         self.mouse_x = x
         self.mouse_y = y
+        self.rerender = True
 
     def on_mouse_move(self, x, y):
-        if y < 30 and x > self.size[0] - 30:
-            glutSetCursor(GLUT_CURSOR_INFO)
-            self.scene_help.set_visibility(True)
-            self.scene_ui.set_visibility(False)
-            self.scene_model.set_visibility(False)
-        else:
-            glutSetCursor(GLUT_CURSOR_INHERIT)
-            self.scene_help.set_visibility(False)
-            self.scene_ui.set_visibility(True)
-            self.scene_model.set_visibility(True)
+        if not self.scene_help.get_visibility():
+            if y < 30 and x > self.size[0] - 30:
+                glutSetCursor(GLUT_CURSOR_INFO)
+            else:
+                glutSetCursor(GLUT_CURSOR_INHERIT)
 
     def __recalculate_stats(self):
-        f_count, v_count = 0, 0
+        f_count, v_count, level = 0, 0, 0
         for obj, _ in self.scene_model.objects:
             f_count += len(obj._adj_faces)
             v_count += len(obj._adj_vertices)
+            level = max(obj.level, level)
         self.element_stats.set_face_count(f_count)
         self.element_stats.set_vertice_count(v_count)
-        level = self.scene_model.objects[1][0].level
         self.element_stats.set_level(level)
 
 
