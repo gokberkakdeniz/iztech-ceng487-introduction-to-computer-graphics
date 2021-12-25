@@ -10,22 +10,22 @@ from ..math import Vec3d
 from ..shape import WingedEdgeShape, color
 
 
-def parse_obj(file):
-    obj = WingedEdgeShape()
-
+def parse_obj(file) -> List[WingedEdgeShape]:
+    group = "__ceng487_default_group__"
     vertices: List[Vec3d] = []
     texture_vertices: List[Vec3d] = []
     normal_vertices: List[Vec3d] = []
-
     face_color = color.RGBA.gray()
     border_color = color.RGBA.red()
     random_face_color = False
     random_face_colors = []
-
     transform_fns_stack = []
+
+    objs = {group: WingedEdgeShape()}
 
     with open(file) as f:
         for line in f.readlines():
+            obj = objs[group]
             line = line.strip()
 
             if len(line) == 0:
@@ -65,7 +65,11 @@ def parse_obj(file):
             elif cmd == "s":
                 continue
             elif cmd == "g":
-                continue
+                group = "".join(tokenized[1:])
+                if group not in objs:
+                    obj = WingedEdgeShape()
+                    objs[group] = obj
+                    obj.name = tokenized[-1]
             elif cmd == "o":
                 obj.name = tokenized[1]
             elif cmd == "v":
@@ -88,13 +92,13 @@ def parse_obj(file):
                         vertice_indexes.split("/")
                     ), None, None)[:3]
 
-                    face_vertices.append(vertices[vi])
+                    face_vertices.append(vertices[vi].clone())
 
                     if vti is not None:
-                        face_texture_vertices.append(texture_vertices[vti])
+                        face_texture_vertices.append(texture_vertices[vti].clone())
 
                     if vni is not None:
-                        face_normal_vertices.append(normal_vertices[vni])
+                        face_normal_vertices.append(normal_vertices[vni].clone())
 
                 current_face_color = face_color
                 if random_face_color:
@@ -106,12 +110,15 @@ def parse_obj(file):
                              texture_vertices=face_texture_vertices)
             else:
                 print("invalid line:", line)
+    for struct in objs.values():
+        for fn in transform_fns_stack:
+            fn()
 
-    for fn in transform_fns_stack:
-        fn()
-
-    return obj
+    return objs.values()
 
 
 def read_image(file):
     return Image.open(file).transpose(Image.FLIP_TOP_BOTTOM)
+
+
+__all__ = [parse_obj, read_image]

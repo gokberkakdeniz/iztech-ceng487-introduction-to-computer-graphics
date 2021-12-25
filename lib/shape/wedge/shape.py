@@ -26,7 +26,7 @@ class WingedEdgeShape(Shape):
                  name: str = None,
                  state=(None, None)):
         # object properties
-        self.name = name or f'shape_{self.__object_index}'
+        self.name = name or f'shape_{WingedEdgeShape.__object_index}'
         self.level = 0
         self.max_level = inf
 
@@ -60,13 +60,13 @@ class WingedEdgeShape(Shape):
                 self.__transform_vertices(v_id, self._matrix)
 
         # private properties
-        self.__object_index += 1
         self.__history: List[WingedEdgeShape] = []
         self.__VBO_face = None
         self.__VBO_border = None
         self.__should_reload_buffer = True
         self.__face_buffer_length = 0
         self.__border_buffer_length = 0
+        WingedEdgeShape.__object_index += 1
 
     @staticmethod
     def quadrilateral(

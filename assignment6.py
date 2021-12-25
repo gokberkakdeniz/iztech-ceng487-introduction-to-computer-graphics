@@ -28,14 +28,13 @@ class Assignment6Application(BaseApplication):
         self.rerender = False
 
         self.camera_model = Camera()
-        self.camera_model.zoom_out(0.4)
-        self.camera_model.rotate(pi/4, pi/8, 0)
         self.camera_ui = Camera()
 
         # model scene
         self.scene_model = Scene(cameras=(self.camera_model,))
-        self.element_grid = Grid((10, 10))
+        self.element_grid = Grid((50, 50))
         self.scene_model.register(self.element_grid)
+        self.scene_model.set_visibility_of(self.element_grid, False)
 
         for obj in objs:
             self.scene_model.register(obj)
@@ -199,7 +198,7 @@ def main():
         try:
             print(f'info: loading "{argv[1]}"...')
 
-            objs.append(parse_obj(argv[1]))
+            objs.extend(parse_obj(argv[1]))
 
             print(f'info: "{argv[1]}" loaded.')
         except FileNotFoundError:
@@ -209,10 +208,9 @@ def main():
             print("error: could not parse the file.")
             raise e
 
-    obj_names = ", ".join(map(lambda o: o.name, objs))
     app = Assignment6Application(
         objs,
-        "IZTECH CENG487 - 12 2021 - 250201041 [" + obj_names + "]",
+        "IZTECH CENG487 - 12 2021 - 250201041 [" + argv[1] + "]",
         argv=argv[:2]
     )
     app.start()
