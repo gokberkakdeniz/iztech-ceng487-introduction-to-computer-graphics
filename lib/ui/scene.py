@@ -1,4 +1,4 @@
-# CENG 487 Assignment5 by
+# CENG 487 Assignment6 by
 # Gokberk Akdeniz
 # StudentId:250201041
 # 12 2021

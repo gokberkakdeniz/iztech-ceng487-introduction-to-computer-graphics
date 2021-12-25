@@ -1,4 +1,4 @@
-# CENG 487 Assignment5 by
+# CENG 487 Assignment6 by
 # Gokberk Akdeniz
 # StudentId:250201041
 # 12 2021
@@ -40,6 +40,7 @@ class WingedEdgeShape(Shape):
         # in O(1), it is bidirectional.
         self._vertices: bidict[int, int] = bidict()  # bidirectional hash table
         self._vertice_index = -1
+        self._texture_vertices: List[int] = []
 
         self._adj_edges: dict[int, WingedEdge] = {}
         self._adj_faces: List[int] = []
@@ -234,7 +235,12 @@ class WingedEdgeShape(Shape):
     def clone(self) -> 'WingedEdgeShape':
         return deepcopy(self)
 
-    def add_face(self, vertices: List[Vec3d], face_color: color.RGBA, border_color: color.RGBA):
+    def add_face(self,
+                 vertices: List[Vec3d],
+                 face_color: color.RGBA,
+                 border_color: color.RGBA,
+                 texture_vertices: List[Vec3d] = None
+                 ):
         v_indexes = [self._register_vertice(v) for v in vertices]
         f_index = len(self._adj_faces)
 
@@ -262,6 +268,7 @@ class WingedEdgeShape(Shape):
                 e0.set_edge_right(e1_index, e2_index)
 
         self._adj_faces.append(self.__get_edge_index_safe(v_indexes[0], v_indexes[1]))
+        self._texture_vertices.append(texture_vertices)
         self._colors.append((face_color, border_color))
         self.__should_reload_buffer = True
 

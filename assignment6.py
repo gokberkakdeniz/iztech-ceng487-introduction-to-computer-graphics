@@ -1,4 +1,4 @@
-# CENG 487 Assignment5 by
+# CENG 487 Assignment6 by
 # Gokberk Akdeniz
 # StudentId:250201041
 # 12 2021
@@ -18,7 +18,7 @@ from lib.ui.elements import StatisticsElement, HelpButtonElement, HelpElement
 from lib.utils.reader import parse_obj
 
 
-class Assignment5Application(BaseApplication):
+class Assignment6Application(BaseApplication):
     def __init__(self, objs: List[WingedEdgeShape], *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
@@ -193,48 +193,8 @@ def main():
     objs = []
 
     if argc < 2:
-        print("info: no file given, loading defaults...")
-
-        root = dirname(__file__)
-
-        print("info: loading ecube.obj")
-        ecube = parse_obj(join(root, "assets", "ecube.obj"))
-        print("info: cloning ecube.obj")
-        ecube2 = ecube.clone()
-        ecube2.name += "2"
-        ecube.scale(1.1, 1.1, 1.1)
-        ecube.translate(4, 1.1, 0)
-        objs.append(ecube)
-
-        ecube2.rotate(pi/4, 0, pi/4)
-        ecube2.scale(0.5, 0.5, 0.5)
-        ecube2.translate(4, 4, 0)
-        objs.append(ecube2)
-
-        print("info: loading tori.obj")
-        tori = parse_obj(join(root, "assets", "tori.obj"))
-        tori.scale(1.1, 1.1, 1.1)
-        tori.translate(-1.5, 1.1, 0)
-        objs.append(tori)
-
-        print("info: loading humanoid_quad.obj")
-        humanoid_quad = parse_obj(join(root, "assets", "humanoid_quad.obj"))
-        humanoid_quad.rotate(-pi/2, 0, 0)
-        humanoid_quad.translate(-2.5, -0.5, +4)
-        objs.append(humanoid_quad)
-
-        print("info: loading sphere.obj")
-        sphere = parse_obj(join(root, "assets", "sphere.obj"))
-        sphere.translate(+3.5, 3.5, -3.5)
-        sphere.max_level = 0
-        objs.append(sphere)
-
-        print("info: loading violin_case.obj")
-        violin_case = parse_obj(join(root, "assets", "violin_case.obj"))
-        violin_case.translate(+2, 0, +3)
-        violin_case.max_level = 0
-        objs.append(violin_case)
-
+        print("error: please pass obj file as an argument.")
+        exit(1)
     else:
         try:
             print(f'info: loading "{argv[1]}"...')
@@ -250,7 +210,7 @@ def main():
             raise e
 
     obj_names = ", ".join(map(lambda o: o.name, objs))
-    app = Assignment5Application(
+    app = Assignment6Application(
         objs,
         "IZTECH CENG487 - 12 2021 - 250201041 [" + obj_names + "]",
         argv=argv[:2]

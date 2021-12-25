@@ -1,10 +1,11 @@
-# CENG 487 Assignment5 by
+# CENG 487 Assignment6 by
 # Gokberk Akdeniz
 # StudentId:250201041
 # 12 2021
 
 import numpy as np
 from typing import List
+from PIL import Image
 from ..math import Vec3d
 from ..shape import WingedEdgeShape, color
 
@@ -13,6 +14,8 @@ def parse_obj(file):
     obj = WingedEdgeShape()
 
     vertices: List[Vec3d] = []
+    texture_vertices: List[Vec3d] = []
+    normal_vertices: List[Vec3d] = []
 
     face_color = color.RGBA.gray()
     border_color = color.RGBA.red()
@@ -28,9 +31,11 @@ def parse_obj(file):
             if len(line) == 0:
                 continue
 
-            cmd = line[0]
+            tokenized = line.strip().split(" ")
+
+            cmd = "#" if line[0] == "#" else tokenized[0]
             if cmd == "#":
-                words = line[1:].strip().split(" ")
+                words = tokenized[1:]
                 # unofficial color support
                 if words[0] == "ceng487":
                     if words[1] == "face_color":
@@ -53,24 +58,52 @@ def parse_obj(file):
                         elif words[2] == "scale":
                             x, y, z = tuple(map(float, words[3:]))
                             transform_fns_stack.append(lambda: obj.scale(x, y, z))
+            elif cmd == "mtllib":
+                continue
+            elif cmd == "usemtl":
+                continue
+            elif cmd == "s":
+                continue
             elif cmd == "g":
                 continue
             elif cmd == "o":
-                obj.name = line.split(" ")[1]
+                obj.name = tokenized[1]
             elif cmd == "v":
-                x, y, z = tuple(map(float, line.split(" ")[1:4]))
-                v = Vec3d.point(x, y, z)
-                vertices.append(v)
+                x, y, z = tuple(map(float, tokenized[1:4]))
+                vertices.append(Vec3d.point(x, y, z))
+            elif cmd == "vt":
+                u, v = tuple(map(float, tokenized[1:3]))
+                texture_vertices.append(Vec3d.point(u, v, 0))
+            elif cmd == "vn":
+                x, y, z = tuple(map(float, tokenized[1:4]))
+                normal_vertices.append(Vec3d.point(x, y, z))
             elif cmd == "f":
-                face_vertices = tuple(map(
-                    lambda index: vertices[int(index)-1],
-                    line.split(" ")[1:]
-                ))
+                face_vertices = []
+                face_normal_vertices = []
+                face_texture_vertices = []
+
+                for vertice_indexes in tokenized[1:]:
+                    vi, vti, vni = (*map(
+                        lambda v: None if v == "" else int(v)-1,
+                        vertice_indexes.split("/")
+                    ), None, None)[:3]
+
+                    face_vertices.append(vertices[vi])
+
+                    if vti is not None:
+                        face_texture_vertices.append(texture_vertices[vti])
+
+                    if vni is not None:
+                        face_normal_vertices.append(normal_vertices[vni])
+
                 current_face_color = face_color
                 if random_face_color:
                     current_face_color = random_face_colors[np.random.randint(0, high=25)]
 
-                obj.add_face(face_vertices, current_face_color, border_color)
+                obj.add_face(face_vertices,
+                             current_face_color,
+                             border_color,
+                             texture_vertices=face_texture_vertices)
             else:
                 print("invalid line:", line)
 
@@ -78,3 +111,7 @@ def parse_obj(file):
         fn()
 
     return obj
+
+
+def read_image(file):
+    return Image.open(file).transpose(Image.FLIP_TOP_BOTTOM)
