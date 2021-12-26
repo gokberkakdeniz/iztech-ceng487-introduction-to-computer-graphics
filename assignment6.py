@@ -11,9 +11,9 @@ from OpenGL.GLU import *
 from sys import argv
 from os.path import join, dirname
 from time import time
-from lib.shape import WingedEdgeShape,  Grid, Shader
-from lib.shape.shader import Program
-from lib.ui import BaseApplication, Camera, Scene
+from lib.shape import WingedEdgeShape, Grid, Shader, Camera, Program
+from lib.shape.texture import Texture
+from lib.ui import BaseApplication, Scene
 from lib.ui.elements import StatisticsElement, HelpButtonElement, HelpElement
 from lib.utils.reader import parse_obj
 
@@ -59,13 +59,19 @@ class Assignment6Application(BaseApplication):
         super().init_gl()
 
         root = dirname(__file__)
-        program = Program([
-            Shader(join(root, "shaders", "model.frag")),
-            Shader(join(root, "shaders", "model.vert"))
-        ])
-
-        for obj, _ in self.scene_model.objects:
-            obj.use_program(program)
+        t = Texture(join(root, "assets", "texture_cornell.png"))
+        Program(
+            shaders=[
+                Shader(join(root, "shaders", "model.frag")),
+                Shader(join(root, "shaders", "model.vert"))
+            ],
+            resources=[
+                *self.scene_model.cameras,
+                *[obj for obj, _ in self.scene_model.objects],
+                t
+            ]
+        )
+        t.load()
 
     def on_resize(self, width, height):
         super().on_resize(width, height)

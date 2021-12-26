@@ -3,11 +3,12 @@
 # StudentId:250201041
 # 12 2021
 
-from typing import List
+from typing import List, Union
 from typing_extensions import Literal
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
+from abc import ABC, abstractmethod
 
 ShaderType = Literal["vertex", "geometry", "fragment", "compute", "tessellation_control", "tessellation_evaluation"]
 
@@ -52,7 +53,7 @@ class Shader:
 
 
 class Program:
-    def __init__(self, shaders: List[Shader]) -> None:
+    def __init__(self, shaders: List[Shader], resources: List['Resource'] = []) -> None:
         self.id = glCreateProgram()
 
         for shader in shaders:
@@ -70,3 +71,18 @@ class Program:
 
         for shader in shaders:
             glDeleteShader(shader.id)
+
+        for res in resources:
+            res.use_program(self)
+
+
+class Resource(ABC):
+    def __init__(self) -> None:
+        self.program = None
+
+    def use_program(self, program: Program):
+        self.program = program
+
+    @abstractmethod
+    def load(self):
+        pass

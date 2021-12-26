@@ -8,12 +8,13 @@ from OpenGL.GLU import *
 from OpenGL.GL import *
 from lib.math.vector import Vec3d
 
-from lib.shape.shader import Program
+from lib.shape.shader import Resource
 from ..math import Mat3d
 
 
-class Camera:
+class Camera(Resource):
     def __init__(self) -> None:
+        super().__init__()
         self.matrix = Mat3d.translation_matrix(0, 0, -6)
         self.fov = 45.0
         self.aspect = 640/480
@@ -49,13 +50,13 @@ class Camera:
                      Vec3d(0.0, 0.0, term_2_2, term_2_3),
                      Vec3d(0.0, 0.0, -1, 0.0))
 
-    def look(self, program: Program = None):
-        if program is None:
+    def load(self):
+        if self.program is None:
             matrix = self.matrix.to_array()
             glLoadMatrixf(matrix)
         else:
-            glUseProgram(program.id)
-            modelLocation = glGetUniformLocation(program.id, "camera")
+            glUseProgram(self.program.id)
+            modelLocation = glGetUniformLocation(self.program.id, "camera")
             matrix = (self.__get_projection_matrix(self.fov, self.aspect, self.near, self.far) @ self.matrix).to_array()
             glUniformMatrix4fv(modelLocation, 1, GL_FALSE, matrix)
             glUseProgram(0)

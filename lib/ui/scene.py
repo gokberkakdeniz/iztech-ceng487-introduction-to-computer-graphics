@@ -3,16 +3,18 @@
 # StudentId:250201041
 # 12 2021
 
-from typing import Iterable, List, Set, Tuple
-from ..shape import WingedEdgeShape
-from .camera import Camera
+from typing import Iterable, List, Tuple
+
+from lib.shape.light import Light
+from ..shape import WingedEdgeShape, Camera
 
 
 class Scene:
-    def __init__(self, cameras: Iterable[Camera], visible=True) -> None:
+    def __init__(self, cameras: Iterable[Camera], lights: Iterable[Light] = [], visible=True) -> None:
         self.objects: List[Tuple[WingedEdgeShape, bool]] = []
-        self.cameras: Set[Camera] = list(cameras)
+        self.cameras = list(cameras)
         self.active_camera = self.cameras[0]
+        self.lights = list(lights)
         self.visible = visible
         self.mode_border = False
         self.mode_background = True
@@ -66,5 +68,5 @@ class Scene:
                 obj, visible = el
 
                 if visible:
-                    self.active_camera.look(obj.program if hasattr(obj, "program") else None)
+                    self.active_camera.load()
                     obj.draw(background=self.mode_background,  border=self.mode_border)

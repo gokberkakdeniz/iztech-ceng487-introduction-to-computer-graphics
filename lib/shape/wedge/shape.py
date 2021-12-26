@@ -3,12 +3,16 @@
 # StudentId:250201041
 # 12 2021
 
+from functools import reduce
 import numpy as np
+
 from typing import Callable, Generator, List, Tuple
 from copy import deepcopy
+from math import inf
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
+
 from lib.shape.shader import Program
 from lib.utils.bidict import bidict
 from .. import color
@@ -16,7 +20,6 @@ from .edge import WingedEdge
 from ..shape import Shape
 from ...math import Vec3d, Mat3d
 from ...utils.itertools import pairwise
-from math import inf
 
 
 class WingedEdgeShape(Shape):
@@ -38,14 +41,21 @@ class WingedEdgeShape(Shape):
         # Bidirectional Dictionary: primary_key <-> hash(vec3d)
         # The vertice indexes are stored here. To perform transformations
         # in O(1), it is bidirectional.
-        self._vertices: bidict[int, int] = bidict()  # bidirectional hash table
+        self._vertices: bidict[int, int] = bidict()
         self._vertice_index = -1
-        self._texture_vertices: List[int] = []
 
+        # edge id -> edge
         self._adj_edges: dict[int, WingedEdge] = {}
+        # face id -> edge id
         self._adj_faces: List[int] = []
+        # vertice id -> edge id
         self._adj_vertices: dict[int, int] = {}
 
+        # face id -> uv-coord
+        self._texture_vertices: List[List[Vec3d]] = []
+        # face id -> normal vector per vertice
+        self._normal_vectors: List[List[Vec3d]] = []
+        # face id -> color per vertice
         self._colors: List[Tuple[color.RGBA]] = []
 
         self.program = None
@@ -64,11 +74,11 @@ class WingedEdgeShape(Shape):
         self.__VBO_face = None
         self.__VBO_border = None
         self.__should_reload_buffer = True
-        self.__face_buffer_length = 0
+        self.__face_buffer_offsets = 0
         self.__border_buffer_length = 0
         WingedEdgeShape.__object_index += 1
 
-    @staticmethod
+    @ staticmethod
     def quadrilateral(
         vertice0=Vec3d,
         vertice1=Vec3d,
@@ -86,7 +96,7 @@ class WingedEdgeShape(Shape):
 
         return obj
 
-    @staticmethod
+    @ staticmethod
     def triangle(
         vertice0=Vec3d,
         vertice1=Vec3d,
@@ -145,33 +155,52 @@ class WingedEdgeShape(Shape):
                 glUseProgram(0)
 
         if background:
-            offset = 0
-
             if self.program is not None:
                 glUseProgram(self.program.id)
 
             glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_face)
+            # vertice positions
             glVertexAttribPointer(0,
                                   3,
                                   GL_FLOAT,
                                   GL_FALSE,
                                   element_size * 3,
-                                  ctypes.c_void_p(offset))
+                                  ctypes.c_void_p(self.__face_buffer_offsets[0]))
             glEnableVertexAttribArray(0)
 
-            offset += self.__face_buffer_length * element_size
+            # vertice colors
             glVertexAttribPointer(1,
                                   4,
                                   GL_FLOAT,
                                   GL_FALSE,
                                   element_size * 4,
-                                  ctypes.c_void_p(offset))
+                                  ctypes.c_void_p(self.__face_buffer_offsets[1]))
             glEnableVertexAttribArray(1)
 
-            glDrawArrays(GL_TRIANGLES, 0, self.__face_buffer_length // 3)
+            # texture positions
+            glVertexAttribPointer(2,
+                                  2,
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  element_size * 2,
+                                  ctypes.c_void_p(self.__face_buffer_offsets[2]))
+            glEnableVertexAttribArray(2)
+
+            # vertice normals
+            glVertexAttribPointer(3,
+                                  4,
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  element_size * 4,
+                                  ctypes.c_void_p(self.__face_buffer_offsets[3]))
+            glEnableVertexAttribArray(3)
+
+            glDrawArrays(GL_TRIANGLES, 0, self.__face_buffer_offsets[1] // (3*element_size))
 
             glDisableVertexAttribArray(0)
             glDisableVertexAttribArray(1)
+            glDisableVertexAttribArray(2)
+            glDisableVertexAttribArray(3)
             glBindBuffer(GL_ARRAY_BUFFER, 0)
 
             if self.program is not None:
@@ -239,8 +268,8 @@ class WingedEdgeShape(Shape):
                  vertices: List[Vec3d],
                  face_color: color.RGBA,
                  border_color: color.RGBA,
-                 texture_vertices: List[Vec3d] = None
-                 ):
+                 texture_vertices: List[Vec3d] = None,
+                 normal_vectors: List[Vec3d] = None):
         v_indexes = [self._register_vertice(v) for v in vertices]
         f_index = len(self._adj_faces)
 
@@ -268,11 +297,20 @@ class WingedEdgeShape(Shape):
                 e0.set_edge_right(e1_index, e2_index)
 
         self._adj_faces.append(self.__get_edge_index_safe(v_indexes[0], v_indexes[1]))
-        self._texture_vertices.append(texture_vertices)
+
+        if texture_vertices is not None:
+            self._texture_vertices.append(texture_vertices)
+
+        if normal_vectors is not None:
+            self._normal_vectors.append(normal_vectors)
+
         self._colors.append((face_color, border_color))
         self.__should_reload_buffer = True
 
     def subdivide_catmull_clark(self):
+        # if len(self._texture_vertices) + len(self._normal_vectors) > 0:
+        #     raise Exception("The operation is disabled when normal vectors and texture vertices is enabled.")
+
         if self.level == self.max_level:
             return
 
@@ -523,12 +561,18 @@ class WingedEdgeShape(Shape):
     def _get_face_array_for_buffer(self, filter_fn: Callable[[Vec3d, Vec3d, Vec3d], bool] = None):
         face_vertices = []
         face_colors = []
+        face_texture_vertices = []
+        face_normals_vectors = []
 
         for f_id in range(len(self._adj_faces)):
-            itr = self.__get_face_vertices(f_id)
-            v1 = next(itr)
+            itr_v = self.__get_face_vertices(f_id)
+            v1 = next(itr_v)
+            itr_vt = iter(self._texture_vertices[f_id])
+            vt1 = next(itr_vt)
+            itr_vn = iter(self._normal_vectors[f_id])
+            vn1 = next(itr_vn)
 
-            for v2, v3 in pairwise(itr):
+            for (v2, v3), (vt2, vt3), (vn2, vn3) in zip(pairwise(itr_v), pairwise(itr_vt), pairwise(itr_vn)):
                 if filter_fn is not None and not filter_fn(v1, v2, v3):
                     continue
 
@@ -536,9 +580,17 @@ class WingedEdgeShape(Shape):
                 face_vertices.extend(v2.to_list()[:3])
                 face_vertices.extend(v3.to_list()[:3])
 
+                face_texture_vertices.extend(vt1.to_list()[:2])
+                face_texture_vertices.extend(vt2.to_list()[:2])
+                face_texture_vertices.extend(vt3.to_list()[:2])
+
+                face_normals_vectors.extend(vn1.to_list())
+                face_normals_vectors.extend(vn2.to_list())
+                face_normals_vectors.extend(vn3.to_list())
+
                 face_colors.extend(self._colors[f_id][0].to_list() * 3)
 
-        return (face_vertices, face_colors)
+        return (face_vertices, face_colors, face_texture_vertices, face_normals_vectors)
 
     def _get_border_array_for_buffer(self, filter_fn: Callable[[Vec3d, Vec3d], bool] = None):
         border_vertices = []
@@ -563,16 +615,20 @@ class WingedEdgeShape(Shape):
         return (border_vertices, border_colors)
 
     def __reload_buffer(self, border=True, background=True):
-        face_vertices, face_colors = self._get_face_array_for_buffer()
+        itemsize = np.dtype(np.float32).itemsize
 
-        self.__face_buffer_length = len(face_vertices)
+        face_array_buffers = self._get_face_array_for_buffer()
+
+        self.__face_buffer_offsets = np.cumsum((0, *map(lambda l: len(l) * itemsize, face_array_buffers))).tolist()
 
         if self.__VBO_face is None:
             self.__VBO_face = glGenBuffers(1)
 
+        face_vertices, face_colors, face_texture_vertices, face_normals_vectors = face_array_buffers
         glBindBuffer(GL_ARRAY_BUFFER, self.__VBO_face)
         glBufferData(GL_ARRAY_BUFFER,
-                     np.array(face_vertices + face_colors, dtype="float32"),
+                     np.array(face_vertices + face_colors + face_texture_vertices + face_normals_vectors,
+                              dtype="float32"),
                      GL_STATIC_DRAW)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
 
