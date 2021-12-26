@@ -18,6 +18,8 @@ class Texture(Resource):
         self.id = None
 
     def use_program(self, program: Program):
+        if self.program == program:
+            return
         result = super().use_program(program)
         self.__load_to_gpu()
         return result
@@ -25,8 +27,8 @@ class Texture(Resource):
     def load(self, location="tex1"):
         glUseProgram(self.program.id)
 
-        tex1Location = glGetUniformLocation(self.program.id, location)
-        glUniform1i(tex1Location, self.id)
+        texLocation = glGetUniformLocation(self.program.id, location)
+        glUniform1i(texLocation, self.id)
 
         glActiveTexture(GL_TEXTURE0 + self.id)
         glBindTexture(GL_TEXTURE_2D, self.id)
@@ -54,3 +56,21 @@ class Texture(Resource):
                      GL_UNSIGNED_BYTE,
                      np.frombuffer(self.__image.tobytes(), dtype=np.uint8))
         glGenerateMipmap(GL_TEXTURE_2D)
+
+
+class TextureBlender(Resource):
+    def __init__(self) -> None:
+        super().__init__()
+        self.ratio = 1.0
+
+    def increase(self):
+        self.ratio = min(1.0, self.ratio + 0.05)
+
+    def decrease(self):
+        self.ratio = max(0.0, self.ratio - 0.05)
+
+    def load(self):
+        glUseProgram(self.program.id)
+        location = glGetUniformLocation(self.program.id, "texBlendRatio")
+        glUniform1f(location, self.ratio)
+        glUseProgram(0)

@@ -1,4 +1,6 @@
 # This file uses centimeters as units for non-parametric coordinates.
+# ceng487 texture texture_cornell.png
+# ceng487 texture texture_cube.png
 
 mtllib CornellManifold.mtl
 g default

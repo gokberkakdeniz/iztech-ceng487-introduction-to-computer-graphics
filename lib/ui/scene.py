@@ -6,15 +6,21 @@
 from typing import Iterable, List, Tuple
 
 from lib.shape.light import Light
+from lib.shape.shader import Resource
 from ..shape import WingedEdgeShape, Camera
 
 
 class Scene:
-    def __init__(self, cameras: Iterable[Camera], lights: Iterable[Light] = [], visible=True) -> None:
+    def __init__(self,
+                 cameras: Iterable[Camera],
+                 lights: Iterable[Light] = [],
+                 resources: Iterable[Resource] = [],
+                 visible=True) -> None:
         self.objects: List[Tuple[WingedEdgeShape, bool]] = []
         self.cameras = list(cameras)
         self.active_camera = self.cameras[0]
         self.lights = list(lights)
+        self.resources = list(resources)
         self.visible = visible
         self.mode_border = False
         self.mode_background = True
@@ -64,9 +70,14 @@ class Scene:
 
     def draw(self):
         if self.visible:
+            self.active_camera.load()
+
+            for res in self.resources+self.lights:
+                res.load()
+
             for el in self.objects:
                 obj, visible = el
 
                 if visible:
-                    self.active_camera.load()
+
                     obj.draw(background=self.mode_background,  border=self.mode_border)

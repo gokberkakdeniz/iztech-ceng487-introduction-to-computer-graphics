@@ -7,20 +7,80 @@ from ..math import Vec3d
 from .color import RGBA
 from .shader import Resource
 
+from OpenGL.GL import *
+from OpenGL.GLUT import *
+from OpenGL.GLU import *
+
 
 class Light(Resource):
-    pass
+    def __init__(self, intensity: float) -> None:
+        super().__init__()
+        self.intensity = intensity
+        self.__intensity_prev = None
+
+    def is_open(self):
+        return self.__intensity_prev is None
+
+    def on(self):
+        if self.is_open():
+            return
+
+        self.intensity = self.__intensity_prev
+        self.__intensity_prev = None
+
+    def off(self):
+        if not self.is_open():
+            return
+
+        self.__intensity_prev = self.intensity
+        self.intensity = 0.0
+
+    def toogle(self):
+        if self.__intensity_prev is None:
+            self.off()
+        else:
+            self.on()
 
 
 class DirectionalLight(Light):
     def __init__(self, direction: Vec3d, color: RGBA, intensity: float = 1.0) -> None:
-        self.__direction = direction
-        self.__color = color
-        self.__intensity = intensity
+        super().__init__(intensity)
+
+        self.direction = direction
+        self.color = color
+
+    def load(self):
+        glUseProgram(self.program.id)
+
+        lightDir = glGetUniformLocation(self.program.id, "dirLight1Dir")
+        glUniform3f(lightDir, *self.direction.to_list()[:3])
+
+        lightColor = glGetUniformLocation(self.program.id, "dirLight1Color")
+        glUniform4f(lightColor, *self.color.to_list())
+
+        lightIntensity = glGetUniformLocation(self.program.id, "dirLight1Intensity")
+        glUniform1f(lightIntensity, self.intensity)
+
+        glUseProgram(0)
 
 
 class PointLight(Light):
     def __init__(self, position: Vec3d, color: RGBA, intensity: float = 1.0) -> None:
-        self.__position = position
-        self.__color = color
-        self.__intensity = intensity
+        super().__init__(intensity)
+
+        self.position = position
+        self.color = color
+
+    def load(self):
+        glUseProgram(self.program.id)
+
+        lightPos = glGetUniformLocation(self.program.id, "pointLight1Pos")
+        glUniform3f(lightPos, *self.position.to_list()[:3])
+
+        lightColor = glGetUniformLocation(self.program.id, "pointLight1Color")
+        glUniform4f(lightColor, *self.color.to_list())
+
+        lightIntensity = glGetUniformLocation(self.program.id, "pointLight1Intensity")
+        glUniform1f(lightIntensity, self.intensity)
+
+        glUseProgram(0)

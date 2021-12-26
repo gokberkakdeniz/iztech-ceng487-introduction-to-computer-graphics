@@ -5,8 +5,10 @@
 
 import numpy as np
 from typing import List
+from os.path import join, dirname
+
 from ..math import Vec3d
-from ..shape import WingedEdgeShape, color
+from ..shape import WingedEdgeShape, color, Texture
 
 
 def parse_obj(file) -> List[WingedEdgeShape]:
@@ -25,6 +27,8 @@ def parse_obj(file) -> List[WingedEdgeShape]:
     transform_fns_stack = []
 
     objs = {group: WingedEdgeShape()}
+
+    textures: List[Texture] = []
 
     with open(file) as f:
         for line in f.readlines():
@@ -61,6 +65,11 @@ def parse_obj(file) -> List[WingedEdgeShape]:
                         elif words[2] == "scale":
                             x, y, z = tuple(map(float, words[3:]))
                             transform_fns_stack.append(lambda: obj.scale(x, y, z))
+                    elif words[1] == "texture":
+                        if len(textures) > 2:
+                            print("warning: maximum 2 textures are supported!")
+                        else:
+                            textures.append(Texture(join(dirname(file), words[2].strip())))
             elif cmd == "mtllib":
                 continue
             elif cmd == "usemtl":
@@ -117,4 +126,9 @@ def parse_obj(file) -> List[WingedEdgeShape]:
     for fn in transform_fns_stack:
         fn()
 
-    return objs.values()
+    result = objs.values()
+    for texture in textures:
+        for obj in result:
+            obj.use_texture(texture)
+
+    return result

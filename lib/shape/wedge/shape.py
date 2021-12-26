@@ -3,7 +3,6 @@
 # StudentId:250201041
 # 12 2021
 
-from functools import reduce
 from itertools import zip_longest
 import numpy as np
 
@@ -14,8 +13,9 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
-from lib.shape.shader import Program
-from lib.utils.bidict import bidict
+from ..shader import Program
+from ..texture import Texture
+from ...utils.bidict import bidict
 from .. import color
 from .edge import WingedEdge
 from ..shape import Shape
@@ -59,7 +59,8 @@ class WingedEdgeShape(Shape):
         # face id -> color per vertice
         self._colors: List[Tuple[color.RGBA]] = []
 
-        self.program = None
+        self.program: Program = None
+        self.textures: List[Texture] = []
 
         # transformation matrix and stack
         self._stack = (state[0] or []).copy()
@@ -209,6 +210,17 @@ class WingedEdgeShape(Shape):
 
     def use_program(self, program: Program):
         self.program = program
+        self.__pass_program_to_textures()
+
+    def use_texture(self, texture: Texture):
+        self.textures.append(texture)
+        if self.program is not None:
+            self.__pass_program_to_textures()
+
+    def __pass_program_to_textures(self):
+        for t_id, texture in enumerate(self.textures):
+            texture.use_program(self.program)
+            texture.load(f'tex{t_id+1}')
 
     def rotate(self, theta_0: float, theta_1: float, theta_2: float, order="xyz") -> None:
         R = Mat3d.rotation_matrix(theta_0, theta_1, theta_2, order)

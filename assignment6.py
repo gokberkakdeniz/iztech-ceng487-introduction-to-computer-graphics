@@ -11,8 +11,9 @@ from OpenGL.GLU import *
 from sys import argv
 from os.path import join, dirname
 from time import time
-from lib.shape import WingedEdgeShape, Grid, Shader, Camera, Program
-from lib.shape.texture import Texture
+from lib.math.vector import Vec3d
+from lib.shape import WingedEdgeShape, Grid, Shader, Camera, Program, TextureBlender, DirectionalLight, PointLight
+from lib.shape.color import RGBA
 from lib.ui import BaseApplication, Scene
 from lib.ui.elements import StatisticsElement, HelpButtonElement, HelpElement
 from lib.utils.reader import parse_obj
@@ -20,7 +21,7 @@ from lib.utils.reader import parse_obj
 
 class Assignment6Application(BaseApplication):
     def __init__(self, objs: List[WingedEdgeShape], *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(size=(800, 600), *args, **kwargs)
 
         self.mouse_x = 0
         self.mouse_y = 0
@@ -30,8 +31,17 @@ class Assignment6Application(BaseApplication):
         self.camera_model = Camera()
         self.camera_ui = Camera()
 
+        self.texture_blender = TextureBlender()
+
+        self.light1 = PointLight(Vec3d.point(1, 1, 1), RGBA.blue())
+        self.light2 = DirectionalLight(Vec3d.vector(0, 0, 0), RGBA.white())
+
         # model scene
-        self.scene_model = Scene(cameras=(self.camera_model,))
+        self.scene_model = Scene(
+            cameras=(self.camera_model,),
+            resources=(self.texture_blender,),
+            lights=(self.light1, self.light2)
+        )
         self.element_grid = Grid((50, 50))
         self.scene_model.register(self.element_grid)
         self.scene_model.set_visibility_of(self.element_grid, False)
@@ -59,7 +69,6 @@ class Assignment6Application(BaseApplication):
         super().init_gl()
 
         root = dirname(__file__)
-        t = Texture(join(root, "assets", "texture_cornell.png"))
         Program(
             shaders=[
                 Shader(join(root, "shaders", "model.frag")),
@@ -68,10 +77,11 @@ class Assignment6Application(BaseApplication):
             resources=[
                 *self.scene_model.cameras,
                 *[obj for obj, _ in self.scene_model.objects],
-                t
+                self.texture_blender,
+                self.light1,
+                self.light2
             ]
         )
-        t.load()
 
     def on_resize(self, width, height):
         super().on_resize(width, height)
@@ -102,21 +112,10 @@ class Assignment6Application(BaseApplication):
         super().on_key_press(key, x, y)
 
         if key == b'+':
-            print("======== Catmull Clark Subdivision ========")
-            for obj in self.scene_model.objects[1:]:
-                if hasattr(obj[0], "subdivide_catmull_clark"):
-                    start_time = time()
-                    obj[0].subdivide_catmull_clark()
-                    level = obj[0].level
-                    time_diff = time() - start_time
-                    if level > 0:
-                        print(f' {obj[0].name:20s}\tL{level}\t{time_diff:.2f}s')
-            print("===========================================\n")
+            self.texture_blender.increase()
             self.__recalculate_stats()
         elif key == b'-':
-            for obj in self.scene_model.objects[1:]:
-                if hasattr(obj[0], "reverse_subdivide_catmull_clark"):
-                    obj[0].reverse_subdivide_catmull_clark()
+            self.texture_blender.decrease()
             self.__recalculate_stats()
         elif key == b'r':
             self.scene_model.active_camera.reset()
@@ -127,6 +126,14 @@ class Assignment6Application(BaseApplication):
         elif key == b'g':
             self.scene_model.set_visibility_of(self.element_grid,
                                                not self.scene_model.get_visibility_of(self.element_grid))
+        elif key == b'1':
+            self.light1.toogle()
+            self.__recalculate_stats()
+        elif key == b'2':
+            self.light2.toogle()
+            self.__recalculate_stats()
+        elif key == b'a':
+            print("a")
 
         self.mouse_x = x
         self.mouse_y = y
@@ -183,14 +190,16 @@ class Assignment6Application(BaseApplication):
                 glutSetCursor(GLUT_CURSOR_INHERIT)
 
     def __recalculate_stats(self):
-        f_count, v_count, level = 0, 0, 0
+        f_count, v_count, ratio = 0, 0, self.texture_blender.ratio
         for obj, _ in self.scene_model.objects:
             f_count += len(obj._adj_faces)
             v_count += len(obj._adj_vertices)
-            level = max(obj.level, level)
+
         self.element_stats.set_face_count(f_count)
         self.element_stats.set_vertice_count(v_count)
-        self.element_stats.set_level(level)
+        self.element_stats.set_ratio(ratio)
+        self.element_stats.set_light1(self.light1.is_open())
+        self.element_stats.set_light2(self.light2.is_open())
 
 
 def main():
