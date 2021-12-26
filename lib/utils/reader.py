@@ -114,8 +114,7 @@ def parse_obj(file) -> List[WingedEdgeShape]:
                              normal_vectors=face_normal_vectors)
             else:
                 print("invalid line:", line)
-    for struct in objs.values():
-        for fn in transform_fns_stack:
-            fn()
+    for fn in transform_fns_stack:
+        fn()
 
     return objs.values()

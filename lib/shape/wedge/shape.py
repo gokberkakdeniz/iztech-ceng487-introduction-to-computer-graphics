@@ -4,6 +4,7 @@
 # 12 2021
 
 from functools import reduce
+from itertools import zip_longest
 import numpy as np
 
 from typing import Callable, Generator, List, Tuple
@@ -564,15 +565,21 @@ class WingedEdgeShape(Shape):
         face_texture_vertices = []
         face_normals_vectors = []
 
+        no_texture_flag = (0, 0)*3
+
         for f_id in range(len(self._adj_faces)):
             itr_v = self.__get_face_vertices(f_id)
             v1 = next(itr_v)
             itr_vt = iter(self._texture_vertices[f_id])
-            vt1 = next(itr_vt)
+            vt1 = next(itr_vt, None)
             itr_vn = iter(self._normal_vectors[f_id])
             vn1 = next(itr_vn)
 
-            for (v2, v3), (vt2, vt3), (vn2, vn3) in zip(pairwise(itr_v), pairwise(itr_vt), pairwise(itr_vn)):
+            for v, vt, vn in zip_longest(pairwise(itr_v), pairwise(itr_vt), pairwise(itr_vn)):
+                v2, v3 = v or (None, None)
+                vt2, vt3 = vt or (None, None)
+                vn2, vn3 = vn or (None, None)
+
                 if filter_fn is not None and not filter_fn(v1, v2, v3):
                     continue
 
@@ -580,9 +587,12 @@ class WingedEdgeShape(Shape):
                 face_vertices.extend(v2.to_list()[:3])
                 face_vertices.extend(v3.to_list()[:3])
 
-                face_texture_vertices.extend(vt1.to_list()[:2])
-                face_texture_vertices.extend(vt2.to_list()[:2])
-                face_texture_vertices.extend(vt3.to_list()[:2])
+                if vt is None:
+                    face_texture_vertices.extend(no_texture_flag)
+                else:
+                    face_texture_vertices.extend(vt1.to_list()[:2])
+                    face_texture_vertices.extend(vt2.to_list()[:2])
+                    face_texture_vertices.extend(vt3.to_list()[:2])
 
                 face_normals_vectors.extend(vn1.to_list())
                 face_normals_vectors.extend(vn2.to_list())
