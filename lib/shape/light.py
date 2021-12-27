@@ -46,8 +46,11 @@ class DirectionalLight(Light):
     def __init__(self, direction: Vec3d, color: RGBA, intensity: float = 1.0) -> None:
         super().__init__(intensity)
 
-        self.direction = direction
+        self.direction = -direction
         self.color = color
+
+    def set_direction(self, direction):
+        self.direction = -direction
 
     def load(self):
         glUseProgram(self.program.id)
