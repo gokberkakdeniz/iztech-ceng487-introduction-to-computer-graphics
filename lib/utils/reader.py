@@ -6,7 +6,6 @@
 import numpy as np
 from typing import List
 from os.path import join, dirname
-
 from ..math import Vec3d
 from ..shape import WingedEdgeShape, color, Texture
 
@@ -25,6 +24,9 @@ def parse_obj(file) -> List[WingedEdgeShape]:
     random_face_colors = []
 
     transform_fns_stack = []
+    def create_scaler(sx, sy, sz): return lambda o: o.scale(sx, sy, sz)
+    def create_rotator(rx, ry, rz): return lambda o: o.rotate(rx, ry, rz)
+    def create_translator(tx, ty, tz): return lambda o: o.translate(tx, ty, tz)
 
     objs = {group: WingedEdgeShape()}
 
@@ -58,13 +60,13 @@ def parse_obj(file) -> List[WingedEdgeShape]:
                     elif words[1] == "post_transform":
                         if words[2] == "translate":
                             x, y, z = tuple(map(float, words[3:]))
-                            transform_fns_stack.append(lambda: obj.translate(x, y, z))
+                            transform_fns_stack.append(create_translator(x, y, z))
                         elif words[2] == "rotate":
                             x, y, z = tuple(map(float, words[3:]))
-                            transform_fns_stack.append(lambda: obj.rotate(x, y, z))
+                            transform_fns_stack.append(create_rotator(x, y, z))
                         elif words[2] == "scale":
                             x, y, z = tuple(map(float, words[3:]))
-                            transform_fns_stack.append(lambda: obj.scale(x, y, z))
+                            transform_fns_stack.append(create_scaler(x, y, z))
                     elif words[1] == "texture":
                         if len(textures) > 2:
                             print("warning: maximum 2 textures are supported!")
@@ -123,12 +125,13 @@ def parse_obj(file) -> List[WingedEdgeShape]:
                              normal_vectors=face_normal_vectors)
             else:
                 print("invalid line:", line)
-    for fn in transform_fns_stack:
-        fn()
 
-    result = objs.values()
-    for texture in textures:
-        for obj in result:
+    result = list(objs.values())
+
+    for obj in result:
+        for fn in transform_fns_stack:
+            fn(obj)
+        for texture in textures:
             obj.use_texture(texture)
 
     return result

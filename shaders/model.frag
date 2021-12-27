@@ -35,7 +35,7 @@ void main()
 	float pointLight1nDotL = max(dot(fragNormal, pointLight1Dir), 0.0);
     vec4 pointLight1 = pointLight1Color * pointLight1Intensity * pointLight1nDotL;
 
-	float dirLight1nDotL = max(dot(fragNormal, normalize(vec4(dirLight1Dir, 1.0))), 0.0);
+	float dirLight1nDotL = max(dot(fragNormal, vec4(normalize(dirLight1Dir), 1.0)), 0.0);
     vec4 dirLight1 = dirLight1Color * dirLight1Intensity * dirLight1nDotL;
 
     vec4 lightBlendVal = mix(pointLight1, dirLight1, 0.5);

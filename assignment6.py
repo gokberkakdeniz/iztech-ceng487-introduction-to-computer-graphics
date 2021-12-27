@@ -33,8 +33,8 @@ class Assignment6Application(BaseApplication):
 
         self.texture_blender = TextureBlender()
 
-        self.light1 = PointLight(Vec3d.point(1, 1, 1), RGBA.blue())
-        self.light2 = DirectionalLight(Vec3d.vector(0, 0, 0), RGBA.white())
+        self.light1 = PointLight(Vec3d.point(0, 1.6023981999999999, 0), RGBA.white())
+        self.light2 = DirectionalLight(Vec3d.vector(-1, 0, +1), RGBA.blue())
 
         # model scene
         self.scene_model = Scene(
