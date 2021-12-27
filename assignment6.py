@@ -3,7 +3,7 @@
 # StudentId:250201041
 # 12 2021
 
-from math import pi
+from math import cos, pi, sin
 from typing import List
 from OpenGL.GL import *
 from OpenGL.GLUT import *
@@ -16,6 +16,7 @@ from lib.shape import WingedEdgeShape, Grid, Shader, Camera, Program, TextureBle
 from lib.shape.color import RGBA
 from lib.ui import BaseApplication, Scene
 from lib.ui.elements import StatisticsElement, HelpButtonElement, HelpElement
+from lib.utils.decorators import with_exec_count
 from lib.utils.reader import parse_obj
 
 
@@ -27,6 +28,9 @@ class Assignment6Application(BaseApplication):
         self.mouse_y = 0
         self.show_help = False
         self.rerender = False
+        self.animate_light = False
+        self.frame = 0
+        self.frame_modulo = 50
 
         self.camera_model = Camera()
         self.camera_ui = Camera()
@@ -104,6 +108,11 @@ class Assignment6Application(BaseApplication):
         return self.draw_gl_scene()
 
     def on_idle(self):
+        self.frame = (self.frame + 1) % self.frame_modulo
+
+        if self.frame == self.frame_modulo-1 and self.animate_light:
+            self.__animate_light()
+
         if self.rerender:
             self.rerender = False
             return self.draw_gl_scene()
@@ -119,6 +128,7 @@ class Assignment6Application(BaseApplication):
             self.__recalculate_stats()
         elif key == b'r':
             self.scene_model.active_camera.reset()
+            self.light1.position = Vec3d.point(0, 1.6023981999999999, 0)
         elif key == b's':
             self.scene_model.set_mode(background=not self.scene_model.mode_background)
         elif key == b'e':
@@ -133,7 +143,7 @@ class Assignment6Application(BaseApplication):
             self.light2.toogle()
             self.__recalculate_stats()
         elif key == b'a':
-            print("a")
+            self.animate_light = not self.animate_light
 
         self.mouse_x = x
         self.mouse_y = y
@@ -188,6 +198,14 @@ class Assignment6Application(BaseApplication):
                 glutSetCursor(GLUT_CURSOR_INFO)
             else:
                 glutSetCursor(GLUT_CURSOR_INHERIT)
+
+    @with_exec_count(0, 49)
+    def __animate_light(self, frame):
+        x = sin(frame * 2 * pi / 50)
+        z = cos(frame * 2 * pi / 50)
+        self.light1.position = Vec3d.point(x, 1.6023981999999999, z)
+
+        self.rerender = True
 
     def __recalculate_stats(self):
         f_count, v_count, ratio = 0, 0, self.texture_blender.ratio
