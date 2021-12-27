@@ -75,6 +75,6 @@ class HelpElement(Element):
         create_ascii_table([
             ("1", "toggle first light        "),
             ("2", "toggle second light      "),
-            ("A", "animate lights     "),
+            ("A", "toggle light animation"),
         ])
     )
