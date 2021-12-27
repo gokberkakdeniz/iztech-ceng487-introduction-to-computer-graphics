@@ -281,8 +281,8 @@ class WingedEdgeShape(Shape):
                  vertices: List[Vec3d],
                  face_color: color.RGBA,
                  border_color: color.RGBA,
-                 texture_vertices: List[Vec3d] = None,
-                 normal_vectors: List[Vec3d] = None):
+                 texture_vertices: List[Vec3d] = [],
+                 normal_vectors: List[Vec3d] = []):
         v_indexes = [self._register_vertice(v) for v in vertices]
         f_index = len(self._adj_faces)
 
@@ -311,11 +311,8 @@ class WingedEdgeShape(Shape):
 
         self._adj_faces.append(self.__get_edge_index_safe(v_indexes[0], v_indexes[1]))
 
-        if texture_vertices is not None:
-            self._texture_vertices.append(texture_vertices)
-
-        if normal_vectors is not None:
-            self._normal_vectors.append(normal_vectors)
+        self._texture_vertices.append(texture_vertices)
+        self._normal_vectors.append(normal_vectors)
 
         self._colors.append((face_color, border_color))
         self.__should_reload_buffer = True
@@ -578,6 +575,7 @@ class WingedEdgeShape(Shape):
         face_normals_vectors = []
 
         no_texture_flag = (0, 0)*3
+        no_vn_flag = (0, 0, 0, 0)*4
 
         for f_id in range(len(self._adj_faces)):
             itr_v = self.__get_face_vertices(f_id)
@@ -585,7 +583,7 @@ class WingedEdgeShape(Shape):
             itr_vt = iter(self._texture_vertices[f_id])
             vt1 = next(itr_vt, None)
             itr_vn = iter(self._normal_vectors[f_id])
-            vn1 = next(itr_vn)
+            vn1 = next(itr_vn, None)
 
             for v, vt, vn in zip_longest(pairwise(itr_v), pairwise(itr_vt), pairwise(itr_vn)):
                 v2, v3 = v or (None, None)
@@ -605,10 +603,12 @@ class WingedEdgeShape(Shape):
                     face_texture_vertices.extend(vt1.to_list()[:2])
                     face_texture_vertices.extend(vt2.to_list()[:2])
                     face_texture_vertices.extend(vt3.to_list()[:2])
-
-                face_normals_vectors.extend(vn1.to_list())
-                face_normals_vectors.extend(vn2.to_list())
-                face_normals_vectors.extend(vn3.to_list())
+                if vn is None:
+                    face_normals_vectors.extend(no_vn_flag)
+                else:
+                    face_normals_vectors.extend(vn1.to_list())
+                    face_normals_vectors.extend(vn2.to_list())
+                    face_normals_vectors.extend(vn3.to_list())
 
                 face_colors.extend(self._colors[f_id][0].to_list() * 3)
 
