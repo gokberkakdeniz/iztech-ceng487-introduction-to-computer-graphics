@@ -12,6 +12,23 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
 
+class BlinToggler(Resource):
+    def __init__(self, enabled=False) -> None:
+        super().__init__()
+        self.enabled = enabled
+
+    def toggle(self):
+        self.enabled = not self.enabled
+
+    def load(self):
+        glUseProgram(self.program.id)
+
+        blinEnabled = glGetUniformLocation(self.program.id, "blinEnabled")
+        glUniform1i(blinEnabled, int(self.enabled))
+
+        glUseProgram(0)
+
+
 class Light(Resource):
     def __init__(self, intensity: float) -> None:
         super().__init__()

@@ -113,7 +113,7 @@ class Vec3d:
         return Vec3d(self.y * vec2.z - self.z * vec2.y,
                      self.z * vec2.x - self.x * vec2.z,
                      self.x * vec2.y - self.y * vec2.x,
-                     0)
+                     self.w * vec2.w)
 
     def project(self, vec2: 'Vec3d') -> 'Vec3d':
         return self.length() * cos(self.angle(vec2)) * vec2.normalize()

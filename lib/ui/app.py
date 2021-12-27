@@ -10,6 +10,17 @@ from OpenGL.GLU import *
 from signal import signal, SIGINT
 
 
+class Event:
+    def __init__(self):
+        self.x = -1
+        self.y = -1
+        self.button = -1
+        self.state = -1
+        self.alt = False
+        self.ctrl = False
+        self.shift = False
+
+
 class BaseApplication(ABC):
     def __init__(self,
                  title: str,
@@ -22,6 +33,9 @@ class BaseApplication(ABC):
         self.mode = mode
         self.pos = pos
         self.argv = argv
+        self.event = Event()
+        self.mouse_x = 0
+        self.mouse_y = 0
 
     def init_gl(self):
         glClearColor(0.0, 0.0, 0.0, 0.0)
@@ -79,7 +93,18 @@ class BaseApplication(ABC):
         pass
 
     def on_mouse_click(self, button, state, x, y):
-        pass
+        self.event.x = x
+        self.event.y = y
+        self.event.state = state
+        self.event.button = button
+
+        m = glutGetModifiers()
+        self.event.alt = m & GLUT_ACTIVE_ALT
+        self.event.ctrl = m & GLUT_ACTIVE_CTRL
+        self.event.shift = m & GLUT_ACTIVE_SHIFT
+
+        self.mouseX = x
+        self.mouseY = y
 
     def on_mouse_drag(self, x, y):
         pass

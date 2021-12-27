@@ -10,9 +10,8 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from sys import argv
 from os.path import join, dirname
-from time import time
 from lib.math.vector import Vec3d
-from lib.shape import WingedEdgeShape, Grid, Shader, Camera, Program, TextureBlender, DirectionalLight, PointLight
+from lib.shape import WingedEdgeShape, Grid, Shader, Camera, Camera2, Program, TextureBlender, DirectionalLight, PointLight, BlinToggler
 from lib.shape.color import RGBA
 from lib.ui import BaseApplication, Scene
 from lib.ui.elements import StatisticsElement, HelpButtonElement, HelpElement
@@ -24,18 +23,17 @@ class Assignment6Application(BaseApplication):
     def __init__(self, objs: List[WingedEdgeShape], *args, **kwargs) -> None:
         super().__init__(size=(800, 600), *args, **kwargs)
 
-        self.mouse_x = 0
-        self.mouse_y = 0
         self.show_help = False
         self.rerender = False
         self.animate_light = False
         self.frame = 0
         self.frame_modulo = 50
 
-        self.camera_model = Camera()
-        self.camera_ui = Camera()
+        self.camera_model = Camera2()
+        self.camera_ui = Camera2()
 
         self.texture_blender = TextureBlender()
+        self.blin_toggler = BlinToggler()
 
         self.light1 = PointLight(Vec3d.point(0, 1.6023981999999999, 0), RGBA.white())
         self.light2 = DirectionalLight(Vec3d.vector(1, 0, 0), RGBA.blue())
@@ -43,10 +41,10 @@ class Assignment6Application(BaseApplication):
         # model scene
         self.scene_model = Scene(
             cameras=(self.camera_model,),
-            resources=(self.texture_blender,),
+            resources=(self.texture_blender, self.blin_toggler),
             lights=(self.light1, self.light2)
         )
-        self.element_grid = Grid((50, 50))
+        self.element_grid = Grid((5, 5))
         self.scene_model.register(self.element_grid)
         self.scene_model.set_visibility_of(self.element_grid, False)
 
@@ -82,6 +80,7 @@ class Assignment6Application(BaseApplication):
                 *self.scene_model.cameras,
                 *[obj for obj, _ in self.scene_model.objects],
                 self.texture_blender,
+                self.blin_toggler,
                 self.light1,
                 self.light2
             ]
@@ -93,7 +92,7 @@ class Assignment6Application(BaseApplication):
         self.element_help_button.set_pos((self.size[0]-30, self.size[1]-30))
         self.element_help.set_pos((30, self.size[1]-40))
         self.camera_model.aspect = self.size[0] / self.size[1]
-        self.camera_ui = self.size[0] / self.size[1]
+        self.camera_ui.aspect = self.size[0] / self.size[1]
 
     def draw_gl_scene(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -144,6 +143,8 @@ class Assignment6Application(BaseApplication):
             self.__recalculate_stats()
         elif key == b'a':
             self.animate_light = not self.animate_light
+        elif key == b'b':
+            self.blin_toggler.toggle()
 
         self.mouse_x = x
         self.mouse_y = y
@@ -151,45 +152,61 @@ class Assignment6Application(BaseApplication):
 
     def on_special_key_press(self, key, x, y):
         if key == GLUT_KEY_LEFT:
-            self.scene_model.active_camera.rotate(0, -pi/8, 0)
+            self.scene_model.active_camera.pan(-1/8)
         elif key == GLUT_KEY_RIGHT:
-            self.scene_model.active_camera.rotate(0, +pi/8, 0)
+            self.scene_model.active_camera.pan(1/8)
         elif key == GLUT_KEY_UP:
-            self.scene_model.active_camera.rotate(-pi/8, 0, 0)
+            self.scene_model.active_camera.tilt(-1/8)
         elif key == GLUT_KEY_DOWN:
-            self.scene_model.active_camera.rotate(+pi/8, 0, 0)
+            self.scene_model.active_camera.tilt(1/8)
 
         self.mouse_x = x
         self.mouse_y = y
         self.rerender = True
 
     def on_mouse_click(self, button, state, x, y):
+        super().on_mouse_click(button, state, x, y)
+
         if button == GLUT_LEFT_BUTTON and state == GLUT_UP \
             and y < 30 and x > self.size[0] - 30 \
                 and not self.scene_help.get_visibility():
             self.scene_help.set_visibility(True)
             self.scene_ui.set_visibility(False)
             self.scene_model.set_visibility(False)
+        elif button == GLUT_CURSOR_DESTROY and state == GLUT_UP and self.event.alt:
+            self.scene_model.active_camera.roll(pi/36 if self.event.ctrl else pi/72)
+        elif button == GLUT_CURSOR_HELP and state == GLUT_UP and self.event.alt:
+            self.scene_model.active_camera.roll(-(pi/36 if self.event.ctrl else pi/72))
         elif button == GLUT_CURSOR_DESTROY and state == GLUT_UP:
-            self.scene_model.active_camera.zoom_in()
+            self.scene_model.active_camera.zoom(0.5)
         elif button == GLUT_CURSOR_HELP and state == GLUT_UP:
-            self.scene_model.active_camera.zoom_out()
+            self.scene_model.active_camera.zoom(-0.5)
         elif button == GLUT_LEFT_BUTTON and state == GLUT_UP and self.scene_help.get_visibility():
             self.scene_help.set_visibility(False)
             self.scene_ui.set_visibility(True)
             self.scene_model.set_visibility(True)
-        self.mouse_x = x
-        self.mouse_y = y
+
         self.rerender = True
 
     def on_mouse_drag(self, x, y):
-        dx = 0.005 * (y - self.mouse_y)
-        dy = 0.005 * (x - self.mouse_x)
+        if self.event.alt == False:
+            return
 
-        self.scene_model.active_camera.rotate(dx, dy, 0)
+        dy = (y - self.mouse_y) * 0.02
+        dx = (x - self.mouse_x) * 0.02
+
+        if self.event.button == GLUT_RIGHT_BUTTON:
+            self.scene_model.active_camera.dolly(-dx, dy, 0)
+        elif self.event.button == GLUT_LEFT_BUTTON:
+            self.scene_model.active_camera.yaw(dx)
+            self.scene_model.active_camera.pitch(dy)
 
         self.mouse_x = x
         self.mouse_y = y
+
+        self.event.x = x
+        self.event.y = y
+
         self.rerender = True
 
     def on_mouse_move(self, x, y):

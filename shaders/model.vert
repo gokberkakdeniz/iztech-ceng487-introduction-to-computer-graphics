@@ -10,14 +10,16 @@ out vec4 fragColor;
 out vec2 fragUV;
 out vec4 fragNormal;
 
-uniform mat4 camera;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
 void main()
 {
-    gl_Position = camera * vec4(vertexPosition, 1.0);
+    gl_Position = projection * view * model * vec4(vertexPosition, 1.0);
 
-	fragPos = vertexPosition;
+	fragPos = vec3(model * vec4(vertexPosition, 1.0));
     fragColor = vertexColor;
 	fragUV = vertexUV;
-	fragNormal = vertexNormal;
+	fragNormal = normalize(transpose(inverse(model)) * vertexNormal);
 }
