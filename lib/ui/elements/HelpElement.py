@@ -76,5 +76,6 @@ class HelpElement(Element):
             ("1", "toggle first light        "),
             ("2", "toggle second light      "),
             ("A", "toggle light animation"),
+            ("B", "toggle blin specular"),
         ])
     )
