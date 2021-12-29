@@ -29,8 +29,9 @@ class Assignment6Application(BaseApplication):
         self.frame = 0
         self.frame_modulo = 50
 
-        self.camera_model = Camera2()
-        self.camera_ui = Camera2()
+        aspect = self.size[0] / self.size[1]
+        self.camera_model = Camera2(aspect)
+        self.camera_ui = Camera2(aspect)
 
         self.texture_blender = TextureBlender()
         self.blin_toggler = BlinToggler()
@@ -44,7 +45,7 @@ class Assignment6Application(BaseApplication):
             resources=(self.texture_blender, self.blin_toggler),
             lights=(self.light1, self.light2)
         )
-        self.element_grid = Grid((5, 5))
+        self.element_grid = Grid((50, 50))
         self.scene_model.register(self.element_grid)
         self.scene_model.set_visibility_of(self.element_grid, False)
 
@@ -55,6 +56,12 @@ class Assignment6Application(BaseApplication):
         self.scene_ui = Scene(cameras=(self.camera_ui,))
 
         self.element_stats = StatisticsElement()
+        f_count, v_count = 0, 0
+        for obj, _ in self.scene_model.objects:
+            f_count += len(obj._adj_faces)
+            v_count += len(obj._adj_vertices)
+        self.element_stats.set_face_count(f_count)
+        self.element_stats.set_vertice_count(v_count)
         self.__recalculate_stats()
         self.scene_ui.register(self.element_stats)
 
@@ -145,6 +152,7 @@ class Assignment6Application(BaseApplication):
             self.animate_light = not self.animate_light
         elif key == b'b':
             self.blin_toggler.toggle()
+            self.__recalculate_stats()
 
         self.mouse_x = x
         self.mouse_y = y
@@ -152,13 +160,13 @@ class Assignment6Application(BaseApplication):
 
     def on_special_key_press(self, key, x, y):
         if key == GLUT_KEY_LEFT:
-            self.scene_model.active_camera.pan(-1/8)
+            self.scene_model.active_camera.rotate_model(0, -pi/8, 0)
         elif key == GLUT_KEY_RIGHT:
-            self.scene_model.active_camera.pan(1/8)
+            self.scene_model.active_camera.rotate_model(0, +pi/8, 0)
         elif key == GLUT_KEY_UP:
-            self.scene_model.active_camera.tilt(-1/8)
+            self.scene_model.active_camera.rotate_model(-pi/8, 0, 0)
         elif key == GLUT_KEY_DOWN:
-            self.scene_model.active_camera.tilt(1/8)
+            self.scene_model.active_camera.rotate_model(+pi/8, 0, 0)
 
         self.mouse_x = x
         self.mouse_y = y
@@ -168,8 +176,8 @@ class Assignment6Application(BaseApplication):
         super().on_mouse_click(button, state, x, y)
 
         if button == GLUT_LEFT_BUTTON and state == GLUT_UP \
-            and y < 30 and x > self.size[0] - 30 \
-                and not self.scene_help.get_visibility():
+           and y < 30 and x > self.size[0] - 30 \
+           and not self.scene_help.get_visibility():
             self.scene_help.set_visibility(True)
             self.scene_ui.set_visibility(False)
             self.scene_model.set_visibility(False)
@@ -189,11 +197,10 @@ class Assignment6Application(BaseApplication):
         self.rerender = True
 
     def on_mouse_drag(self, x, y):
-        if self.event.alt == False:
-            return
+        dy = (y - self.mouse_y) / 250
+        dx = (x - self.mouse_x) / 250
 
-        dy = (y - self.mouse_y) * 0.02
-        dx = (x - self.mouse_x) * 0.02
+        print(dx, dy)
 
         if self.event.button == GLUT_RIGHT_BUTTON:
             self.scene_model.active_camera.dolly(-dx, dy, 0)
@@ -220,21 +227,17 @@ class Assignment6Application(BaseApplication):
     def __animate_light(self, frame):
         x = sin(frame * 2 * pi / 50)
         z = cos(frame * 2 * pi / 50)
-        self.light1.position = Vec3d.point(x, 1.6023981999999999, z)
+        self.light1.set_position(Vec3d.point(x, 1.6023981999999999, z))
 
         self.rerender = True
 
     def __recalculate_stats(self):
-        f_count, v_count, ratio = 0, 0, self.texture_blender.ratio
-        for obj, _ in self.scene_model.objects:
-            f_count += len(obj._adj_faces)
-            v_count += len(obj._adj_vertices)
+        ratio = self.texture_blender.ratio
 
-        self.element_stats.set_face_count(f_count)
-        self.element_stats.set_vertice_count(v_count)
         self.element_stats.set_ratio(ratio)
         self.element_stats.set_light1(self.light1.is_open())
         self.element_stats.set_light2(self.light2.is_open())
+        self.element_stats.set_blin(self.blin_toggler.enabled)
 
 
 def main():

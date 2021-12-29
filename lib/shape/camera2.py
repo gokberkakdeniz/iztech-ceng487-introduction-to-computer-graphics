@@ -15,7 +15,7 @@ from ..math import Mat3d
 
 
 class Camera2(Resource):
-    def __init__(self):
+    def __init__(self, aspect: float = None):
         super().__init__()
         self.eye = Vec3d.point(0.0, 0.0, 0.0)
         self.center = Vec3d.point(0.0, 0.0, 0.0)
@@ -23,8 +23,9 @@ class Camera2(Resource):
 
         self.fov = 45
         self.near = 0.1
-        self.far = 100
-        self.aspect = 1
+        self.far = 10000
+        self.aspect = aspect or 1
+
         self.cameraX = Vec3d.vector(0.0, 0.0, 0.0)
         self.cameraY = Vec3d.vector(0.0, 0.0, 0.0)
         self.cameraZ = Vec3d.vector(0.0, 0.0, 0.0)
@@ -115,14 +116,9 @@ class Camera2(Resource):
         postViewVecYZ = Vec3d.vector(0, postViewVec.y, postViewVec.z)
         postViewVecXZ = Vec3d.vector(postViewVec.x, 0, postViewVec.z)
 
-        try:
-            angleX = postViewVecYZ.angle(preViewVecYZ)
-        except ValueError:
-            angleX = 0
-        try:
-            angleY = postViewVecXZ.angle(preViewVecXZ)
-        except ValueError:
-            angleY = 0
+        angleX = postViewVecYZ.angle(preViewVecYZ)
+
+        angleY = postViewVecXZ.angle(preViewVecXZ)
 
         rot1 = Mat3d.rotation_x_matrix(-angleX)
         rot2 = Mat3d.rotation_y_matrix(-angleY)
@@ -217,9 +213,13 @@ class Camera2(Resource):
                      Vec3d(0.0, 0.0, -1, 0.0))
 
     def get_view_matrix(self):
-        R = Mat3d(self.cameraX,
-                  self.cameraY,
-                  -self.cameraZ,
+        camZAxis = Vec3d.point(-self.eye.x, -self.eye.y, -self.eye.z).normalize()
+        camXAxis = camZAxis.cross(self.up)
+        camYAxis = camXAxis.cross(camZAxis)
+
+        R = Mat3d(camXAxis,
+                  camYAxis,
+                  -camZAxis,
                   Vec3d(0.0, 0.0, 0.0, 1.0))
         T = Mat3d.translation_matrix(-self.eye.x, -self.eye.y, -self.eye.z)
 
@@ -258,22 +258,21 @@ class Camera2(Resource):
             glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, projection.to_array())
 
             cameraPosLocation = glGetUniformLocation(self.program.id, "cameraPos")
-            glUniform4f(cameraPosLocation, *self.eye.to_list())
+            glUniform3f(cameraPosLocation, *self.eye.to_list()[:3])
 
             glUseProgram(0)
 
     def __rotate_camera(self):
-
-        return Mat3d(Vec3d(self.cameraX.x, self.cameraY.x, self.cameraZ.x, 0.0),
-                     Vec3d(self.cameraX.y, self.cameraY.y, self.cameraZ.y, 0.0),
-                     Vec3d(self.cameraX.z, self.cameraY.z, self.cameraZ.z, 0.0),
-                     Vec3d(0.0,  0.0,  0.0, 1.0))
-
-    def __unrotate_camera(self):
         return Mat3d(Vec3d(self.cameraX.x, self.cameraX.y, self.cameraX.z, 0.0),
                      Vec3d(self.cameraY.x, self.cameraY.y, self.cameraY.z, 0.0),
                      Vec3d(self.cameraZ.x, self.cameraZ.y, self.cameraZ.z, 0.0),
                      Vec3d(0.0, 0.0, 0.0, 1.0))
+
+    def __unrotate_camera(self):
+        return Mat3d(Vec3d(self.cameraX.x, self.cameraY.x, self.cameraZ.x, 0.0),
+                     Vec3d(self.cameraX.y, self.cameraY.y, self.cameraZ.y, 0.0),
+                     Vec3d(self.cameraX.z, self.cameraY.z, self.cameraZ.z, 0.0),
+                     Vec3d(0.0,  0.0,  0.0, 1.0))
 
     def __rotate_camera_x(self, a):
         unCam = self.__unrotate_camera()
@@ -300,3 +299,6 @@ class Camera2(Resource):
         self.cameraZ = (self.center - self.eye).normalize()
         self.cameraX = self.cameraZ.cross(self.up).normalize()
         self.cameraY = self.cameraX.cross(self.cameraZ)
+
+    def should_reload(self):
+        return True

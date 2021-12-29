@@ -18,7 +18,7 @@ uniform float pointLight1Intensity;
 uniform vec3 dirLight1Dir;
 uniform vec4 dirLight1Color;
 uniform float dirLight1Intensity;
-uniform vec3 viewPos;
+uniform vec3 cameraPos;
 uniform bool blinEnabled;
 
 void main()
@@ -32,7 +32,7 @@ void main()
     // vec4 texBlendVal = (1.0 - texVal1.a) * texVal2 + texVal1.a * texVal1;
     vec4 texBlendVal = mix(texVal1, texVal2, texVal2.a);
 
-	vec4 pointLight1Dir = normalize(vec4(pointLight1Pos - fragPos, 1.0));
+	vec4 pointLight1Dir = vec4(normalize(pointLight1Pos - fragPos), 1.0);
 	float pointLight1nDotL = max(dot(fragNormal, pointLight1Dir), 0.0);
     vec4 pointLight1 = pointLight1Color * pointLight1Intensity * pointLight1nDotL;
 
@@ -44,10 +44,10 @@ void main()
     float dirLight1Spec = 1.0;
 
     if (blinEnabled) {
-        vec4 viewDir = normalize(vec4(viewPos - fragPos, 1.0));
+        vec4 viewDir = vec4(normalize(cameraPos - fragPos), 0.0);
 
         vec4 pointLight1halfwayDir = normalize(pointLight1Dir + viewDir);  
-        pointLight1Spec = pow(max(dot(fragNormal, pointLight1halfwayDir), 0.0), 4.0);
+        pointLight1Spec = pow(max(dot(fragNormal, pointLight1halfwayDir), 0.0), 0.5);
 
         vec4 dirLight1halfwayDir = normalize(vec4(dirLight1Dir, 0.0) + viewDir);  
         dirLight1Spec = pow(max(dot(fragNormal, dirLight1halfwayDir), 0.0), 0.5);

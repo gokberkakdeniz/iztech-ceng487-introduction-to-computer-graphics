@@ -17,7 +17,7 @@ def parse_obj(file) -> List[WingedEdgeShape]:
     texture_vertices: List[Vec3d] = []
     normal_vertices: List[Vec3d] = []
 
-    face_color = color.RGBA.white()
+    face_color = color.RGBA.gray()
     border_color = color.RGBA.red()
 
     random_face_color = False

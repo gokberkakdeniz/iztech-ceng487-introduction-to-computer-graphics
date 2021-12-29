@@ -84,5 +84,9 @@ class Resource(ABC):
         self.program = program
 
     @abstractmethod
+    def should_reload(self):
+        pass
+
+    @abstractmethod
     def load(self):
         pass

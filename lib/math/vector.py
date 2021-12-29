@@ -107,9 +107,6 @@ class Vec3d:
     def cross(self, vec2: 'Vec3d') -> 'Vec3d':
         ensure.type_of(vec2, "operand", [Vec3d])
 
-        if self.w != vec2.w != 0:
-            raise TypeError("expected vector not point")
-
         return Vec3d(self.y * vec2.z - self.z * vec2.y,
                      self.z * vec2.x - self.x * vec2.z,
                      self.x * vec2.y - self.y * vec2.x,

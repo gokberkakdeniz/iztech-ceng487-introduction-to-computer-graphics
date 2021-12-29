@@ -103,8 +103,8 @@ class BaseApplication(ABC):
         self.event.ctrl = m & GLUT_ACTIVE_CTRL
         self.event.shift = m & GLUT_ACTIVE_SHIFT
 
-        self.mouseX = x
-        self.mouseY = y
+        self.mouse_x = x
+        self.mouse_y = y
 
     def on_mouse_drag(self, x, y):
         pass

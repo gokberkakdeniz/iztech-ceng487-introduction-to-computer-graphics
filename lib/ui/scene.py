@@ -73,11 +73,12 @@ class Scene:
             self.active_camera.load()
 
             for res in self.resources+self.lights:
-                res.load()
+                if res.should_reload():
+                    print(res)
+                    res.load()
 
             for el in self.objects:
                 obj, visible = el
 
                 if visible:
-
                     obj.draw(background=self.mode_background,  border=self.mode_border)

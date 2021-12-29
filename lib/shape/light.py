@@ -16,9 +16,14 @@ class BlinToggler(Resource):
     def __init__(self, enabled=False) -> None:
         super().__init__()
         self.enabled = enabled
+        self.reload = True
 
     def toggle(self):
         self.enabled = not self.enabled
+        self.reload = True
+
+    def should_reload(self):
+        return self.reload
 
     def load(self):
         glUseProgram(self.program.id)
@@ -28,12 +33,15 @@ class BlinToggler(Resource):
 
         glUseProgram(0)
 
+        self.reload = False
+
 
 class Light(Resource):
     def __init__(self, intensity: float) -> None:
         super().__init__()
         self.intensity = intensity
         self.__intensity_prev = None
+        self.reload = True
 
     def is_open(self):
         return self.__intensity_prev is None
@@ -44,6 +52,7 @@ class Light(Resource):
 
         self.intensity = self.__intensity_prev
         self.__intensity_prev = None
+        self.reload = True
 
     def off(self):
         if not self.is_open():
@@ -51,6 +60,10 @@ class Light(Resource):
 
         self.__intensity_prev = self.intensity
         self.intensity = 0.0
+        self.reload = True
+
+    def should_reload(self):
+        return self.reload
 
     def toogle(self):
         if self.__intensity_prev is None:
@@ -66,8 +79,13 @@ class DirectionalLight(Light):
         self.direction = -direction
         self.color = color
 
+    def set_color(self, color):
+        self.color = color
+        self.reload = True
+
     def set_direction(self, direction):
         self.direction = -direction
+        self.reload = True
 
     def load(self):
         glUseProgram(self.program.id)
@@ -82,6 +100,7 @@ class DirectionalLight(Light):
         glUniform1f(lightIntensity, self.intensity)
 
         glUseProgram(0)
+        self.reload = False
 
 
 class PointLight(Light):
@@ -90,6 +109,14 @@ class PointLight(Light):
 
         self.position = position
         self.color = color
+
+    def set_color(self, color):
+        self.color = color
+        self.reload = True
+
+    def set_position(self, position):
+        self.position = position
+        self.reload = True
 
     def load(self):
         glUseProgram(self.program.id)
@@ -104,3 +131,4 @@ class PointLight(Light):
         glUniform1f(lightIntensity, self.intensity)
 
         glUseProgram(0)
+        self.reload = False

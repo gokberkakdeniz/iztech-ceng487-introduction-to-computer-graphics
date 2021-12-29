@@ -60,3 +60,6 @@ class Camera(Resource):
             matrix = (self.__get_projection_matrix(self.fov, self.aspect, self.near, self.far) @ self.matrix).to_array()
             glUniformMatrix4fv(modelLocation, 1, GL_FALSE, matrix)
             glUseProgram(0)
+
+    def should_reload(self):
+        return True

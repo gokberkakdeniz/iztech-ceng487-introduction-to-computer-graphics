@@ -16,13 +16,20 @@ class Texture(Resource):
         super().__init__()
         self.__image = Image.open(file)
         self.id = None
+        self.reload = True
 
     def use_program(self, program: Program):
         if self.program == program:
             return
         result = super().use_program(program)
         self.__load_to_gpu()
+
+        self.reload = True
+
         return result
+
+    def should_reload(self):
+        return self.reload
 
     def load(self, location="tex1"):
         glUseProgram(self.program.id)
@@ -34,6 +41,7 @@ class Texture(Resource):
         glBindTexture(GL_TEXTURE_2D, self.id)
 
         glUseProgram(0)
+        self.reload = False
 
     def __load_to_gpu(self):
         self.id = glGenTextures(1)
@@ -62,15 +70,27 @@ class TextureBlender(Resource):
     def __init__(self) -> None:
         super().__init__()
         self.ratio = 1.0
+        self.reload = True
 
     def increase(self):
-        self.ratio = min(1.0, self.ratio + 0.05)
+        new = min(1.0, self.ratio + 0.05)
+        if self != new:
+            self.ratio = new
+            self.reload = True
 
     def decrease(self):
-        self.ratio = max(0.0, self.ratio - 0.05)
+        new = max(0.0, self.ratio - 0.05)
+        if self != new:
+            self.ratio = new
+            self.reload = True
+
+    def should_reload(self):
+        return self.reload
 
     def load(self):
         glUseProgram(self.program.id)
         location = glGetUniformLocation(self.program.id, "texBlendRatio")
         glUniform1f(location, self.ratio)
         glUseProgram(0)
+
+        self.reload = False
