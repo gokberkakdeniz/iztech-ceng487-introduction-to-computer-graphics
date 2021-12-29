@@ -13,11 +13,11 @@ from ..math import Mat3d
 
 
 class Camera(Resource):
-    def __init__(self) -> None:
+    def __init__(self, aspect: float) -> None:
         super().__init__()
         self.matrix = Mat3d.translation_matrix(0, 0, -6)
         self.fov = 45.0
-        self.aspect = 640/480
+        self.aspect = aspect or 1
         self.near = 0.1
         self.far = 100.0
 
@@ -30,6 +30,9 @@ class Camera(Resource):
         self.matrix @= Mat3d.scaling_matrix(
             factor, factor, factor
         )
+
+    def translate(self, x: float, y: float, z: float):
+        self.matrix @= Mat3d.translation_matrix(x, y, z)
 
     def rotate(self, x: float, y: float, z: float):
         self.matrix @= Mat3d.rotation_matrix(x, y, z)
@@ -56,9 +59,20 @@ class Camera(Resource):
             glLoadMatrixf(matrix)
         else:
             glUseProgram(self.program.id)
-            modelLocation = glGetUniformLocation(self.program.id, "camera")
-            matrix = (self.__get_projection_matrix(self.fov, self.aspect, self.near, self.far) @ self.matrix).to_array()
-            glUniformMatrix4fv(modelLocation, 1, GL_FALSE, matrix)
+
+            modelLocation = glGetUniformLocation(self.program.id, "model")
+            glUniformMatrix4fv(modelLocation, 1, GL_FALSE, Mat3d.identity().to_array())
+
+            viewLocation = glGetUniformLocation(self.program.id, "view")
+            glUniformMatrix4fv(viewLocation, 1, GL_FALSE, self.matrix.to_array())
+
+            projection = self.__get_projection_matrix(self.fov, self.aspect, self.near, self.far).to_array()
+            projectionLocation = glGetUniformLocation(self.program.id, "projection")
+            glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, projection)
+
+            cameraPosLocation = glGetUniformLocation(self.program.id, "cameraPos")
+            glUniform3f(cameraPosLocation, 0, 0, 0)
+
             glUseProgram(0)
 
     def should_reload(self):

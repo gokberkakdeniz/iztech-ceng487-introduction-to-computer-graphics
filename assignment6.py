@@ -30,8 +30,8 @@ class Assignment6Application(BaseApplication):
         self.frame_modulo = 50
 
         aspect = self.size[0] / self.size[1]
-        self.camera_model = Camera2(aspect)
-        self.camera_ui = Camera2(aspect)
+        self.camera_model = Camera(aspect)
+        self.camera_ui = Camera(aspect)
 
         self.texture_blender = TextureBlender()
         self.blin_toggler = BlinToggler()
@@ -160,13 +160,13 @@ class Assignment6Application(BaseApplication):
 
     def on_special_key_press(self, key, x, y):
         if key == GLUT_KEY_LEFT:
-            self.scene_model.active_camera.rotate_model(0, -pi/8, 0)
+            self.scene_model.active_camera.rotate(0, -pi/8, 0)
         elif key == GLUT_KEY_RIGHT:
-            self.scene_model.active_camera.rotate_model(0, +pi/8, 0)
+            self.scene_model.active_camera.rotate(0, +pi/8, 0)
         elif key == GLUT_KEY_UP:
-            self.scene_model.active_camera.rotate_model(-pi/8, 0, 0)
+            self.scene_model.active_camera.rotate(-pi/8, 0, 0)
         elif key == GLUT_KEY_DOWN:
-            self.scene_model.active_camera.rotate_model(+pi/8, 0, 0)
+            self.scene_model.active_camera.rotate(+pi/8, 0, 0)
 
         self.mouse_x = x
         self.mouse_y = y
@@ -182,13 +182,17 @@ class Assignment6Application(BaseApplication):
             self.scene_ui.set_visibility(False)
             self.scene_model.set_visibility(False)
         elif button == GLUT_CURSOR_DESTROY and state == GLUT_UP and self.event.alt:
-            self.scene_model.active_camera.roll(pi/36 if self.event.ctrl else pi/72)
+            self.scene_model.active_camera.translate(0.5, 0, 0)
         elif button == GLUT_CURSOR_HELP and state == GLUT_UP and self.event.alt:
-            self.scene_model.active_camera.roll(-(pi/36 if self.event.ctrl else pi/72))
+            self.scene_model.active_camera.translate(-0.5, 0, 0)
+        elif button == GLUT_CURSOR_DESTROY and state == GLUT_UP and self.event.ctrl:
+            self.scene_model.active_camera.translate(0, 0.5, 0)
+        elif button == GLUT_CURSOR_HELP and state == GLUT_UP and self.event.ctrl:
+            self.scene_model.active_camera.translate(0, -0.5, 0)
         elif button == GLUT_CURSOR_DESTROY and state == GLUT_UP:
-            self.scene_model.active_camera.zoom(0.5)
+            self.scene_model.active_camera.zoom_in()
         elif button == GLUT_CURSOR_HELP and state == GLUT_UP:
-            self.scene_model.active_camera.zoom(-0.5)
+            self.scene_model.active_camera.zoom_out()
         elif button == GLUT_LEFT_BUTTON and state == GLUT_UP and self.scene_help.get_visibility():
             self.scene_help.set_visibility(False)
             self.scene_ui.set_visibility(True)
@@ -197,15 +201,13 @@ class Assignment6Application(BaseApplication):
         self.rerender = True
 
     def on_mouse_drag(self, x, y):
-        dy = (y - self.mouse_y) / 250
-        dx = (x - self.mouse_x) / 250
+        dx = 0.005 * (y - self.mouse_y)
+        dy = 0.005 * (x - self.mouse_x)
 
+        if self.event.button == GLUT_LEFT_BUTTON:
+            self.scene_model.active_camera.rotate(dx, dy, 0)
         if self.event.button == GLUT_RIGHT_BUTTON:
-            self.scene_model.active_camera.dolly(-dx, dy, 0)
-        elif self.event.button == GLUT_LEFT_BUTTON:
-            self.scene_model.active_camera.yaw(dx)
-            self.scene_model.active_camera.pitch(dy)
-
+            self.scene_model.active_camera.translate(dy * 10, 0, dx * 10)
         self.mouse_x = x
         self.mouse_y = y
 
@@ -268,4 +270,7 @@ def main():
 
 
 if __name__ == "__main__":
+    print("NOTE: The next homework is also implemented.")
+    print("      I migrated template Camera class but reverted it because it does not work as it should be.")
+    print("      I will try to debug it later...\n")
     main()
