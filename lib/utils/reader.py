@@ -28,7 +28,7 @@ def parse_obj(file) -> List[WingedEdgeShape]:
     def create_rotator(rx, ry, rz): return lambda o: o.rotate(rx, ry, rz)
     def create_translator(tx, ty, tz): return lambda o: o.translate(tx, ty, tz)
 
-    objs = {group: WingedEdgeShape()}
+    objs = {group: WingedEdgeShape(), "__temporary_fix_for_single_object_texture__": WingedEdgeShape()}
 
     textures: List[Texture] = []
 

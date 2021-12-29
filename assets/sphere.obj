@@ -1,5 +1,6 @@
 # This file uses centimeters as units for non-parametric coordinates.
 # ceng487 texture texture_sphere.png 
+# ceng487 texture texture_sphere2.png
 
 mtllib sphere.mtl
 v 0.475528 -0.809017 -0.345492

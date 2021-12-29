@@ -1,5 +1,6 @@
 # This file uses centimeters as units for non-parametric coordinates.
 # ceng487 texture texture_cube.png 
+# ceng487 texture texture_cube2.png 
 
 mtllib cube.mtl
 v -0.500000 -0.500000 0.500000

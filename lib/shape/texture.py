@@ -5,7 +5,7 @@
 import numpy as np
 from .shader import Program, Resource
 from PIL import Image
-
+from os.path import basename
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
@@ -14,6 +14,7 @@ from OpenGL.GLU import *
 class Texture(Resource):
     def __init__(self, file: str) -> None:
         super().__init__()
+        self.name = basename(file)
         self.__image = Image.open(file)
         self.id = None
         self.reload = True
@@ -65,6 +66,9 @@ class Texture(Resource):
                      np.frombuffer(self.__image.tobytes(), dtype=np.uint8))
         glGenerateMipmap(GL_TEXTURE_2D)
 
+    def __str__(self) -> str:
+        return f'Texture(id={self.id}, name={self.name})'
+
 
 class TextureBlender(Resource):
     def __init__(self) -> None:
@@ -74,13 +78,13 @@ class TextureBlender(Resource):
 
     def increase(self):
         new = min(1.0, self.ratio + 0.05)
-        if self != new:
+        if self.ratio != new:
             self.ratio = new
             self.reload = True
 
     def decrease(self):
         new = max(0.0, self.ratio - 0.05)
-        if self != new:
+        if self.ratio != new:
             self.ratio = new
             self.reload = True
 
