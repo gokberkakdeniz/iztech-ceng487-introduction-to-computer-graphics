@@ -74,7 +74,6 @@ class Scene:
 
             for res in self.resources+self.lights:
                 if res.should_reload():
-                    print(res)
                     res.load()
 
             for el in self.objects:

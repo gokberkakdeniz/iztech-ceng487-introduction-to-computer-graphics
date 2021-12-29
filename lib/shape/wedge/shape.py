@@ -119,7 +119,6 @@ class WingedEdgeShape(Shape):
             return
 
         if self.__should_reload_buffer:
-            print("load!")
             self.__reload_buffer(border, background)
             self.__should_reload_buffer = False
 

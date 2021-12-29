@@ -200,8 +200,6 @@ class Assignment6Application(BaseApplication):
         dy = (y - self.mouse_y) / 250
         dx = (x - self.mouse_x) / 250
 
-        print(dx, dy)
-
         if self.event.button == GLUT_RIGHT_BUTTON:
             self.scene_model.active_camera.dolly(-dx, dy, 0)
         elif self.event.button == GLUT_LEFT_BUTTON:
