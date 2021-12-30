@@ -4,16 +4,13 @@
 # 12 2021
 
 from typing import List
-from typing_extensions import Literal
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
-ShaderType = Literal["vertex", "geometry", "fragment", "compute", "tessellation_control", "tessellation_evaluation"]
-
 
 class Shader:
-    def __init__(self, file: str, type: ShaderType = None) -> None:
+    def __init__(self, file: str, type=None) -> None:
         self.type = type or file.split(".")[-1]
         self.status = None
         self.id = glCreateShader(self.__get_opengl_shader_type_constant())

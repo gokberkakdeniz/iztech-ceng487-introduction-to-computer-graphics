@@ -7,9 +7,9 @@ from .drawable import Drawable
 from .deprecated import DeprecatedTorus, DeprecatedBox, DeprecatedCylinder, DeprecatedShape, DeprecatedSphere, Object3d
 from .shape import Shape
 from .wedge import WingedEdgeShape, Grid
-from .shader import Shader, ShaderType, Program
+from .shader import Shader, Program
 from . import color
 
-__all__ = [Drawable, Shape, WingedEdgeShape, Grid, Shader, ShaderType, Program,
+__all__ = [Drawable, Shape, WingedEdgeShape, Grid, Shader, Program,
            DeprecatedShape, DeprecatedTorus, DeprecatedBox, DeprecatedCylinder, DeprecatedShape, DeprecatedSphere, Object3d,
            color]
