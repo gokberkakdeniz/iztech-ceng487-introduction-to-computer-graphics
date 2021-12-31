@@ -157,6 +157,9 @@ class WingedEdgeShape(Shape):
                 glUseProgram(0)
 
         if background:
+            for t_id, texture in enumerate(self.textures):
+                texture.load(f'tex{t_id+1}')
+
             if self.program is not None:
                 glUseProgram(self.program.id)
 

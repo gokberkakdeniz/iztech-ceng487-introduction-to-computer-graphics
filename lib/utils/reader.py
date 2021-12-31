@@ -28,8 +28,7 @@ def parse_obj(file) -> List[WingedEdgeShape]:
     def create_rotator(rx, ry, rz): return lambda o: o.rotate(rx, ry, rz)
     def create_translator(tx, ty, tz): return lambda o: o.translate(tx, ty, tz)
 
-    # TODO: figure out why single object texture loading not working. second texture is not loaded in this situation.
-    objs = {group: WingedEdgeShape(), "__temporary_fix_for_single_object_texture__": WingedEdgeShape()}
+    objs = {group: WingedEdgeShape()}
 
     textures: List[Texture] = []
 
