@@ -11,11 +11,11 @@ from .shader import Shader, Program, Resource
 from .camera import Camera
 from .camera2 import Camera2
 from .texture import Texture, TextureBlender
-from .light import Light, DirectionalLight, PointLight, BlinToggler
+from .light import Light, DirectionalLight, SpotLight, PointLight, BlinToggler
 from . import color
 
 __all__ = [Drawable, Shape, WingedEdgeShape, Grid,
            Shader, Program, Camera, Texture, Resource, TextureBlender, BlinToggler, Camera2,
-           Light, DirectionalLight, PointLight,
+           Light, DirectionalLight, PointLight, SpotLight,
            DeprecatedShape, DeprecatedTorus, DeprecatedBox, DeprecatedCylinder, DeprecatedShape, DeprecatedSphere, Object3d,
            color]

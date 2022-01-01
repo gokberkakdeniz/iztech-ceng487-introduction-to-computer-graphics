@@ -18,6 +18,13 @@ uniform float pointLight1Intensity;
 uniform vec3 dirLight1Dir;
 uniform vec4 dirLight1Color;
 uniform float dirLight1Intensity;
+
+uniform vec3 spotLight1Pos;
+uniform vec3 spotLight1Dir;
+uniform vec4 spotLight1Color;
+uniform float spotLight1Angle;
+uniform float spotLight1Intensity;
+
 uniform vec3 cameraPos;
 uniform bool blinEnabled;
 
@@ -29,7 +36,6 @@ void main()
     vec4 texVal2 = texture(tex2, fragUV);
     texVal2.a = 1.0 - texBlendRatio;
     
-    // vec4 texBlendVal = (1.0 - texVal1.a) * texVal2 + texVal1.a * texVal1;
     vec4 texBlendVal = mix(texVal1, texVal2, texVal2.a);
 
 	vec4 pointLight1Dir = vec4(normalize(pointLight1Pos - fragPos), 1.0);
@@ -39,6 +45,15 @@ void main()
 	float dirLight1nDotL = max(dot(fragNormal, normalize(vec4(dirLight1Dir, 0.0))), 0.0);
     vec4 dirLight1 = dirLight1Color * dirLight1Intensity * dirLight1nDotL;
 
+    float spotLight1Factor = 0.0;
+    float spotLight1Cosine = dot(
+        normalize(-spotLight1Dir),
+        normalize(spotLight1Pos - fragPos)
+    );
+    if (spotLight1Cosine >= spotLight1Angle) { 
+        spotLight1Factor = pow(spotLight1Cosine, 48);
+    }
+    vec4 spotLight1 = spotLight1Color * spotLight1Intensity * spotLight1Factor;
 
     float pointLight1Spec = 1.0;
     float dirLight1Spec = 1.0;
@@ -53,7 +68,7 @@ void main()
         dirLight1Spec = pow(max(dot(fragNormal, dirLight1halfwayDir), 0.0), 0.5);
     }
 
-    vec4 lightVal = dirLight1 * dirLight1Spec + pointLight1 * pointLight1Spec;
+    vec4 lightVal = dirLight1 * dirLight1Spec + pointLight1 * pointLight1Spec + spotLight1;
 
     outColor = fragColor * texBlendVal * lightVal;
 }

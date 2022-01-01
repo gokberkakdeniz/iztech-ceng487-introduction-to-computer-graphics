@@ -73,8 +73,9 @@ class HelpElement(Element):
     )
     draw_light_table = staticmethod(
         create_ascii_table([
-            ("1", "toggle first light        "),
-            ("2", "toggle second light      "),
+            ("1", "toggle point light"),
+            ("2", "toggle directional light  "),
+            ("3", "toggle spot light"),
             ("A", "toggle light animation"),
             ("B", "toggle blin specular"),
         ])

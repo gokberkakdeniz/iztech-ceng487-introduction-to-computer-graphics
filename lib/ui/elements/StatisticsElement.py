@@ -25,6 +25,9 @@ class StatisticsElement(Element):
     def set_light2(self, on: bool):
         self.light2 = on
 
+    def set_light3(self, on: bool):
+        self.light3 = on
+
     def set_blin(self, on: bool):
         self.blin = on
 
@@ -35,11 +38,13 @@ class StatisticsElement(Element):
         self.face_count = face_count
 
     def draw(self, background=None, border=None):
-        l1 = "on" if self.light1 else "off"
-        l2 = "on" if self.light2 else "off"
-        bl = "on" if self.blin else "off"
-
+        text = " | ".join([
+            f'Ratio: {self.ratio:.2f}',
+            f'L1: {"on" if self.light1 else "off"}',
+            f'L2: {"on" if self.light2 else "off"}',
+            f'L3: { "on" if self.light3 else "off"}',
+            f'Blin: {"on" if self.blin else "off"}',
+        ])
         glColor3f(0.0, 1.0, 1.0)
         glWindowPos2f(*self.pos)
-        glutBitmapString(GLUT_BITMAP_9_BY_15,
-                         (f"Ratio: {self.ratio:.2f} | L1: {l1} | L2: {l2} | Blin: {bl} | Vertice count: {self.vertice_count} | Face count: {self.face_count}").encode("utf-8"))
+        glutBitmapString(GLUT_BITMAP_9_BY_15, text.encode("utf-8"))

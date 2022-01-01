@@ -3,6 +3,11 @@
 # StudentId:250201041
 # 12 2021
 
+from lib.utils.reader import parse_obj
+from lib.utils.decorators import with_exec_count
+from lib.ui.elements import StatisticsElement, HelpButtonElement, HelpElement
+from lib.ui import BaseApplication, Scene
+from lib.shape.color import RGBA
 from math import cos, pi, sin
 from typing import List
 from OpenGL.GL import *
@@ -11,12 +16,8 @@ from OpenGL.GLU import *
 from sys import argv
 from os.path import join, dirname
 from lib.math.vector import Vec3d
-from lib.shape import WingedEdgeShape, Grid, Shader, Camera, Camera2, Program, TextureBlender, DirectionalLight, PointLight, BlinToggler
-from lib.shape.color import RGBA
-from lib.ui import BaseApplication, Scene
-from lib.ui.elements import StatisticsElement, HelpButtonElement, HelpElement
-from lib.utils.decorators import with_exec_count
-from lib.utils.reader import parse_obj
+from lib.shape import WingedEdgeShape, Grid, Shader, Camera, Camera2, Program, TextureBlender, \
+    DirectionalLight, PointLight, SpotLight, BlinToggler
 
 
 class Assignment6Application(BaseApplication):
@@ -38,12 +39,16 @@ class Assignment6Application(BaseApplication):
 
         self.light1 = PointLight(Vec3d.point(0, 1.6023981999999999, 0), RGBA.white())
         self.light2 = DirectionalLight(Vec3d.vector(1, 0, 0), RGBA.blue())
+        self.light3 = SpotLight(Vec3d.vector(0, sin(pi/12), -cos(pi/12)),
+                                Vec3d.point(0, -1.6023981999999999, 1.6023981999999999),
+                                RGBA.green(),
+                                pi/12)
 
         # model scene
         self.scene_model = Scene(
             cameras=(self.camera_model,),
             resources=(self.texture_blender, self.blin_toggler),
-            lights=(self.light1, self.light2)
+            lights=(self.light1, self.light2, self.light3)
         )
         self.element_grid = Grid((50, 50))
         self.scene_model.register(self.element_grid)
@@ -89,7 +94,8 @@ class Assignment6Application(BaseApplication):
                 self.texture_blender,
                 self.blin_toggler,
                 self.light1,
-                self.light2
+                self.light2,
+                self.light3
             ]
         )
 
@@ -147,6 +153,9 @@ class Assignment6Application(BaseApplication):
             self.__recalculate_stats()
         elif key == b'2':
             self.light2.toogle()
+            self.__recalculate_stats()
+        elif key == b'3':
+            self.light3.toogle()
             self.__recalculate_stats()
         elif key == b'a':
             self.animate_light = not self.animate_light
@@ -207,7 +216,7 @@ class Assignment6Application(BaseApplication):
         if self.event.button == GLUT_LEFT_BUTTON:
             self.scene_model.active_camera.rotate(dx, dy, 0)
         if self.event.button == GLUT_RIGHT_BUTTON:
-            self.scene_model.active_camera.translate(dy * 10, 0, dx * 10)
+            self.scene_model.active_camera.translate(dy * 10, -dx * 10, 0)
         self.mouse_x = x
         self.mouse_y = y
 
@@ -235,8 +244,9 @@ class Assignment6Application(BaseApplication):
         ratio = self.texture_blender.ratio
 
         self.element_stats.set_ratio(ratio)
-        self.element_stats.set_light1(self.light1.is_open())
-        self.element_stats.set_light2(self.light2.is_open())
+        self.element_stats.set_light1(self.light1.is_on())
+        self.element_stats.set_light2(self.light2.is_on())
+        self.element_stats.set_light3(self.light3.is_on())
         self.element_stats.set_blin(self.blin_toggler.enabled)
 
 
@@ -270,7 +280,4 @@ def main():
 
 
 if __name__ == "__main__":
-    print("NOTE: The next homework is also implemented.")
-    print("      I migrated template Camera class but reverted it because it does not work as it should be.")
-    print("      I will try to debug it later...\n")
     main()
