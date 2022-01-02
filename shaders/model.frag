@@ -30,6 +30,8 @@ uniform bool blinEnabled;
 
 void main()
 {
+    vec4 normal = vec4(normalize(vec3(fragNormal.x, fragNormal.y, fragNormal.z)), 1.0);
+
     vec4 texVal1 = texture(tex1, fragUV);
     texVal1.a = texBlendRatio;
     
@@ -39,19 +41,17 @@ void main()
     vec4 texBlendVal = mix(texVal1, texVal2, texVal2.a);
 
 	vec4 pointLight1Dir = vec4(normalize(pointLight1Pos - fragPos), 1.0);
-	float pointLight1nDotL = max(dot(fragNormal, pointLight1Dir), 0.0);
+	float pointLight1nDotL = max(dot(normal, pointLight1Dir), 0.0);
     vec4 pointLight1 = pointLight1Color * pointLight1Intensity * pointLight1nDotL;
 
-	float dirLight1nDotL = max(dot(fragNormal, normalize(vec4(dirLight1Dir, 0.0))), 0.0);
+	float dirLight1nDotL = max(dot(normal, vec4(normalize(dirLight1Dir), 1.0)), 0.0);
     vec4 dirLight1 = dirLight1Color * dirLight1Intensity * dirLight1nDotL;
 
     float spotLight1Factor = 0.0;
-    float spotLight1Cosine = dot(
-        normalize(-spotLight1Dir),
-        normalize(spotLight1Pos - fragPos)
-    );
-    if (spotLight1Cosine >= spotLight1Angle) { 
-        spotLight1Factor = pow(spotLight1Cosine, 48);
+    float spotLight1Cosine = dot(normalize(-spotLight1Dir), normalize(spotLight1Pos - fragPos));
+    if (spotLight1Cosine >= spotLight1Angle) {
+	    float spotLight1nDotL = max(dot(normal, vec4(normalize(-spotLight1Dir), 0.0)), 0.0);
+        spotLight1Factor = pow(spotLight1Cosine, 48) * spotLight1nDotL;
     }
     vec4 spotLight1 = spotLight1Color * spotLight1Intensity * spotLight1Factor;
 

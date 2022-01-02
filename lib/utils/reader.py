@@ -94,7 +94,7 @@ def parse_obj(file) -> List[WingedEdgeShape]:
                 texture_vertices.append(Vec3d.point(u, v, 0))
             elif cmd == "vn":
                 x, y, z = tuple(map(float, tokenized[1:4]))
-                normal_vertices.append(Vec3d.point(x, y, z))
+                normal_vertices.append(Vec3d.vector(x, y, z))
             elif cmd == "f":
                 face_vertices = []
                 face_normal_vectors = []

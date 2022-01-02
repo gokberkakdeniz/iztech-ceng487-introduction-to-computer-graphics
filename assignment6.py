@@ -40,7 +40,7 @@ class Assignment6Application(BaseApplication):
         self.light1 = PointLight(Vec3d.point(0, 1.6023981999999999, 0), RGBA.white())
         self.light2 = DirectionalLight(Vec3d.vector(1, 0, 0), RGBA.blue())
         self.light3 = SpotLight(Vec3d.vector(0, sin(pi/12), -cos(pi/12)),
-                                Vec3d.point(0, -1.6023981999999999, 1.6023981999999999),
+                                Vec3d.point(0, -1.5, 1.6023981999999999),
                                 RGBA.green(),
                                 pi/12)
 
