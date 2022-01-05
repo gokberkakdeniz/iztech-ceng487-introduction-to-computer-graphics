@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# CENG 487 Assignment6 by
+# CENG 487 Assignment7 by
 # Gokberk Akdeniz
 # StudentId:250201041
 # 12 2021

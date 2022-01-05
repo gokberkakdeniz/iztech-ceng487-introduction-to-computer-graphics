@@ -1,4 +1,4 @@
-# CENG 487 Assignment6 by
+# CENG 487 Assignment7 by
 # Gokberk Akdeniz
 # StudentId:250201041
 # 12 2021
@@ -20,7 +20,7 @@ from lib.shape import WingedEdgeShape, Grid, Shader, Camera, Camera2, Program, T
     DirectionalLight, PointLight, SpotLight, BlinToggler
 
 
-class Assignment6Application(BaseApplication):
+class Assignment7Application(BaseApplication):
     def __init__(self, objs: List[WingedEdgeShape], *args, **kwargs) -> None:
         super().__init__(size=(800, 600), *args, **kwargs)
 
@@ -271,7 +271,7 @@ def main():
             print("error: could not parse the file.")
             raise e
 
-    app = Assignment6Application(
+    app = Assignment7Application(
         objs,
         "IZTECH CENG487 - 12 2021 - 250201041 [" + argv[1] + "]",
         argv=argv[:2]
